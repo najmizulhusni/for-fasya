@@ -170,18 +170,22 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 .promise-card{border:1.5px solid var(--line);border-radius:14px;padding:16px 14px;background:rgba(255,255,255,.7);opacity:0;transform:translateY(16px);transition:opacity .45s,transform .45s,border-color .2s,box-shadow .2s;}
 .promise-card.revealed{opacity:1;transform:translateY(0);}
 .promise-card:hover{border-color:var(--rose-md);box-shadow:0 4px 16px rgba(192,65,90,.1);}
-.pc-icon{font-size:22px;margin-bottom:8px;display:block;}
+.pc-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--rose-lt),#ffe6ec);border:1px solid rgba(192,65,90,.14);display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0;}
+.pc-icon i{font-size:17px;color:var(--rose);}
 .pc-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px;}
 .pc-desc{font-size:11px;color:var(--muted);line-height:1.55;}
-.promise-card.gold{border-color:var(--gold);background:var(--gold-lt);grid-column:span 2;text-align:center;}
+.promise-card.gold{border-color:var(--gold);background:var(--gold-lt);grid-column:span 2;text-align:center;align-items:center;display:flex;flex-direction:column;}
+.promise-card.gold .pc-icon{background:linear-gradient(135deg,var(--gold-lt),#fdefd8);border-color:rgba(184,151,90,.22);}
+.promise-card.gold .pc-icon i{color:var(--gold);}
 .promise-card.gold .pc-title{color:var(--gold);font-size:14px;}
 .promise-card.gold .pc-desc{font-size:13px;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-soft);line-height:1.65;}
 
 /* ── FINAL ── */
 .final-glow{position:absolute;inset:0;border-radius:var(--r);z-index:-1;background:radial-gradient(ellipse at 50% 30%,rgba(192,65,90,.12) 0%,transparent 70%);animation:glowPulse 2.5s ease-in-out infinite;}
 @keyframes glowPulse{0%,100%{opacity:.6}50%{opacity:1}}
-.big-heart{font-size:64px;margin-bottom:8px;display:block;animation:heartbeat 1.4s ease-in-out infinite;}
-@keyframes heartbeat{0%,100%{transform:scale(1);}14%{transform:scale(1.18);}28%{transform:scale(1);}42%{transform:scale(1.12);}}
+.icon-ring-lg{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--rose-lt),#fff0f4);border:1.5px solid rgba(192,65,90,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:heartbeat 1.4s ease-in-out infinite,softPulse 3s ease-in-out infinite;box-shadow:0 4px 24px rgba(192,65,90,.15);}
+.icon-ring-lg i{font-size:38px;color:var(--rose);}
+@keyframes heartbeat{0%,100%{transform:scale(1);}14%{transform:scale(1.12);}28%{transform:scale(1);}42%{transform:scale(1.07);}}
 .final-message{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--ink-soft);line-height:1.8;margin-bottom:28px;padding:0 4px;}
 .final-message em{color:var(--rose);font-weight:600;}
 
@@ -453,7 +457,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
   <div class="card" style="max-width:520px;">
     <div class="final-glow"></div>
     <div class="progress" id="pg8"></div>
-    <span class="big-heart">🎁</span>
+    <div class="icon-ring-lg"><i class="ti ti-gift"></i></div>
     <p class="eyebrow">a little surprise</p>
     <h1 class="headline" style="margin-bottom:8px;">My promises<br>to <em>you</em></h1>
     <p class="body-text" style="margin-bottom:20px;">These aren't just words. Consider them yours, forever.</p>
@@ -468,7 +472,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 <div class="screen" id="sc9">
   <div class="card" style="max-width:440px;">
     <div class="final-glow"></div>
-    <span class="big-heart">❤️</span>
+    <div class="icon-ring-lg"><i class="ti ti-heart-filled"></i></div>
     <p class="eyebrow">always &amp; forever</p>
     <h1 class="headline" style="font-size:38px;margin-bottom:18px;">I love you,<br><em>Fasya</em> 🌙</h1>
     <p class="final-message">You are my favourite <em>human</em>.<br>My person. My home.<br>And I will keep choosing you —<br>every single day, <em>for as long as you'll have me</em>.</p>
@@ -589,21 +593,20 @@ function buildCounter(){
 function goFinal(e){spawnHearts(e.currentTarget);launchConfetti();setTimeout(()=>go(8),500);}
 
 const PROMISES=[
-  {icon:'🤗',title:'Free hugs anytime',desc:"No reason needed. Day or night. Just ask (or don't — I'll know)."},
-  {icon:'🎬',title:'Your choice, always',desc:'Movies, food, plans — your pick. Every single time.'},
-  {icon:'🌧️',title:'Rainy day buddy',desc:"On your hardest days, I'll be right there. No fixing needed, just presence."},
-  {icon:'😂',title:'Your personal comedian',desc:'Terrible jokes included at no extra charge. Lifetime warranty.'},
-  {icon:'🌙',title:'Late night calls',desc:"Whenever you can't sleep. I'll always pick up. Always."},
-  {icon:'✨',title:"I'll never stop trying",desc:'To make you feel loved, chosen, and special. Every single day.'},
-  {icon:'💛',title:'No matter what',desc:'Good days, bad days, messy days — I\'m yours through all of it.'},
-  {icon:'❤️',title:'Forever yours',desc:'\"Najmi, thank you for loving me.\" — I hope you always feel this way, Fasya. I love you more than words can say.',gold:true},
+  {icon:'ti-hand-love',    title:'Free hugs anytime',      desc:"No reason needed. Day or night. Just ask (or don't — I'll know)."},
+  {icon:'ti-crown',        title:'Your choice, always',     desc:'Movies, food, plans — your pick. Every single time.'},
+  {icon:'ti-umbrella',     title:'Rainy day buddy',         desc:"On your hardest days, I'll be right there. No fixing needed, just presence."},
+  {icon:'ti-mood-happy',   title:'Your personal comedian',  desc:'Terrible jokes included at no extra charge. Lifetime warranty.'},
+  {icon:'ti-phone-call',   title:'Late night calls',        desc:"Whenever you can't sleep. I'll always pick up. Always."},
+  {icon:'ti-sparkles',     title:"I'll never stop trying",  desc:'To make you feel loved, chosen, and special. Every single day.'},
+  {icon:'ti-infinity',     title:'Forever yours',           desc:'"Najmi, thank you for loving me." — I hope you always feel this way, Fasya. I love you more than words can say.',gold:true},
 ];
 function revealPromises(){
   const g=document.getElementById('promiseGrid');if(g.children.length)return;
   PROMISES.forEach((p,i)=>{
     const div=document.createElement('div');
     div.className='promise-card'+(p.gold?' gold':'');
-    div.innerHTML=`<span class="pc-icon">${p.icon}</span><div class="pc-title">${p.title}</div><div class="pc-desc">${p.desc}</div>`;
+    div.innerHTML=`<div class="pc-icon"><i class="ti ${p.icon}"></i></div><div class="pc-title">${p.title}</div><div class="pc-desc">${p.desc}</div>`;
     g.appendChild(div);
     setTimeout(()=>div.classList.add('revealed'),i*110+80);
   });

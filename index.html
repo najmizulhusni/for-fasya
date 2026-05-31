@@ -198,6 +198,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 .unlock-text{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:rgba(255,255,255,.95);animation:unlockPop .6s cubic-bezier(.34,1.56,.64,1) .1s both;}
 @keyframes unlockPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 
+/* ── PHOTO ── */
+.photo-frame{margin:0 auto 24px;width:100%;max-width:320px;border-radius:16px;overflow:hidden;border:3px solid rgba(192,65,90,.15);box-shadow:0 8px 32px rgba(192,65,90,.18),0 2px 8px rgba(0,0,0,.08);position:relative;}
+.photo-frame::after{content:'';position:absolute;inset:0;border-radius:13px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);pointer-events:none;}
+.photo-frame img{width:100%;height:auto;display:block;object-fit:cover;}
+
 /* ── MISC ── */
 #cCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:200;}
 .hburst{position:fixed;pointer-events:none;z-index:150;animation:hbAnim 1.1s ease-out forwards;}
@@ -476,6 +481,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
     <p class="eyebrow">always &amp; forever</p>
     <h1 class="headline" style="font-size:38px;margin-bottom:18px;">I love you,<br><em>Fasya</em> 🌙</h1>
     <p class="final-message">You are my favourite <em>human</em>.<br>My person. My home.<br>And I will keep choosing you —<br>every single day, <em>for as long as you'll have me</em>.</p>
+    <div class="photo-frame">
+      <img src="IMG_7890.JPG" alt="Us" loading="lazy">
+    </div>
     <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
     <p class="signature">With everything I have,<br><strong>Najmi Zulhusni</strong> 🤍</p>
   </div>

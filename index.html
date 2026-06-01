@@ -127,35 +127,6 @@ body::before {
   opacity: 0.6;
 }
 
-/* ─── Progress dots ─── */
-.progress {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 40px;
-}
-.pip {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--rose-lt);
-  border: 1.5px solid var(--rose-md);
-  transition: all 0.4s cubic-bezier(.34,1.56,.64,1);
-}
-.pip.done { background: var(--rose-md); border-color: var(--rose-md); }
-.pip.now  { background: var(--rose); border-color: var(--rose); transform: scale(1.4); box-shadow: 0 0 0 3px rgba(192,65,90,0.18); }
-
-/* ─── Icon ring ─── */
-.icon-ring {
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--rose-lt), #fff0f4);
-  border: 1.5px solid rgba(192,65,90,0.2);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 28px;
-  animation: softPulse 3s ease-in-out infinite;
-  box-shadow: 0 4px 20px rgba(192,65,90,0.12);
-}
-.icon-ring i { font-size: 32px; color: var(--rose); }
 @keyframes softPulse {
   0%,100% { box-shadow: 0 4px 20px rgba(192,65,90,0.12), 0 0 0 0 rgba(192,65,90,0.15); }
   50%      { box-shadow: 0 4px 20px rgba(192,65,90,0.12), 0 0 0 12px rgba(192,65,90,0); }
@@ -232,19 +203,6 @@ body::before {
 .btn-ghost:hover { background: var(--rose-lt); }
 .btn-ghost i { font-size: 15px; }
 
-/* ─── Feedback line ─── */
-.feedback {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: 16px;
-  color: var(--rose);
-  min-height: 24px;
-  margin-bottom: 16px;
-  opacity: 0;
-  transition: opacity 0.3s, transform 0.3s;
-  transform: translateY(4px);
-}
-.feedback.show { opacity: 1; transform: translateY(0); }
 
 /* ─── Story screen ─── */
 #scStory {
@@ -705,7 +663,7 @@ body::before {
   box-shadow: 0 4px 20px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
   transition: all 0.22s cubic-bezier(.34,1.56,.64,1);
   min-height: 44px; min-width: 44px;
-  white-space: nowrap; border: none;
+  white-space: nowrap;
   border: 1.5px solid rgba(192,65,90,0.14);
 }
 .hub-nav-btn:hover {
@@ -725,9 +683,6 @@ body::before {
   .login-title     { font-size: 34px; margin-bottom: 36px; }
   .date-selectors  { gap: 16px; }
   .date-sel        { font-size: 28px; padding: 0 2px 10px; }
-  .date-grid       { gap: 8px; }
-  .counter-pill    { padding: 14px 18px; min-width: 68px; }
-  .counter-num     { font-size: 28px; }
   .btn-primary     { padding: 13px 28px; font-size: 13.5px; }
   .hub-name        { font-size: 42px; letter-spacing: -1px; }
   .door-card       { padding: 16px 14px 14px; }
@@ -923,49 +878,6 @@ body::before {
 </div>
 
 <!-- ═══════════════════════════════════
-     SCREEN 1 — Do you love me?
-════════════════════════════════════ -->
-<div class="screen" id="sc1">
-  <div class="card">
-    <div class="progress" id="pg1"></div>
-    <div class="icon-ring"><i class="ti ti-heart"></i></div>
-    <p class="eyebrow">be honest now</p>
-    <h1 class="headline">Do you<br><em>love me?</em></h1>
-    <p class="body-text">Think about it carefully.<br>No pressure. (Okay, maybe a little.)</p>
-    <p class="feedback" id="fb1"></p>
-    <div class="btn-row" id="row1" style="min-height:56px;">
-      <button class="btn-primary" id="yesBtn1" onclick="loveYes()">
-        <i class="ti ti-heart-filled"></i>
-        Yes, always
-      </button>
-      <button class="btn-ghost" id="noBtn1" onmouseover="flee(this)" ontouchstart="flee(this)">
-        <i class="ti ti-run"></i>
-        No
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════
-     SCREEN 2 — Letter body
-════════════════════════════════════ -->
-<div class="screen" id="sc2">
-  <div class="card">
-    <div class="progress" id="pg2"></div>
-    <div class="icon-ring"><i class="ti ti-pencil"></i></div>
-    <p class="eyebrow">pages of this letter</p>
-    <h1 class="headline">There are things<br>I <em>notice.</em></h1>
-    <p class="body-text">I notice the way you go quiet when something actually matters to you. The way you still check on me even when you're the one who's tired. I haven't always said it — but I notice, and I keep all of it.</p>
-    <div class="btn-row">
-      <button class="btn-primary" onclick="go(4)">
-        keep reading
-        <i class="ti ti-arrow-right"></i>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════
      SCREEN 3 — Letter closing
 ════════════════════════════════════ -->
 <div class="screen" id="sc3">
@@ -975,29 +887,6 @@ body::before {
     <p class="body-text">No conditions. No footnotes.<br>Just you — exactly as you are.</p>
     <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
     <p class="signature">yours completely,<br><strong>Najmi Zulhusni</strong></p>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════
-     SCREEN 4 — Before I seal this
-════════════════════════════════════ -->
-<div class="screen" id="sc4">
-  <div class="card">
-    <div class="progress" id="pg4"></div>
-    <div class="icon-ring"><i class="ti ti-moon-stars"></i></div>
-    <p class="eyebrow">before I seal this</p>
-    <h1 class="headline">Will you keep<br>being <em>mine?</em></h1>
-    <p class="body-text">This is me asking, properly.<br>With absolutely zero chill.</p>
-    <div class="btn-row" id="row4" style="min-height:56px;">
-      <button class="btn-primary" onclick="finale(event)">
-        <i class="ti ti-heart-filled"></i>
-        Always
-      </button>
-      <button class="btn-ghost" id="noBtn4" onmouseover="flee(this)" ontouchstart="flee(this)">
-        <i class="ti ti-run"></i>
-        No
-      </button>
-    </div>
   </div>
 </div>
 
@@ -1096,15 +985,12 @@ body::before {
 <script>
 /* ═══ State ═══ */
 let cur = -1; // -1 = login
-const TOTAL = 5;
-let loveYesCount = 0;
-let fleeCount    = 0;
+let fleeCount = 0;
 
 const TARGET_HASH = '7d43482088fef7e4729d16c28c604679aba241b36c821dd66168b70bb74cb2a9';
 let failCount = parseInt(sessionStorage.getItem('lf') || '0');
 let lockUntil = parseInt(sessionStorage.getItem('lu') || '0');
 let lockTimer  = null;
-const loveFeedback = ['I knew it 🤍', 'Tell me again...', 'Once more?', 'I believe you now 💕'];
 
 /* ═══ Populate day/year dropdowns ═══ */
 (function() {
@@ -1266,30 +1152,8 @@ function go(n) {
   if (prev) { prev.classList.add('exit'); setTimeout(() => prev.classList.remove('active', 'exit'), 350); }
   cur = n;
   document.getElementById('sc' + n).classList.add('active');
-  renderPips(n);
   setHubNav(true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function renderPips(n) {
-  const el = document.getElementById('pg' + n);
-  if (!el) return;
-  el.innerHTML = '';
-  for (let i = 0; i < TOTAL; i++) {
-    const d = document.createElement('div');
-    d.className = 'pip' + (i < n ? ' done' : i === n ? ' now' : '');
-    el.appendChild(d);
-  }
-}
-
-/* ═══ Love screen ═══ */
-function loveYes() {
-  spawnHearts(document.getElementById('yesBtn1'));
-  const fb = document.getElementById('fb1');
-  fb.textContent = loveFeedback[Math.min(loveYesCount, loveFeedback.length - 1)];
-  fb.classList.add('show');
-  loveYesCount++;
-  if (loveYesCount >= 2) setTimeout(() => go(2), 700);
 }
 
 /* ═══ Flee button ═══ */

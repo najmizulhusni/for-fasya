@@ -435,103 +435,112 @@ body::before {
 #scLogin { flex-direction: column; gap: 0; }
 
 .login-card {
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,0.95);
-  padding: 48px 44px 40px;
-  max-width: 420px; width: 100%;
-  box-shadow: var(--shadow-lg);
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,1);
+  padding: 52px 44px 44px;
+  max-width: 400px; width: 100%;
+  box-shadow:
+    0 2px 4px rgba(192,65,90,0.04),
+    0 12px 40px rgba(192,65,90,0.1),
+    0 32px 80px rgba(0,0,0,0.06);
   position: relative; overflow: hidden;
-  animation: screenIn 0.8s cubic-bezier(.22,.68,0,1.15) 0.1s both;
+  animation: screenIn 0.7s cubic-bezier(.22,.68,0,1.15) both;
 }
 .login-card::before {
   content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--rose-md), var(--rose), var(--rose-md), transparent);
-  opacity: 0.55;
+  position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rose), transparent);
+  opacity: 0.7;
 }
 
 .login-pre {
   display: block; text-align: center;
-  font-size: 10px; letter-spacing: 3px;
+  font-size: 9.5px; letter-spacing: 4px;
   text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-bottom: 18px;
+  font-weight: 500; margin-bottom: 16px;
 }
 .login-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 34px; font-weight: 300;
+  font-size: 40px; font-weight: 300; font-style: italic;
   color: var(--ink); text-align: center;
-  margin-bottom: 8px; line-height: 1.2;
+  margin-bottom: 36px; line-height: 1.1; letter-spacing: -0.5px;
 }
-.login-title em { font-style: italic; color: var(--rose); }
-.login-subtitle {
-  font-size: 13px; color: var(--muted);
-  text-align: center; line-height: 1.7; margin-bottom: 32px;
+.login-title strong {
+  font-style: normal; font-weight: 600; color: var(--rose);
+  display: block; font-size: 0.72em; letter-spacing: 0px;
 }
 
-/* ─── Date selectors ─── */
-.date-input-group { margin-bottom: 24px; }
-.date-input-label {
-  display: block; font-size: 10px; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-bottom: 14px; text-align: center;
+/* ─── Date selector — unified container ─── */
+.date-input-group { margin-bottom: 20px; }
+.date-selectors {
+  display: flex;
+  border: 1.5px solid rgba(192,65,90,0.18);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--rose-pale);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.date-selectors { display: flex; gap: 10px; justify-content: center; }
+.date-selectors:focus-within {
+  border-color: var(--rose-md);
+  box-shadow: 0 0 0 4px rgba(192,65,90,0.09);
+  background: #fff;
+}
 .date-sel-wrap {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  flex: 1; max-width: 120px;
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  border-right: 1px solid rgba(192,65,90,0.12);
 }
-.date-sel-wrap.day-wrap  { max-width: 80px; }
-.date-sel-wrap.year-wrap { max-width: 100px; }
+.date-sel-wrap:last-child { border-right: none; }
+.date-sel-wrap.day-wrap  { flex: 0 0 76px; }
+.date-sel-wrap.year-wrap { flex: 0 0 104px; }
 .date-sel-sub {
-  font-size: 9.5px; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--muted-lt); font-weight: 500;
+  font-size: 8.5px; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--muted-lt);
+  font-weight: 500; padding-bottom: 11px;
 }
 .date-sel {
-  width: 100%; padding: 12px 10px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--line);
-  background: var(--rose-pale); color: var(--ink);
+  width: 100%; padding: 16px 6px 8px;
+  border: none; border-radius: 0;
+  background: transparent; color: var(--ink);
   font-family: 'Cormorant Garamond', serif;
-  font-size: 20px; font-weight: 600; text-align: center;
+  font-size: 24px; font-weight: 600; text-align: center;
   -webkit-appearance: none; appearance: none;
-  cursor: pointer; transition: all 0.2s; outline: none;
+  cursor: pointer; outline: none; line-height: 1;
 }
-.date-sel:focus {
-  border-color: var(--rose);
-  box-shadow: 0 0 0 3px rgba(192,65,90,0.12); background: #fff;
-}
-.date-sel option { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; }
+.date-sel:focus { color: var(--rose); }
+.date-sel option { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; color: var(--ink); }
 
 /* ─── Error ─── */
 .login-error {
   display: flex; align-items: center; gap: 8px;
-  background: #fff0f0; border: 1px solid #f5c5c5;
-  border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+  background: #fff4f4; border: 1px solid #f5c5c5;
+  border-radius: 10px; padding: 11px 14px; margin-bottom: 14px;
   opacity: 0; transform: translateY(-4px);
-  transition: all 0.3s; pointer-events: none;
+  transition: all 0.25s; pointer-events: none;
 }
 .login-error.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.login-error i { font-size: 15px; color: #e05555; flex-shrink: 0; }
-.login-error span { font-size: 12.5px; color: #c04040; line-height: 1.5; }
+.login-error i { font-size: 14px; color: #e05555; flex-shrink: 0; }
+.login-error span { font-size: 12px; color: #c04040; line-height: 1.5; }
 
 /* ─── Lockout ─── */
 .login-lockout {
   display: none; align-items: center; gap: 8px;
-  background: rgba(192,65,90,0.05);
-  border: 1px solid rgba(192,65,90,0.15);
-  border-radius: 10px; padding: 11px 16px; margin-bottom: 14px;
-  font-size: 12.5px; color: var(--rose); font-weight: 500;
+  background: rgba(192,65,90,0.04);
+  border: 1px solid rgba(192,65,90,0.16);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+  font-size: 12px; color: var(--rose); font-weight: 500;
 }
 .login-lockout.show { display: flex; }
-.login-lockout i { font-size: 15px; flex-shrink: 0; }
+.login-lockout i { font-size: 14px; flex-shrink: 0; }
 
 /* ─── Hint ─── */
 .login-hint {
-  text-align: center; margin-top: 18px;
-  font-size: 12px; color: var(--muted-lt); line-height: 1.6;
+  text-align: center; margin-top: 20px;
+  font-size: 12.5px; color: var(--muted-lt); line-height: 1.6;
   font-family: 'Cormorant Garamond', serif; font-style: italic;
+  letter-spacing: 0.2px;
 }
 
 /* ─── Unlock animation overlay ─── */
@@ -711,7 +720,7 @@ body::before {
   .card            { padding: 40px 24px; }
   .headline        { font-size: 28px; }
   .login-card      { padding: 40px 24px 36px; }
-  .login-title     { font-size: 24px; }
+  .login-title     { font-size: 30px; }
   .date-selectors  { gap: 8px; }
   .date-sel        { font-size: 18px; padding: 10px 8px; }
   .date-grid       { gap: 8px; }
@@ -731,7 +740,7 @@ body::before {
   .card            { padding: 60px 56px; }
   .headline        { font-size: 36px; }
   .login-card      { padding: 56px 52px 48px; }
-  .login-title     { font-size: 30px; }
+  .login-title     { font-size: 46px; }
 }
 </style>
 </head>
@@ -828,11 +837,9 @@ body::before {
 
   <div class="login-card">
     <span class="login-pre">private · for fasya only</span>
-    <h1 class="login-title">What day<br><em>did we start?</em></h1>
-    <p class="login-subtitle">Only you know this one.</p>
+    <h1 class="login-title">our date,<strong>Fasya.</strong></h1>
 
     <div class="date-input-group">
-      <label class="date-input-label">day · month · year</label>
       <div class="date-selectors">
         <div class="date-sel-wrap day-wrap">
           <select class="date-sel" id="inDay" aria-label="Day">
@@ -873,8 +880,8 @@ body::before {
 
     <div class="btn-row">
       <button class="btn-primary" onclick="attemptLogin()" id="loginBtn" style="width:100%;justify-content:center;">
+        Open
         <i class="ti ti-arrow-right"></i>
-        Continue
       </button>
     </div>
 

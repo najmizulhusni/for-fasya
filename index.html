@@ -435,112 +435,114 @@ body::before {
 #scLogin { flex-direction: column; gap: 0; }
 
 .login-card {
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
-  border-radius: 24px;
-  border: 1px solid rgba(255,255,255,1);
-  padding: 52px 44px 44px;
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(48px); -webkit-backdrop-filter: blur(48px);
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.92);
+  padding: 52px 48px 48px;
   max-width: 400px; width: 100%;
+  text-align: center;
   box-shadow:
-    0 2px 4px rgba(192,65,90,0.04),
-    0 12px 40px rgba(192,65,90,0.1),
-    0 32px 80px rgba(0,0,0,0.06);
-  position: relative; overflow: hidden;
-  animation: screenIn 0.7s cubic-bezier(.22,.68,0,1.15) both;
-}
-.login-card::before {
-  content: '';
-  position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--rose), transparent);
-  opacity: 0.7;
+    0 1px 1px rgba(192,65,90,0.03),
+    0 4px 16px rgba(192,65,90,0.07),
+    0 20px 56px rgba(0,0,0,0.07),
+    0 48px 100px rgba(0,0,0,0.04);
+  animation: screenIn 0.65s cubic-bezier(.22,.68,0,1.15) both;
 }
 
-.login-pre {
-  display: block; text-align: center;
-  font-size: 9.5px; letter-spacing: 4px;
-  text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-bottom: 16px;
+/* Monogram */
+.login-monogram {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 32px;
 }
+.login-monogram hr {
+  flex: 1; border: none;
+  border-top: 1px solid rgba(192,65,90,0.14);
+}
+.login-monogram-mark {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 13px; font-weight: 300;
+  color: var(--rose-md); letter-spacing: 5px;
+  white-space: nowrap; line-height: 1;
+}
+
+/* Title */
 .login-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 40px; font-weight: 300; font-style: italic;
-  color: var(--ink); text-align: center;
-  margin-bottom: 36px; line-height: 1.1; letter-spacing: -0.5px;
+  font-size: 44px; font-weight: 300;
+  color: var(--ink); line-height: 1.08;
+  margin-bottom: 44px; letter-spacing: -0.5px;
 }
-.login-title strong {
-  font-style: normal; font-weight: 600; color: var(--rose);
-  display: block; font-size: 0.72em; letter-spacing: 0px;
-}
+.login-title em { font-style: italic; color: var(--rose); }
 
-/* ─── Date selector — unified container ─── */
-.date-input-group { margin-bottom: 20px; }
+/* Underline date selects */
 .date-selectors {
-  display: flex;
-  border: 1.5px solid rgba(192,65,90,0.18);
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--rose-pale);
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-}
-.date-selectors:focus-within {
-  border-color: var(--rose-md);
-  box-shadow: 0 0 0 4px rgba(192,65,90,0.09);
-  background: #fff;
+  display: flex; gap: 24px; justify-content: center;
+  margin-bottom: 36px;
 }
 .date-sel-wrap {
-  flex: 1;
   display: flex; flex-direction: column; align-items: center;
-  border-right: 1px solid rgba(192,65,90,0.12);
+  width: 82px;
 }
-.date-sel-wrap:last-child { border-right: none; }
-.date-sel-wrap.day-wrap  { flex: 0 0 76px; }
-.date-sel-wrap.year-wrap { flex: 0 0 104px; }
-.date-sel-sub {
-  font-size: 8.5px; letter-spacing: 1.8px;
-  text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; padding-bottom: 11px;
-}
+.date-sel-wrap.day-wrap  { width: 54px; }
+.date-sel-wrap.year-wrap { width: 100px; }
 .date-sel {
-  width: 100%; padding: 16px 6px 8px;
-  border: none; border-radius: 0;
+  width: 100%; padding: 0 2px 12px;
   background: transparent; color: var(--ink);
+  border: none; border-bottom: 1.5px solid rgba(192,65,90,0.2);
+  border-radius: 0;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 24px; font-weight: 600; text-align: center;
+  font-size: 38px; font-weight: 600; text-align: center;
   -webkit-appearance: none; appearance: none;
   cursor: pointer; outline: none; line-height: 1;
+  transition: border-color 0.18s, color 0.18s;
 }
-.date-sel:focus { color: var(--rose); }
-.date-sel option { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; color: var(--ink); }
+.date-sel:focus {
+  border-bottom-color: var(--rose);
+  color: var(--rose);
+}
+.date-sel option {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 400; color: var(--ink);
+}
+.date-sel-sub {
+  font-size: 8.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted-lt);
+  font-weight: 500; margin-top: 10px;
+}
 
-/* ─── Error ─── */
+/* Error */
 .login-error {
-  display: flex; align-items: center; gap: 8px;
-  background: #fff4f4; border: 1px solid #f5c5c5;
-  border-radius: 10px; padding: 11px 14px; margin-bottom: 14px;
-  opacity: 0; transform: translateY(-4px);
-  transition: all 0.25s; pointer-events: none;
+  display: flex; align-items: flex-start; gap: 8px;
+  background: rgba(255,240,240,0.9);
+  border: 1px solid rgba(224,85,85,0.18);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;
+  opacity: 0; transform: translateY(-6px);
+  transition: opacity 0.25s, transform 0.25s; pointer-events: none;
+  text-align: left;
 }
 .login-error.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.login-error i { font-size: 14px; color: #e05555; flex-shrink: 0; }
-.login-error span { font-size: 12px; color: #c04040; line-height: 1.5; }
+.login-error i { font-size: 13px; color: #e05555; flex-shrink: 0; margin-top: 2px; }
+.login-error span { font-size: 12px; color: #c04040; line-height: 1.55; }
 
-/* ─── Lockout ─── */
+/* Lockout */
 .login-lockout {
   display: none; align-items: center; gap: 8px;
   background: rgba(192,65,90,0.04);
-  border: 1px solid rgba(192,65,90,0.16);
-  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+  border: 1px solid rgba(192,65,90,0.14);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;
   font-size: 12px; color: var(--rose); font-weight: 500;
+  text-align: left;
 }
 .login-lockout.show { display: flex; }
-.login-lockout i { font-size: 14px; flex-shrink: 0; }
+.login-lockout i { font-size: 13px; flex-shrink: 0; }
 
-/* ─── Hint ─── */
+/* Hint */
 .login-hint {
   text-align: center; margin-top: 20px;
-  font-size: 12.5px; color: var(--muted-lt); line-height: 1.6;
-  font-family: 'Cormorant Garamond', serif; font-style: italic;
-  letter-spacing: 0.2px;
+  font-size: 13px; color: var(--muted-lt);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; letter-spacing: 0.2px;
 }
 
 /* ─── Unlock animation overlay ─── */
@@ -719,10 +721,10 @@ body::before {
 @media (max-width: 520px) {
   .card            { padding: 40px 24px; }
   .headline        { font-size: 28px; }
-  .login-card      { padding: 40px 24px 36px; }
-  .login-title     { font-size: 30px; }
-  .date-selectors  { gap: 8px; }
-  .date-sel        { font-size: 18px; padding: 10px 8px; }
+  .login-card      { padding: 44px 28px 40px; }
+  .login-title     { font-size: 34px; margin-bottom: 36px; }
+  .date-selectors  { gap: 16px; }
+  .date-sel        { font-size: 28px; padding: 0 2px 10px; }
   .date-grid       { gap: 8px; }
   .counter-pill    { padding: 14px 18px; min-width: 68px; }
   .counter-num     { font-size: 28px; }
@@ -732,15 +734,15 @@ body::before {
   .door-desc       { font-size: 12px; }
 }
 @media (max-width: 360px) {
-  .date-selectors  { flex-direction: column; align-items: center; }
-  .date-sel-wrap   { max-width: 100% !important; width: 100%; }
+  .date-selectors  { gap: 10px; }
+  .date-sel        { font-size: 24px; }
   .door-grid       { grid-template-columns: 1fr; }
 }
 @media (min-width: 768px) {
   .card            { padding: 60px 56px; }
   .headline        { font-size: 36px; }
-  .login-card      { padding: 56px 52px 48px; }
-  .login-title     { font-size: 46px; }
+  .login-card      { padding: 60px 56px 52px; }
+  .login-title     { font-size: 50px; }
 }
 </style>
 </head>
@@ -836,35 +838,37 @@ body::before {
 <div class="screen active" id="scLogin">
 
   <div class="login-card">
-    <span class="login-pre">private · for fasya only</span>
-    <h1 class="login-title">our date,<strong>Fasya.</strong></h1>
 
-    <div class="date-input-group">
-      <div class="date-selectors">
-        <div class="date-sel-wrap day-wrap">
-          <select class="date-sel" id="inDay" aria-label="Day">
-            <option value="">DD</option>
-          </select>
-          <span class="date-sel-sub">Day</span>
-        </div>
-        <div class="date-sel-wrap">
-          <select class="date-sel" id="inMonth" aria-label="Month">
-            <option value="">MMM</option>
-            <option value="1">Jan</option><option value="2">Feb</option>
-            <option value="3">Mar</option><option value="4">Apr</option>
-            <option value="5">May</option><option value="6">Jun</option>
-            <option value="7">Jul</option><option value="8">Aug</option>
-            <option value="9">Sep</option><option value="10">Oct</option>
-            <option value="11">Nov</option><option value="12">Dec</option>
-          </select>
-          <span class="date-sel-sub">Month</span>
-        </div>
-        <div class="date-sel-wrap year-wrap">
-          <select class="date-sel" id="inYear" aria-label="Year">
-            <option value="">YYYY</option>
-          </select>
-          <span class="date-sel-sub">Year</span>
-        </div>
+    <div class="login-monogram">
+      <hr><span class="login-monogram-mark">N · F</span><hr>
+    </div>
+
+    <h1 class="login-title">tell me<br>our <em>date.</em></h1>
+
+    <div class="date-selectors">
+      <div class="date-sel-wrap day-wrap">
+        <select class="date-sel" id="inDay" aria-label="Day">
+          <option value="">—</option>
+        </select>
+        <span class="date-sel-sub">day</span>
+      </div>
+      <div class="date-sel-wrap">
+        <select class="date-sel" id="inMonth" aria-label="Month">
+          <option value="">—</option>
+          <option value="1">Jan</option><option value="2">Feb</option>
+          <option value="3">Mar</option><option value="4">Apr</option>
+          <option value="5">May</option><option value="6">Jun</option>
+          <option value="7">Jul</option><option value="8">Aug</option>
+          <option value="9">Sep</option><option value="10">Oct</option>
+          <option value="11">Nov</option><option value="12">Dec</option>
+        </select>
+        <span class="date-sel-sub">month</span>
+      </div>
+      <div class="date-sel-wrap year-wrap">
+        <select class="date-sel" id="inYear" aria-label="Year">
+          <option value="">—</option>
+        </select>
+        <span class="date-sel-sub">year</span>
       </div>
     </div>
 

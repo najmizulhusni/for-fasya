@@ -377,6 +377,33 @@ body::before {
 }
 .signature strong { color: var(--rose); font-style: normal; font-weight: 600; }
 
+/* ─── Letter ─── */
+.card-letter { text-align: left; }
+.letter-date {
+  font-size: 10px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--muted-lt);
+  font-weight: 500; margin-bottom: 20px;
+}
+.letter-salutation {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-style: italic; font-weight: 400;
+  color: var(--ink); margin-bottom: 22px; line-height: 1.2;
+}
+.letter-body {
+  display: flex; flex-direction: column; gap: 14px;
+  margin-bottom: 24px;
+}
+.letter-body p {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.85; font-weight: 300;
+}
+.letter-question {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 19px;
+  color: var(--ink-soft); text-align: center;
+  margin-bottom: 24px; line-height: 1.4;
+}
+
 /* ─── Divider ─── */
 .divider {
   display: flex; align-items: center; gap: 12px;
@@ -898,19 +925,29 @@ body::before {
 </div>
 
 <!-- ═══════════════════════════════════
-     SCREEN 0 — Envelope opener
+     SCREEN 0 — The letter
 ════════════════════════════════════ -->
 <div class="screen" id="sc0">
-  <div class="card">
-    <div class="progress" id="pg0"></div>
-    <div class="icon-ring"><i class="ti ti-mail-opened"></i></div>
-    <p class="eyebrow">a letter for you</p>
-    <h1 class="headline">Something I've<br>been <em>meaning to say...</em></h1>
-    <p class="body-text">This is for you, Fasya.<br>Open it when you're ready. 🤍</p>
-    <div class="btn-row">
-      <button class="btn-primary" onclick="go(1)">
-        <i class="ti ti-lock-open"></i>
-        Open the letter
+  <div class="card card-letter">
+    <p class="letter-date">20 · 09 · 2022</p>
+    <p class="letter-salutation">Dear Fasya,</p>
+    <div class="letter-body">
+      <p>I've been meaning to write this for a while. Not because it's hard to say — more because some things deserve more than a text.</p>
+      <p>You came to Johor for my graduation. I know you made it seem like nothing. I've been thinking about it ever since.</p>
+      <p>Three years in, and I still notice the small things. The way you go quiet when something's bothering you. The way you still check on me even when you've had a long day yourself. I don't always say it — but I notice.</p>
+      <p>We ran 12km together in January. I genuinely didn't see that coming. But it made sense the whole way through, like most things with you do.</p>
+      <p>So here it is. Written down, and meant.</p>
+    </div>
+    <div class="divider"><hr></div>
+    <p class="letter-question">Will you keep being mine?</p>
+    <div class="btn-row" style="min-height:56px;">
+      <button class="btn-primary" onclick="finale(event)">
+        <i class="ti ti-heart-filled"></i>
+        Always
+      </button>
+      <button class="btn-ghost" id="noBtn0" onmouseover="flee(this)" ontouchstart="flee(this)">
+        <i class="ti ti-run"></i>
+        No
       </button>
     </div>
   </div>
@@ -964,8 +1001,6 @@ body::before {
 ════════════════════════════════════ -->
 <div class="screen" id="sc3">
   <div class="card">
-    <div class="progress" id="pg3"></div>
-    <div class="icon-ring"><i class="ti ti-heart"></i></div>
     <p class="eyebrow">with all that I am</p>
     <h1 class="headline">You're it<br>for <em>me, Fasya.</em></h1>
     <p class="body-text">No conditions. No footnotes.<br>Just you — exactly as you are.</p>

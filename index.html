@@ -530,6 +530,7 @@ body::before {
   from { opacity:0; transform: scale(0.6); }
   to   { opacity:1; transform: scale(1); }
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── Hub ─── */
 #scHub { flex-direction: column; align-items: center; }
@@ -847,18 +848,10 @@ body::before {
 /* ─── Vault ─── */
 #scVault { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
 .vault-wrap { max-width: 480px; width: 100%; margin: 0 auto; }
-.vault-puzzle { margin-bottom: 28px; }
-.vault-puzzle-line {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 18px; font-weight: 300; color: var(--muted);
-  line-height: 1.9; padding-left: 18px;
-  border-left: 2px solid var(--line);
-  margin-bottom: 2px;
-}
-.vault-puzzle-eq {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 22px; font-weight: 400;
-  color: var(--ink); margin-top: 16px; line-height: 1.4;
+.vault-riddle {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 20px; font-weight: 300; color: var(--ink);
+  line-height: 1.6; margin-bottom: 28px;
 }
 .vault-input {
   width: 100%; padding: 14px 16px;
@@ -1411,14 +1404,9 @@ body::before {
     <div id="vaultGate">
       <p class="story-overline">private · protected</p>
       <h1 class="story-title">the <em>vault.</em></h1>
-      <div class="vault-puzzle">
-        <p class="vault-puzzle-line">Take the day of our first date.</p>
-        <p class="vault-puzzle-line">Multiply it by the day we became us.</p>
-        <p class="vault-puzzle-line">Add the year we started.</p>
-        <p class="vault-puzzle-eq">What number do you get?</p>
-      </div>
-      <input class="vault-input" id="vaultInput" type="number" inputmode="numeric"
-        placeholder="enter the number…" autocomplete="off"
+      <p class="vault-riddle">"What is our word — the one that means we are never apart?"</p>
+      <input class="vault-input" id="vaultInput" type="text"
+        placeholder="one word, lowercase…" autocomplete="off" autocorrect="off" autocapitalize="none"
         onkeydown="if(event.key==='Enter') attemptVaultUnlock()">
       <p class="vault-err" id="vaultErr">not quite right.</p>
       <div class="btn-row">
@@ -1496,10 +1484,25 @@ body::before {
 let cur = -1; // -1 = login
 let fleeCount = 0;
 
-const TARGET_HASH = '7d43482088fef7e4729d16c28c604679aba241b36c821dd66168b70bb74cb2a9';
+// Hash chunks — split so no single readable constant exists in source
+const TH = ['3ba5e5b9','0caef901','c84a46b9','ef90a57b','d5c51af1','86c4fdac','04f62f0e','b5613460'];
+const VH = ['aea995a2','587286a7','41900782','14245ee7','d5d991a2','d638308c','df1bb827','c0822c87'];
+
 let failCount = parseInt(sessionStorage.getItem('lf') || '0');
 let lockUntil = parseInt(sessionStorage.getItem('lu') || '0');
 let lockTimer  = null;
+
+// PBKDF2 — 250k iterations makes each brute-force attempt ~47ms
+// so all 4464 date combinations take ~3.5 min, not milliseconds
+async function kdf(password, saltB64, bits) {
+  const enc = new TextEncoder();
+  const km  = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const buf = await crypto.subtle.deriveBits(
+    { name:'PBKDF2', salt: enc.encode(atob(saltB64)), iterations: 250000, hash:'SHA-256' },
+    km, bits
+  );
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 /* ═══ Populate day/year dropdowns ═══ */
 (function() {
@@ -1526,6 +1529,7 @@ async function attemptLogin() {
   const y = parseInt(document.getElementById('inYear').value);
   const err = document.getElementById('loginError');
   const msg = document.getElementById('loginErrorMsg');
+  const btn = document.getElementById('loginBtn');
 
   if (!d || !m || !y) {
     msg.textContent = 'Fill in all three — day, month, and year.';
@@ -1534,10 +1538,17 @@ async function attemptLogin() {
     return;
   }
 
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${d}|${m}|${y}`));
-  const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin .8s linear infinite;display:inline-block"></i>';
 
-  if (hash === TARGET_HASH) {
+  // Format obfuscated: separator encoded so format isn't plainly visible
+  const input = [d, m, y].join(atob('fA==')); // fA== = |
+  const hash  = await kdf(input, 'bmYtZ2F0ZS0yMDIy', 256); // bmYt... = nf-gate-2022
+
+  btn.disabled = false;
+  btn.innerHTML = 'Open <i class="ti ti-arrow-right"></i>';
+
+  if (hash === TH.join('')) {
     err.classList.remove('show');
     document.getElementById('loginLockout').classList.remove('show');
     sessionStorage.removeItem('lf');
@@ -1957,18 +1968,24 @@ function updateClCount() {
 }
 
 /* ═══ Vault ═══ */
-const VAULT_HASH = 'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9';
 let vaultKey = null;
 
 async function attemptVaultUnlock() {
   const answer = document.getElementById('vaultInput').value.trim().toLowerCase();
   const err    = document.getElementById('vaultErr');
-  if (!answer) { err.textContent = 'type your answer first.'; err.classList.add('show'); return; }
+  const btn    = document.querySelector('#vaultGate .btn-primary');
+  if (!answer) { err.textContent = 'enter your answer first.'; err.classList.add('show'); return; }
 
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(answer));
-  const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin .8s linear infinite;display:inline-block"></i>';
 
-  if (hash !== VAULT_HASH) { err.textContent = 'not quite right.'; err.classList.add('show'); return; }
+  // PBKDF2 check — same slow derivation as login
+  const hash = await kdf(answer, 'bmYtdmF1bHQtMjAyMg==', 256); // = nf-vault-2022
+
+  btn.disabled = false;
+  btn.innerHTML = 'Enter <i class="ti ti-arrow-right"></i>';
+
+  if (hash !== VH.join('')) { err.textContent = 'not quite right.'; err.classList.add('show'); return; }
 
   err.classList.remove('show');
   vaultKey = await deriveVaultKey(answer);

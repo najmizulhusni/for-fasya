@@ -814,30 +814,6 @@ body::before {
 .music-chip.playing .ic-play  { display: none; }
 .music-chip.playing .ic-pause { display: block; }
 
-/* ─── Music card ─── */
-.music-card {
-  position: fixed;
-  bottom: max(76px, env(safe-area-inset-bottom, 0px) + 76px);
-  left: 50%; transform: translateX(-50%);
-  width: 320px; max-width: calc(100vw - 32px);
-  background: #fff; border-radius: 18px; overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
-  display: none; z-index: 88;
-}
-.music-card.open { display: block; animation: screenIn 0.25s cubic-bezier(.22,.68,0,1.15) both; }
-.music-card-head {
-  padding: 14px 18px; display: flex; align-items: center;
-  justify-content: space-between; border-bottom: 1px solid var(--line);
-}
-.music-card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; color: var(--ink); }
-.music-card-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.music-card-close {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--rose-lt); border: none; color: var(--rose);
-  font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.music-card iframe { width: 100%; height: 80px; border: none; display: block; border-radius: 0 0 18px 18px; }
 
 /* ─── Checklist ─── */
 #scChecklist { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
@@ -1067,21 +1043,14 @@ body::before {
   </button>
 </nav>
 
-<!-- Music card (visible YouTube player — most reliable across all browsers) -->
-<div class="music-card" id="musicCard">
-  <div class="music-card-head">
-    <div>
-      <div class="music-card-title">Tak Terbatas</div>
-      <div class="music-card-sub">Good Morning Everyone · our song 🌙</div>
-    </div>
-    <button class="music-card-close" onclick="closeMusicCard()">×</button>
-  </div>
-  <iframe id="musicFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="height:80px;"></iframe>
-</div>
-
-<!-- Music chip -->
-<div class="music-chip" id="musicChip">
-  <div class="music-pill" onclick="toggleMusic()">
+<!-- Music chip — iframe hidden inside, no popup -->
+<div class="music-chip" id="musicChip" style="position:relative;">
+  <!-- YouTube iframe lives inside chip at near-zero opacity so browser renders it (allows autoplay) -->
+  <iframe id="musicFrame" src=""
+    allow="autoplay; encrypted-media"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.01;pointer-events:none;border:none;z-index:0;">
+  </iframe>
+  <div class="music-pill" onclick="toggleMusic()" style="position:relative;z-index:1;">
     <div class="music-bars">
       <div class="bar b1"></div>
       <div class="bar b2"></div>
@@ -1925,23 +1894,22 @@ function checkSeptemberUnlock() {
 }
 
 /* ═══ Music ═══ */
-let musicCardOpen = false, musicFrameLoaded = false;
+let musicLoaded = false, musicPlaying = false;
 
 function toggleMusic() {
-  musicCardOpen = !musicCardOpen;
-  if (musicCardOpen && !musicFrameLoaded) {
-    document.getElementById('musicFrame').src =
-      'https://open.spotify.com/embed/track/0LZYp2h2jM1w5Kf0V9junQ?utm_source=generator&theme=0';
-    musicFrameLoaded = true;
+  const frame = document.getElementById('musicFrame');
+  if (!musicLoaded) {
+    frame.src = 'https://www.youtube.com/embed/QLVei17AIUY?autoplay=1&controls=0&rel=0&enablejsapi=1&playsinline=1';
+    musicLoaded = true;
+    musicPlaying = true;
+  } else if (musicPlaying) {
+    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*');
+    musicPlaying = false;
+  } else {
+    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*');
+    musicPlaying = true;
   }
-  document.getElementById('musicCard').classList.toggle('open', musicCardOpen);
-  document.getElementById('musicChip').classList.toggle('playing', musicCardOpen);
-}
-
-function closeMusicCard() {
-  musicCardOpen = false;
-  document.getElementById('musicCard').classList.remove('open');
-  document.getElementById('musicChip').classList.remove('playing');
+  document.getElementById('musicChip').classList.toggle('playing', musicPlaying);
 }
 
 /* ═══ Checklist ═══ */

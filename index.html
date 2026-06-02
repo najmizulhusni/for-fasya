@@ -675,6 +675,156 @@ body::before {
 }
 .hub-nav-btn:active { transform: scale(0.94); }
 
+/* ─── Countdown ─── */
+.hub-countdown {
+  text-align: center;
+  padding: 18px 0 22px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.countdown-label {
+  font-size: 9.5px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--muted-lt);
+  font-weight: 500; margin-bottom: 14px;
+}
+.countdown-display {
+  display: flex; gap: 24px; justify-content: center; align-items: flex-end;
+}
+.cd-unit { display: flex; flex-direction: column; align-items: center; }
+.cd-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px; font-weight: 600;
+  color: var(--ink); line-height: 1;
+}
+.cd-label {
+  font-size: 8.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted-lt);
+  font-weight: 500; margin-top: 5px;
+}
+.countdown-sub {
+  font-size: 12px; color: var(--muted); margin-top: 12px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+}
+
+/* ─── Album screen ─── */
+#scAlbum { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
+.album-wrap { max-width: 440px; width: 100%; margin: 0 auto; }
+.album-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.album-thumb {
+  border-radius: 10px; overflow: hidden;
+  cursor: pointer; aspect-ratio: 1; position: relative;
+  background: var(--rose-lt);
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+}
+.album-thumb:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.album-thumb:active { transform: scale(0.97); }
+.album-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.album-hover-cap {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 20px 10px 10px;
+  background: linear-gradient(transparent, rgba(15,4,8,0.55));
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 10.5px; color: rgba(255,255,255,0.88);
+  opacity: 0; transition: opacity 0.2s;
+}
+.album-thumb:hover .album-hover-cap { opacity: 1; }
+
+/* ─── Lightbox ─── */
+.lightbox {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(6,2,4,0.97);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 56px 16px 80px;
+  touch-action: pan-y;
+}
+.lightbox.open { display: flex; animation: screenIn 0.25s ease both; }
+.lb-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.lb-count { font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.3); font-weight: 500; }
+.lb-close {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: none;
+  color: rgba(255,255,255,0.65); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+}
+.lb-close:hover { background: rgba(255,255,255,0.15); }
+.lb-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; max-width: 100%; }
+.lb-img-wrap img { max-width: 100%; max-height: calc(100dvh - 150px); object-fit: contain; border-radius: 6px; }
+.lb-caption { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12.5px; color: rgba(255,255,255,0.38); text-align: center; margin-top: 14px; }
+.lb-footer {
+  position: absolute; bottom: 28px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 12px;
+}
+.lb-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: none;
+  color: rgba(255,255,255,0.65); font-size: 22px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+}
+.lb-btn:hover { background: rgba(255,255,255,0.15); }
+
+/* ─── Music ─── */
+.music-chip {
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px) + 12px);
+  left: 50%; transform: translateX(-50%);
+  z-index: 85; display: none;
+}
+.music-chip.visible { display: block; }
+.music-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(192,65,90,0.14);
+  border-radius: 50px; padding: 8px 10px 8px 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+.music-pill:hover { background: var(--rose-lt); border-color: var(--rose-md); transform: translateY(-2px); }
+.music-pill:active { transform: scale(0.96); }
+.music-pill-song { font-size: 12px; font-weight: 500; color: var(--ink-soft); line-height: 1.3; }
+.music-pill-band { font-size: 10px; color: var(--muted-lt); line-height: 1.3; }
+.music-pill-icon {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--rose); display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.music-modal {
+  position: fixed; inset: 0; z-index: 490;
+  background: rgba(6,2,4,0.85);
+  display: none; align-items: flex-end; justify-content: center;
+  padding-bottom: max(80px, env(safe-area-inset-bottom, 0px) + 80px);
+}
+.music-modal.open { display: flex; animation: screenIn 0.28s ease both; }
+.music-card {
+  width: 360px; max-width: calc(100vw - 32px);
+  background: rgba(255,255,255,0.97);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+}
+.music-card-head {
+  padding: 16px 20px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.music-card-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; color: var(--ink); }
+.music-card-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.music-card-x {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--rose-lt); border: none;
+  color: var(--rose); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.music-card iframe { width: 100%; height: 200px; display: block; border: none; }
+
 /* ─── Responsive ─── */
 @media (max-width: 520px) {
   .card            { padding: 40px 24px; }
@@ -712,6 +862,49 @@ body::before {
   </button>
 </nav>
 
+<!-- Music chip -->
+<div class="music-chip" id="musicChip">
+  <div class="music-pill" onclick="openMusic()">
+    <div class="music-pill-text">
+      <div class="music-pill-song">Tak Terbatas</div>
+      <div class="music-pill-band">GME · our song</div>
+    </div>
+    <div class="music-pill-icon">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- Music modal -->
+<div class="music-modal" id="musicModal" onclick="closeMusicModal(event)">
+  <div class="music-card">
+    <div class="music-card-head">
+      <div>
+        <div class="music-card-title">Tak Terbatas</div>
+        <div class="music-card-sub">GME · our song 🌙</div>
+      </div>
+      <button class="music-card-x" onclick="closeMusicModal()">×</button>
+    </div>
+    <iframe id="ytFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-bar">
+    <span class="lb-count" id="lbCount"></span>
+    <button class="lb-close" onclick="closeLightbox()">×</button>
+  </div>
+  <div class="lb-img-wrap">
+    <img id="lbImg" src="" alt="">
+  </div>
+  <p class="lb-caption" id="lbCap"></p>
+  <div class="lb-footer">
+    <button class="lb-btn" onclick="lbMove(-1)">‹</button>
+    <button class="lb-btn" onclick="lbMove(1)">›</button>
+  </div>
+</div>
+
 <div class="unlock-overlay" id="unlockOverlay">
   <div class="unlock-icon-big"><i class="ti ti-lock-open-2"></i></div>
   <div class="unlock-text">You remembered 🤍</div>
@@ -727,6 +920,17 @@ body::before {
       <p class="hub-eyebrow">private · for you only</p>
       <h1 class="hub-name">Fasya.</h1>
       <p class="hub-meta" id="hubMeta"></p>
+    </div>
+
+    <!-- Countdown -->
+    <div class="hub-countdown">
+      <div class="countdown-label">until our next anniversary</div>
+      <div class="countdown-display">
+        <div class="cd-unit"><span class="cd-num" id="cdDays">—</span><span class="cd-label">days</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdHours">—</span><span class="cd-label">hrs</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
+      </div>
+      <div class="countdown-sub" id="cdSub"></div>
     </div>
 
     <div class="door-grid">
@@ -757,29 +961,29 @@ body::before {
         </div>
       </div>
 
-      <!-- Door 3: our album — LOCKED -->
-      <div class="door-card locked">
+      <!-- Door 3: our album — OPEN -->
+      <div class="door-card open" onclick="openDoor('scAlbum')" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         </div>
         <div class="door-title">our album</div>
-        <div class="door-desc">something is being prepared for you 🌙</div>
+        <div class="door-desc">our moments, all in one place</div>
         <div class="door-foot">
-          <div class="door-dot dot-lock"></div>
-          <span class="door-label label-lock">locked</span>
+          <div class="door-dot dot-open"></div>
+          <span class="door-label label-open">open</span>
         </div>
       </div>
 
-      <!-- Door 4: something for september — LOCKED -->
-      <div class="door-card locked">
+      <!-- Door 4: something for september — locked until 20 Sep -->
+      <div class="door-card locked" id="doorSeptember">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </div>
         <div class="door-title">something for september</div>
         <div class="door-desc">wait for it — 20.09 🌙</div>
         <div class="door-foot">
-          <div class="door-dot dot-lock"></div>
-          <span class="door-label label-lock">locked</span>
+          <div class="door-dot dot-lock" id="doorSepDot"></div>
+          <span class="door-label label-lock" id="doorSepLabel">locked</span>
         </div>
       </div>
 
@@ -981,6 +1185,31 @@ body::before {
   </div>
 </div>
 
+<!-- ═══════════════════════════════════
+     ALBUM — Photo gallery
+════════════════════════════════════ -->
+<div class="screen" id="scAlbum">
+  <div class="album-wrap">
+    <p class="story-overline">captured moments</p>
+    <h1 class="story-title">our <em>album.</em></h1>
+    <div class="album-grid" id="albumGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SEPTEMBER — Anniversary reveal
+════════════════════════════════════ -->
+<div class="screen" id="scSeptember">
+  <div class="card">
+    <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
+    <p class="eyebrow">20 · 09 · 2026</p>
+    <h1 class="headline">Happy anniversary,<br><em>Fasya.</em></h1>
+    <p class="body-text">Four years. Every single one worth it.<br>Here's to forever more.</p>
+    <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
+    <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
+  </div>
+</div>
+
 <script>
 /* ═══ State ═══ */
 let cur = -1; // -1 = login
@@ -1118,6 +1347,9 @@ function goFromLogin() {
   document.getElementById('scHub').classList.add('active');
   setHubNav(false);
   buildHubMeta();
+  buildCountdown();
+  checkSeptemberUnlock();
+  document.getElementById('musicChip').classList.add('visible');
 }
 
 function screenId(c) {
@@ -1131,6 +1363,7 @@ function openDoor(id, isStory) {
   setTimeout(() => hub.classList.remove('active', 'exit'), 350);
   cur = id;
   if (isStory) buildCounter();
+  if (id === 'scAlbum') buildAlbum();
   document.getElementById(screenId(id)).classList.add('active');
   setHubNav(true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1138,6 +1371,7 @@ function openDoor(id, isStory) {
 
 function goToHub() {
   setHubNav(false);
+  closeMusicModal();
   const prev = cur === 'hub' ? null : document.getElementById(screenId(cur));
   if (prev) { prev.classList.add('exit'); setTimeout(() => prev.classList.remove('active', 'exit'), 350); }
   cur = 'hub';
@@ -1283,9 +1517,122 @@ spawnPetals();
   if (rem > 0) startLockout(Math.ceil(rem / 1000));
 })();
 
-/* ═══ Enter key support on login ═══ */
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && cur === -1) attemptLogin();
+/* ═══ Photos ═══ */
+const PHOTOS = [
+  { src: 'IMG_0118.JPG',      cap: '10 · 10 · 2022 — our first date' },
+  { src: 'first-airport.png', cap: '25 · 11 · 2023 — KLIA, jakarta trip' },
+  { src: 'first-date-kl.png', cap: '02 · 08 · 2024 — kuala lumpur' },
+  { src: 'IMG_7735.JPG',      cap: '18 · 11 · 2025 — UTM graduation' },
+  { src: 'convocation.png',   cap: '18 · 01 · 2026 — twincity marathon' },
+];
+let lbIdx = 0;
+
+/* ═══ Album ═══ */
+function buildAlbum() {
+  const grid = document.getElementById('albumGrid');
+  if (!grid || grid.childElementCount) return;
+  PHOTOS.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'album-thumb';
+    el.onclick = () => openLightbox(i);
+    el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy">
+      <div class="album-hover-cap">${p.cap}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+/* ═══ Lightbox ═══ */
+function openLightbox(i) {
+  lbIdx = i; renderLb();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function lbMove(dir) {
+  lbIdx = (lbIdx + dir + PHOTOS.length) % PHOTOS.length;
+  renderLb();
+}
+function renderLb() {
+  const p = PHOTOS[lbIdx];
+  document.getElementById('lbImg').src = p.src;
+  document.getElementById('lbCap').textContent = p.cap;
+  document.getElementById('lbCount').textContent = `${lbIdx + 1} / ${PHOTOS.length}`;
+}
+
+// Touch swipe on lightbox
+let lbTx = 0;
+document.getElementById('lightbox').addEventListener('touchstart', e => { lbTx = e.touches[0].clientX; }, { passive: true });
+document.getElementById('lightbox').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - lbTx;
+  if (Math.abs(dx) > 48) lbMove(dx < 0 ? 1 : -1);
+});
+
+/* ═══ Countdown ═══ */
+let cdTimer = null;
+function buildCountdown() {
+  function tick() {
+    const now = new Date();
+    let target = new Date(now.getFullYear(), 8, 20); // Sep 20
+    if (now >= target) target = new Date(now.getFullYear() + 1, 8, 20);
+    const diff = target - now;
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const pad = n => String(n).padStart(2, '0');
+    document.getElementById('cdDays').textContent  = d;
+    document.getElementById('cdHours').textContent = pad(h);
+    document.getElementById('cdMins').textContent  = pad(m);
+    document.getElementById('cdSub').textContent   =
+      `20 · 09 · ${target.getFullYear()} — year ${target.getFullYear() - 2022}`;
+  }
+  tick();
+  clearInterval(cdTimer);
+  cdTimer = setInterval(tick, 30000);
+}
+
+/* ═══ September auto-unlock ═══ */
+function checkSeptemberUnlock() {
+  const now = new Date();
+  const unlocked = (now.getMonth() === 8 && now.getDate() >= 20) || now.getMonth() > 8;
+  if (!unlocked) return;
+  const card = document.getElementById('doorSeptember');
+  if (!card || card.classList.contains('open')) return;
+  card.classList.remove('locked');
+  card.classList.add('open');
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.onclick = () => openDoor('scSeptember');
+  document.getElementById('doorSepDot').className = 'door-dot dot-open';
+  document.getElementById('doorSepLabel').className = 'door-label label-open';
+  document.getElementById('doorSepLabel').textContent = 'open';
+}
+
+/* ═══ Music ═══ */
+const YT_ID = 'QLVei17AIUY';
+function openMusic() {
+  const frame = document.getElementById('ytFrame');
+  if (!frame.src) {
+    frame.src = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&rel=0&modestbranding=1`;
+  }
+  document.getElementById('musicModal').classList.add('open');
+}
+function closeMusicModal(e) {
+  if (e && e.target !== document.getElementById('musicModal')) return;
+  document.getElementById('musicModal').classList.remove('open');
+}
+
+/* ═══ Keyboard ═══ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && cur === -1) { attemptLogin(); return; }
+  const lb = document.getElementById('lightbox');
+  if (lb.classList.contains('open')) {
+    if (e.key === 'ArrowLeft')  lbMove(-1);
+    if (e.key === 'ArrowRight') lbMove(1);
+    if (e.key === 'Escape')     closeLightbox();
+  }
 });
 </script>
 </body>

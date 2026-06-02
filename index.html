@@ -814,6 +814,127 @@ body::before {
 .music-chip.playing .ic-play  { display: none; }
 .music-chip.playing .ic-pause { display: block; }
 
+/* ─── Music card ─── */
+.music-card {
+  position: fixed;
+  bottom: max(76px, env(safe-area-inset-bottom, 0px) + 76px);
+  left: 50%; transform: translateX(-50%);
+  width: 320px; max-width: calc(100vw - 32px);
+  background: #fff; border-radius: 18px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
+  display: none; z-index: 88;
+}
+.music-card.open { display: block; animation: screenIn 0.25s cubic-bezier(.22,.68,0,1.15) both; }
+.music-card-head {
+  padding: 14px 18px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--line);
+}
+.music-card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; color: var(--ink); }
+.music-card-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.music-card-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--rose-lt); border: none; color: var(--rose);
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.music-card iframe { width: 100%; height: 180px; border: none; display: block; }
+
+/* ─── Checklist ─── */
+#scChecklist { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
+.cl-wrap { max-width: 440px; width: 100%; margin: 0 auto; }
+.cl-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 0; border-bottom: 1px solid var(--line);
+  cursor: default;
+}
+.cl-item:first-child { border-top: 1px solid var(--line); }
+.cl-item.done { opacity: 0.45; }
+.cl-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--rose-md); background: transparent;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #fff; cursor: pointer;
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+  outline: none; font-family: inherit;
+}
+.cl-item.done .cl-check { background: var(--rose); border-color: var(--rose); }
+.cl-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 400; color: var(--ink); line-height: 1.3; flex: 1;
+}
+.cl-item.done .cl-label { text-decoration: line-through; color: var(--muted); }
+.cl-progress {
+  font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted-lt); margin-top: 24px; font-weight: 500;
+}
+
+/* ─── Vault ─── */
+#scVault { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
+.vault-wrap { max-width: 480px; width: 100%; margin: 0 auto; }
+.vault-riddle {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 21px; font-weight: 300; color: var(--ink);
+  line-height: 1.5; margin-bottom: 28px;
+}
+.vault-input {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--line); border-radius: 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  color: var(--ink); background: #fff; outline: none;
+  transition: border-color 0.2s; margin-bottom: 10px; display: block;
+}
+.vault-input:focus { border-color: var(--rose-md); }
+.vault-err {
+  font-size: 12px; color: var(--rose); margin-bottom: 14px;
+  min-height: 18px; opacity: 0; transition: opacity 0.2s;
+}
+.vault-err.show { opacity: 1; }
+.vault-content { display: none; }
+.vault-content.open { display: block; }
+.vault-section {
+  margin-bottom: 16px; padding: 20px; background: #fff;
+  border-radius: 16px; border: 1px solid var(--line);
+}
+.vault-section-label {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; margin-bottom: 12px;
+  display: block; opacity: 0.8;
+}
+.vault-drive-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; background: var(--rose); color: #fff;
+  border-radius: 50px; text-decoration: none; font-size: 13px;
+  font-weight: 500; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(192,65,90,0.3);
+}
+.vault-drive-btn:hover { transform: translateY(-2px); }
+.vault-body {
+  font-size: 14px; color: var(--muted); line-height: 1.8; white-space: pre-wrap;
+}
+.vault-body.empty::before { content: 'Tap edit to add notes.'; font-style: italic; opacity: 0.5; }
+.vault-edit-btn {
+  font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--rose); background: none; border: none; cursor: pointer;
+  font-weight: 500; padding: 6px 0; margin-top: 10px;
+  font-family: 'DM Sans', sans-serif; display: block;
+}
+.vault-textarea {
+  width: 100%; min-height: 96px; padding: 12px;
+  border: 1.5px solid var(--line); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--ink); resize: vertical; outline: none;
+  transition: border-color 0.2s; display: none; margin-top: 8px;
+}
+.vault-textarea.editing { display: block; }
+.vault-textarea:focus { border-color: var(--rose-md); }
+.vault-save-btn {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #fff; background: var(--rose); border: none; cursor: pointer;
+  padding: 8px 16px; border-radius: 50px; font-weight: 500;
+  margin-top: 8px; display: none; font-family: 'DM Sans', sans-serif;
+}
+.vault-save-btn.editing { display: inline-block; }
+
 /* ─── Responsive ─── */
 @media (max-width: 520px) {
   .card            { padding: 40px 24px; }
@@ -938,10 +1059,17 @@ body::before {
   </button>
 </nav>
 
-<!-- YouTube audio — rendered off-screen (not display:none so autoplay works) -->
-<iframe id="ytAudio" src="" allow="autoplay; encrypted-media"
-  style="position:fixed;top:-220px;left:-10px;width:320px;height:180px;border:none;pointer-events:none;z-index:-1;"
-  aria-hidden="true"></iframe>
+<!-- Music card (visible YouTube player — most reliable across all browsers) -->
+<div class="music-card" id="musicCard">
+  <div class="music-card-head">
+    <div>
+      <div class="music-card-title">Tak Terbatas</div>
+      <div class="music-card-sub">Good Morning Everyone · our song 🌙</div>
+    </div>
+    <button class="music-card-close" onclick="closeMusicCard()">×</button>
+  </div>
+  <iframe id="musicFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
 
 <!-- Music chip -->
 <div class="music-chip" id="musicChip">
@@ -1057,6 +1185,32 @@ body::before {
         <div class="door-foot">
           <div class="door-dot dot-lock" id="doorSepDot"></div>
           <span class="door-label label-lock" id="doorSepLabel">locked</span>
+        </div>
+      </div>
+
+      <!-- Door 5: Future Checklist — OPEN -->
+      <div class="door-card open" onclick="openDoor('scChecklist')" role="button" tabindex="0">
+        <div class="door-icon-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="door-title">future checklist</div>
+        <div class="door-desc">things we'll do together</div>
+        <div class="door-foot">
+          <div class="door-dot dot-open"></div>
+          <span class="door-label label-open" id="clDoorLabel">open</span>
+        </div>
+      </div>
+
+      <!-- Door 6: The Vault — OPEN (protected inside) -->
+      <div class="door-card open" onclick="openDoor('scVault')" role="button" tabindex="0">
+        <div class="door-icon-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="door-title">the vault</div>
+        <div class="door-desc">private · answer to enter</div>
+        <div class="door-foot">
+          <div class="door-dot dot-open"></div>
+          <span class="door-label label-open">open</span>
         </div>
       </div>
 
@@ -1259,6 +1413,78 @@ body::before {
 </div>
 
 <!-- ═══════════════════════════════════
+     CHECKLIST
+════════════════════════════════════ -->
+<div class="screen" id="scChecklist">
+  <div class="cl-wrap">
+    <p class="story-overline">together · someday</p>
+    <h1 class="story-title">our <em>list.</em></h1>
+    <div id="checklistItems"></div>
+    <p class="cl-progress" id="checklistCount"></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VAULT
+════════════════════════════════════ -->
+<div class="screen" id="scVault">
+  <div class="vault-wrap">
+
+    <!-- Riddle gate -->
+    <div id="vaultGate">
+      <p class="story-overline">private · protected</p>
+      <h1 class="story-title">the <em>vault.</em></h1>
+      <p class="vault-riddle">"What is the title of the song playing in the background?"</p>
+      <input class="vault-input" id="vaultInput" type="text"
+        placeholder="type your answer…" autocomplete="off" autocorrect="off" autocapitalize="none"
+        onkeydown="if(event.key==='Enter') attemptVaultUnlock()">
+      <p class="vault-err" id="vaultErr">not quite right.</p>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="attemptVaultUnlock()">
+          Enter <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Unlocked content -->
+    <div class="vault-content" id="vaultContent">
+      <div class="monogram"><hr><span class="monogram-mark">the vault</span><hr></div>
+
+      <!-- Google Drive -->
+      <div class="vault-section">
+        <span class="vault-section-label">our google drive</span>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px;">All our files, photos, and documents — in one place.</p>
+        <a class="vault-drive-btn" href="https://drive.google.com/drive/folders/14VUziIgf8tU4GWVnqqsHQmww0NMGd3Vg?usp=sharing" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open Drive
+        </a>
+      </div>
+
+      <!-- Folder guide -->
+      <div class="vault-section">
+        <span class="vault-section-label">folder guide</span>
+        <div class="vault-body empty" id="vaultFolder"></div>
+        <button class="vault-edit-btn" onclick="editVault('folder')">edit</button>
+        <textarea class="vault-textarea" id="vaultFolderArea"
+          placeholder="Describe the folder structure — e.g.&#10;/Photos — sorted by year&#10;/Documents — IDs, insurance"></textarea>
+        <button class="vault-save-btn" id="vaultFolderSave" onclick="saveVault('folder')">save</button>
+      </div>
+
+      <!-- Bank accounts -->
+      <div class="vault-section">
+        <span class="vault-section-label">bank accounts</span>
+        <div class="vault-body empty" id="vaultBank"></div>
+        <button class="vault-edit-btn" onclick="editVault('bank')">edit</button>
+        <textarea class="vault-textarea" id="vaultBankArea"
+          placeholder="Maybank: [account number]&#10;Aeon Bank: [account number]&#10;&#10;Add any other details."></textarea>
+        <button class="vault-save-btn" id="vaultBankSave" onclick="saveVault('bank')">save</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
      ALBUM — Photo gallery
 ════════════════════════════════════ -->
 <div class="screen" id="scAlbum">
@@ -1422,6 +1648,7 @@ function goFromLogin() {
   buildHubMeta();
   buildCountdown();
   checkSeptemberUnlock();
+  updateClCount();
   document.getElementById('musicChip').classList.add('visible');
 }
 
@@ -1436,7 +1663,9 @@ function openDoor(id, isStory) {
   setTimeout(() => hub.classList.remove('active', 'exit'), 350);
   cur = id;
   if (isStory) buildCounter();
-  if (id === 'scAlbum') buildAlbum();
+  if (id === 'scAlbum')     buildAlbum();
+  if (id === 'scChecklist') buildChecklist();
+  if (id === 'scVault' && vaultKey) { renderVaultContent(); document.getElementById('vaultGate').style.display='none'; document.getElementById('vaultContent').classList.add('open'); }
   document.getElementById(screenId(id)).classList.add('active');
   setHubNav(true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1683,23 +1912,148 @@ function checkSeptemberUnlock() {
 }
 
 /* ═══ Music ═══ */
-let musicLoaded = false, musicPlaying = false;
+let musicCardOpen = false, musicFrameLoaded = false;
 
 function toggleMusic() {
-  const frame = document.getElementById('ytAudio');
-  if (!musicLoaded) {
-    // First tap — set src during user gesture so browser allows autoplay
-    frame.src = 'https://www.youtube.com/embed/QLVei17AIUY?autoplay=1&rel=0&controls=0&enablejsapi=1&playsinline=1';
-    musicLoaded = true;
-    musicPlaying = true;
-  } else if (musicPlaying) {
-    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*');
-    musicPlaying = false;
-  } else {
-    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*');
-    musicPlaying = true;
+  musicCardOpen = !musicCardOpen;
+  if (musicCardOpen && !musicFrameLoaded) {
+    document.getElementById('musicFrame').src =
+      'https://www.youtube.com/embed/QLVei17AIUY?rel=0&modestbranding=1';
+    musicFrameLoaded = true;
   }
-  document.getElementById('musicChip').classList.toggle('playing', musicPlaying);
+  document.getElementById('musicCard').classList.toggle('open', musicCardOpen);
+  document.getElementById('musicChip').classList.toggle('playing', musicCardOpen);
+}
+
+function closeMusicCard() {
+  musicCardOpen = false;
+  document.getElementById('musicCard').classList.remove('open');
+  document.getElementById('musicChip').classList.remove('playing');
+}
+
+/* ═══ Checklist ═══ */
+const CHECKLIST = [
+  { id: 'wagyu',      text: 'Wagyu dinner in KL'    },
+  { id: 'langkawi',   text: 'Langkawi trip'          },
+  { id: 'bali',       text: 'Bali trip'              },
+  { id: 'disneyland', text: 'Disneyland Japan'       },
+  { id: 'omurice',    text: 'Eat omurice at TRX'     },
+];
+
+function buildChecklist() {
+  const list = document.getElementById('checklistItems');
+  if (list.childElementCount) { updateClCount(); return; }
+  const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
+  CHECKLIST.forEach(item => {
+    const done = !!saved[item.id];
+    const el = document.createElement('div');
+    el.className = 'cl-item' + (done ? ' done' : '');
+    el.id = 'cl_' + item.id;
+    el.innerHTML = `<button class="cl-check" onclick="toggleCheck('${item.id}')" aria-label="${item.text}">${done ? '✓' : ''}</button><span class="cl-label">${item.text}</span>`;
+    list.appendChild(el);
+  });
+  updateClCount();
+}
+
+function toggleCheck(id) {
+  const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
+  saved[id] = !saved[id];
+  localStorage.setItem('cl_state', JSON.stringify(saved));
+  const done = saved[id];
+  const item = document.getElementById('cl_' + id);
+  item.classList.toggle('done', done);
+  item.querySelector('.cl-check').textContent = done ? '✓' : '';
+  updateClCount();
+}
+
+function updateClCount() {
+  const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
+  const n = CHECKLIST.filter(i => saved[i.id]).length;
+  const el = document.getElementById('checklistCount');
+  if (el) el.textContent = `${n} of ${CHECKLIST.length} done`;
+  const lbl = document.getElementById('clDoorLabel');
+  if (lbl) lbl.textContent = n === CHECKLIST.length ? 'all done ✓' : `${n}/${CHECKLIST.length}`;
+}
+
+/* ═══ Vault ═══ */
+const VAULT_HASH = 'efb6f9c637e8bf082c5a07e9977b1a49e20679bab968f68356e4932f0c39833d';
+let vaultKey = null;
+
+async function attemptVaultUnlock() {
+  const answer = document.getElementById('vaultInput').value.trim().toLowerCase();
+  const err    = document.getElementById('vaultErr');
+  if (!answer) { err.textContent = 'type your answer first.'; err.classList.add('show'); return; }
+
+  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(answer));
+  const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+  if (hash !== VAULT_HASH) { err.textContent = 'not quite right.'; err.classList.add('show'); return; }
+
+  err.classList.remove('show');
+  vaultKey = await deriveVaultKey(answer);
+  await renderVaultContent();
+  document.getElementById('vaultGate').style.display = 'none';
+  document.getElementById('vaultContent').classList.add('open');
+}
+
+async function deriveVaultKey(pw) {
+  const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: new TextEncoder().encode('vfp-vault-2022'), iterations: 100000, hash: 'SHA-256' },
+    raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+
+const b64 = a => btoa(String.fromCharCode(...new Uint8Array(a)));
+const ub64 = s => new Uint8Array([...atob(s)].map(c => c.charCodeAt(0)));
+
+async function vaultEncrypt(text) {
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, vaultKey, new TextEncoder().encode(text));
+  return JSON.stringify({ iv: b64(iv), d: b64(enc) });
+}
+
+async function vaultDecrypt(stored) {
+  try {
+    const { iv, d } = JSON.parse(stored);
+    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub64(iv) }, vaultKey, ub64(d));
+    return new TextDecoder().decode(dec);
+  } catch { return ''; }
+}
+
+async function renderVaultContent() {
+  for (const sec of ['folder', 'bank']) {
+    const stored = localStorage.getItem('vault_' + sec);
+    const cap = sec[0].toUpperCase() + sec.slice(1);
+    const el  = document.getElementById('vault' + cap);
+    if (!el) continue;
+    const text = stored ? await vaultDecrypt(stored) : '';
+    el.textContent = text;
+    el.classList.toggle('empty', !text);
+  }
+}
+
+function editVault(sec) {
+  const cap  = sec[0].toUpperCase() + sec.slice(1);
+  const area = document.getElementById('vault' + cap + 'Area');
+  const save = document.getElementById('vault' + cap + 'Save');
+  const disp = document.getElementById('vault' + cap);
+  area.value = disp.textContent;
+  area.classList.add('editing');
+  save.classList.add('editing');
+}
+
+async function saveVault(sec) {
+  const cap  = sec[0].toUpperCase() + sec.slice(1);
+  const area = document.getElementById('vault' + cap + 'Area');
+  const save = document.getElementById('vault' + cap + 'Save');
+  const disp = document.getElementById('vault' + cap);
+  const text = area.value.trim();
+  localStorage.setItem('vault_' + sec, await vaultEncrypt(text));
+  disp.textContent = text;
+  disp.classList.toggle('empty', !text);
+  area.classList.remove('editing');
+  save.classList.remove('editing');
 }
 
 /* ═══ Keyboard ═══ */

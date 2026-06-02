@@ -1357,7 +1357,6 @@ function openDoor(id, isStory) {
 
 function goToHub() {
   setHubNav(false);
-  if (ytPlaying) ytPlayer.pauseVideo();
   const prev = cur === 'hub' ? null : document.getElementById(screenId(cur));
   if (prev) { prev.classList.add('exit'); setTimeout(() => prev.classList.remove('active', 'exit'), 350); }
   cur = 'hub';

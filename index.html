@@ -832,11 +832,98 @@ body::before {
   .date-sel        { font-size: 24px; }
   .door-grid       { grid-template-columns: 1fr; }
 }
+/* ── Tablet (768px+) ── */
 @media (min-width: 768px) {
-  .card            { padding: 60px 56px; }
+  .screen          { padding: 3rem 2rem; }
+
+  /* Cards */
+  .card            { padding: 60px 56px; max-width: 520px; }
   .headline        { font-size: 36px; }
-  .login-card      { padding: 60px 56px 52px; }
+
+  /* Login */
+  .login-card      { padding: 60px 56px 52px; max-width: 440px; }
   .login-title     { font-size: 50px; }
+
+  /* Hub */
+  .hub-wrap        { max-width: 620px; }
+  .hub-name        { font-size: 62px; letter-spacing: -2px; }
+
+  /* Story */
+  #scStory         { padding-top: 90px; }
+  .story-wrap      { max-width: 560px; }
+  .story-title     { font-size: 42px; }
+  .s-num           { font-size: 50px; }
+  .tl-heading      { font-size: 26px; }
+
+  /* Album */
+  #scAlbum         { padding-top: 90px; }
+  .album-wrap      { max-width: 600px; }
+  .album-grid      { grid-template-columns: repeat(3, 1fr); }
+
+  /* Countdown */
+  .cd-num          { font-size: 40px; }
+}
+
+/* ── Desktop (1024px+) ── */
+@media (min-width: 1024px) {
+  .screen          { padding: 4rem 3rem; }
+
+  /* Cards wider, more breathing room */
+  .card            { max-width: 560px; padding: 64px 60px; }
+  .headline        { font-size: 38px; }
+
+  /* Hub — split layout: left=header+countdown, right=door-grid */
+  #scHub           { align-items: center; }
+  .hub-wrap {
+    max-width: 940px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 64px;
+    align-items: center;
+  }
+  .hub-header {
+    grid-column: 1; grid-row: 1;
+    border-bottom: none; margin-bottom: 0;
+    padding-bottom: 28px;
+    border-right: 1px solid var(--line);
+    padding-right: 44px;
+  }
+  .hub-countdown {
+    grid-column: 1; grid-row: 2;
+    border-bottom: none; margin-bottom: 0;
+    padding: 28px 44px 0 0;
+    border-right: 1px solid var(--line);
+    text-align: left;
+  }
+  .countdown-display { justify-content: flex-start; }
+  .countdown-label   { text-align: left; }
+  .countdown-sub     { text-align: left; }
+  .door-grid {
+    grid-column: 2; grid-row: 1 / span 2;
+    gap: 10px;
+  }
+  .hub-name        { font-size: 76px; letter-spacing: -2.5px; line-height: 0.88; }
+  .cd-num          { font-size: 44px; }
+
+  /* Story */
+  .story-wrap      { max-width: 640px; }
+  .story-title     { font-size: 48px; }
+  .s-num           { font-size: 56px; }
+  .tl-photo img    { max-height: 420px; }
+
+  /* Album — 3 wide columns */
+  .album-wrap      { max-width: 780px; }
+  .album-grid      { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  /* Login */
+  .login-title     { font-size: 54px; }
+  .login-card      { max-width: 460px; }
+
+  /* Hub nav higher up */
+  .hub-nav         { top: max(28px, env(safe-area-inset-top, 0px) + 20px); left: max(28px, env(safe-area-inset-left, 0px) + 20px); }
+
+  /* Music chip slightly higher */
+  .music-chip      { bottom: max(28px, env(safe-area-inset-bottom, 0px) + 20px); }
 }
 </style>
 </head>

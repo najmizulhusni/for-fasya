@@ -837,7 +837,7 @@ body::before {
   font-size: 16px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
-.music-card iframe { width: 100%; height: 180px; border: none; display: block; }
+.music-card iframe { width: 100%; height: 80px; border: none; display: block; border-radius: 0 0 18px 18px; }
 
 /* ─── Checklist ─── */
 #scChecklist { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
@@ -871,10 +871,18 @@ body::before {
 /* ─── Vault ─── */
 #scVault { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
 .vault-wrap { max-width: 480px; width: 100%; margin: 0 auto; }
-.vault-riddle {
-  font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: 21px; font-weight: 300; color: var(--ink);
-  line-height: 1.5; margin-bottom: 28px;
+.vault-puzzle { margin-bottom: 28px; }
+.vault-puzzle-line {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-weight: 300; color: var(--muted);
+  line-height: 1.9; padding-left: 18px;
+  border-left: 2px solid var(--line);
+  margin-bottom: 2px;
+}
+.vault-puzzle-eq {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 22px; font-weight: 400;
+  color: var(--ink); margin-top: 16px; line-height: 1.4;
 }
 .vault-input {
   width: 100%; padding: 14px 16px;
@@ -1068,7 +1076,7 @@ body::before {
     </div>
     <button class="music-card-close" onclick="closeMusicCard()">×</button>
   </div>
-  <iframe id="musicFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <iframe id="musicFrame" src="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="height:80px;"></iframe>
 </div>
 
 <!-- Music chip -->
@@ -1434,9 +1442,14 @@ body::before {
     <div id="vaultGate">
       <p class="story-overline">private · protected</p>
       <h1 class="story-title">the <em>vault.</em></h1>
-      <p class="vault-riddle">"What is the title of the song playing in the background?"</p>
-      <input class="vault-input" id="vaultInput" type="text"
-        placeholder="type your answer…" autocomplete="off" autocorrect="off" autocapitalize="none"
+      <div class="vault-puzzle">
+        <p class="vault-puzzle-line">Take the day of our first date.</p>
+        <p class="vault-puzzle-line">Multiply it by the day we became us.</p>
+        <p class="vault-puzzle-line">Add the year we started.</p>
+        <p class="vault-puzzle-eq">What number do you get?</p>
+      </div>
+      <input class="vault-input" id="vaultInput" type="number" inputmode="numeric"
+        placeholder="enter the number…" autocomplete="off"
         onkeydown="if(event.key==='Enter') attemptVaultUnlock()">
       <p class="vault-err" id="vaultErr">not quite right.</p>
       <div class="btn-row">
@@ -1918,7 +1931,7 @@ function toggleMusic() {
   musicCardOpen = !musicCardOpen;
   if (musicCardOpen && !musicFrameLoaded) {
     document.getElementById('musicFrame').src =
-      'https://www.youtube.com/embed/QLVei17AIUY?rel=0&modestbranding=1';
+      'https://open.spotify.com/embed/track/0LZYp2h2jM1w5Kf0V9junQ?utm_source=generator&theme=0';
     musicFrameLoaded = true;
   }
   document.getElementById('musicCard').classList.toggle('open', musicCardOpen);
@@ -1976,7 +1989,7 @@ function updateClCount() {
 }
 
 /* ═══ Vault ═══ */
-const VAULT_HASH = 'efb6f9c637e8bf082c5a07e9977b1a49e20679bab968f68356e4932f0c39833d';
+const VAULT_HASH = 'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9';
 let vaultKey = null;
 
 async function attemptVaultUnlock() {

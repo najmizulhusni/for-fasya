@@ -326,32 +326,79 @@ body::before {
 }
 .signature strong { color: var(--rose); font-style: normal; font-weight: 600; }
 
-/* ─── Letter ─── */
-.card-letter { text-align: left; }
+/* ─── Letter screen — cinematic dark treatment ─── */
+#sc0 {
+  background: linear-gradient(160deg, #0c0509 0%, #1a0911 45%, #0c0509 100%);
+}
+#sc0.active .card-letter {
+  animation: letterReveal 0.8s cubic-bezier(.22,.68,0,1.15) 0.06s both;
+}
+@keyframes letterReveal {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ─── Letter card — parchment ─── */
+.card-letter {
+  text-align: left;
+  background: #fef9f2;
+  border-color: rgba(192,65,90,0.06);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.25),
+    0 16px 48px rgba(0,0,0,0.5),
+    0 60px 120px rgba(0,0,0,0.3);
+}
+/* Inner stationery frame */
+.card-letter::after {
+  content: '';
+  position: absolute; inset: 10px;
+  border: 1px solid rgba(192,65,90,0.09);
+  border-radius: 14px; pointer-events: none;
+}
+
+/* Wax seal */
+.letter-seal {
+  width: 62px; height: 62px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  box-shadow: 0 6px 20px rgba(192,65,90,0.55), 0 0 0 4px rgba(192,65,90,0.1);
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 13px; color: rgba(255,255,255,0.96);
+  letter-spacing: 3.5px; font-weight: 300;
+  flex-shrink: 0;
+}
+
+/* Letter typography */
 .letter-date {
-  font-size: 10px; letter-spacing: 2.5px;
+  font-size: 9.5px; letter-spacing: 2.5px;
   text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-bottom: 20px;
+  font-weight: 500; margin-bottom: 16px;
 }
 .letter-salutation {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-style: italic; font-weight: 400;
-  color: var(--ink); margin-bottom: 22px; line-height: 1.2;
+  font-size: 27px; font-style: italic; font-weight: 400;
+  color: var(--ink); margin-bottom: 24px; line-height: 1.2;
 }
 .letter-body {
-  display: flex; flex-direction: column; gap: 14px;
-  margin-bottom: 24px;
+  display: flex; flex-direction: column; gap: 16px;
+  margin-bottom: 28px;
 }
 .letter-body p {
-  font-size: 14px; color: var(--muted);
-  line-height: 1.85; font-weight: 300;
+  font-size: 14.5px; color: #4a2e38;
+  line-height: 1.9; font-weight: 300;
 }
 .letter-question {
   font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 19px;
-  color: var(--ink-soft); text-align: center;
-  margin-bottom: 24px; line-height: 1.4;
+  font-style: italic; font-size: 21px;
+  color: var(--ink); text-align: center;
+  margin-bottom: 28px; line-height: 1.4;
+  padding: 20px 0;
+  border-top: 1px solid rgba(192,65,90,0.14);
+  border-bottom: 1px solid rgba(192,65,90,0.14);
 }
+.card-letter .btn-row { min-height: 52px; }
+.card-letter .btn-primary { flex: 1; justify-content: center; }
 
 /* ─── Divider ─── */
 .divider {
@@ -419,9 +466,6 @@ body::before {
 
 /* Button full-width in login (avoids inline style) */
 .login-card .btn-primary { width: 100%; justify-content: center; }
-
-/* Letter action row height (avoids inline style) */
-.card-letter .btn-row { min-height: 56px; }
 
 /* Title */
 .login-title {
@@ -1254,17 +1298,22 @@ body::before {
 ════════════════════════════════════ -->
 <div class="screen" id="sc0">
   <div class="card card-letter">
+
+    <div class="letter-seal">N · F</div>
+
     <p class="letter-date">20 · 09 · 2022</p>
     <p class="letter-salutation">Dear Fasya,</p>
+
     <div class="letter-body">
-      <p>I've been meaning to write this for a while. Not because it's hard to say — more because some things deserve more than a text.</p>
-      <p>You came to Johor for my graduation. I know you made it seem like nothing. I've been thinking about it ever since.</p>
-      <p>Three years in, and I still notice the small things. The way you go quiet when something's bothering you. The way you still check on me even when you've had a long day yourself. I don't always say it — but I notice.</p>
-      <p>We ran 12km together in January. I genuinely didn't see that coming. But it made sense the whole way through, like most things with you do.</p>
+      <p>I wrote this a few times before settling on this version. The earlier ones were too careful. This one is honest.</p>
+      <p>Three years ago you said yes without knowing everything yet. And since then you've just — kept showing up. Driving me to the airport for Jakarta. Making the trip from KL for my graduation. Running 12km beside me in January like that was always something we did together.</p>
+      <p>I notice the quiet things most. The way you go still when something actually matters to you. The way you always find something kind to say, even on days I haven't deserved it.</p>
+      <p>I didn't plan for someone like you. But you happened. And now I can't picture any version of this life that makes sense without you in it.</p>
       <p>So here it is. Written down, and meant.</p>
     </div>
-    <div class="divider"><hr></div>
+
     <p class="letter-question">Will you keep being mine?</p>
+
     <div class="btn-row">
       <button class="btn-primary" onclick="finale(event)">
         <i class="ti ti-heart-filled"></i>
@@ -1272,6 +1321,7 @@ body::before {
       </button>
       <button class="btn-ghost" id="noBtn0" onmouseover="flee(this)" ontouchstart="flee(this)">No</button>
     </div>
+
   </div>
 </div>
 

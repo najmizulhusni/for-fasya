@@ -330,7 +330,6 @@ body::before {
    LETTER — 3-page scroll experience
 ══════════════════════════════════════ */
 #sc0 {
-  background: linear-gradient(160deg, #0c0509 0%, #1a0911 45%, #0c0509 100%);
   padding: 0;
   align-items: stretch;
   overflow: hidden;
@@ -338,8 +337,9 @@ body::before {
 .letter-exp {
   width: 100%;
   height: 100vh; height: 100dvh;
-  overflow-y: scroll;
+  overflow-y: auto;
   scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -367,24 +367,19 @@ body::before {
   display: flex;
   flex-direction: column;
   padding: 36px 32px 28px;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.22),
-    0 12px 40px rgba(0,0,0,0.52),
-    0 48px 100px rgba(0,0,0,0.32);
+  box-shadow: 0 4px 24px rgba(192,65,90,0.08), 0 8px 40px rgba(0,0,0,0.1);
+  will-change: transform; /* GPU layer hint */
 }
 /* Inner stationery border */
 .lp-card::before {
   content: '';
   position: absolute; inset: 11px;
-  border: 1px solid rgba(192,65,90,0.14);
-  pointer-events: none; z-index: 0;
+  border: 1px solid rgba(192,65,90,0.13);
+  pointer-events: none;
 }
-/* Subtle texture shimmer */
-.lp-card::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(192,65,90,0.02) 100%);
-  pointer-events: none; border-radius: 3px;
+/* Auto-height variant for sc3 closing card */
+.lp-card-auto {
+  height: auto; max-height: none; text-align: center;
 }
 
 /* Corner ornaments */
@@ -1492,14 +1487,18 @@ body::before {
      SCREEN 3 — Letter closing
 ════════════════════════════════════ -->
 <div class="screen" id="sc3">
-  <div class="card">
-    <div class="monogram">
-      <hr><span class="monogram-mark">N · F</span><hr>
+  <div class="lp-card lp-card-auto">
+    <span class="lp-corner tl">◆</span>
+    <span class="lp-corner tr">◆</span>
+    <span class="lp-corner bl">◆</span>
+    <span class="lp-corner br">◆</span>
+    <div class="lp-rule" style="margin-bottom:28px;"><span>✦</span></div>
+    <p class="lp-salutation" style="text-align:center;">You're it for me,<br><em>Fasya.</em></p>
+    <div class="lp-body" style="text-align:center;overflow:visible;">
+      <p>No conditions. No footnotes.<br>Just you — exactly as you are.</p>
     </div>
-    <h1 class="headline">You're it<br>for <em>me, Fasya.</em></h1>
-    <p class="body-text">No conditions. No footnotes.<br>Just you — exactly as you are.</p>
-    <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
-    <p class="signature">yours completely,<br><strong>Najmi Zulhusni</strong></p>
+    <p class="lp-question-ornament" style="margin:24px 0 20px;letter-spacing:8px;font-size:11px;color:rgba(192,65,90,0.35);">✦ &nbsp; ✦ &nbsp; ✦</p>
+    <p class="lp-sig" style="text-align:center;">yours completely, <strong>Najmi Zulhusni</strong></p>
   </div>
 </div>
 

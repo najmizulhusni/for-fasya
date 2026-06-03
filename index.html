@@ -326,79 +326,190 @@ body::before {
 }
 .signature strong { color: var(--rose); font-style: normal; font-weight: 600; }
 
-/* ─── Letter screen — cinematic dark treatment ─── */
+/* ══════════════════════════════════════
+   LETTER — 3-page scroll experience
+══════════════════════════════════════ */
 #sc0 {
   background: linear-gradient(160deg, #0c0509 0%, #1a0911 45%, #0c0509 100%);
+  padding: 0;
+  align-items: stretch;
+  overflow: hidden;
 }
-#sc0.active .card-letter {
-  animation: letterReveal 0.8s cubic-bezier(.22,.68,0,1.15) 0.06s both;
+.letter-exp {
+  width: 100%;
+  height: 100vh; height: 100dvh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
-@keyframes letterReveal {
-  from { opacity: 0; transform: translateY(32px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
-}
+.letter-exp::-webkit-scrollbar { display: none; }
 
-/* ─── Letter card — parchment ─── */
-.card-letter {
-  text-align: left;
-  background: #fef9f2;
-  border-color: rgba(192,65,90,0.06);
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.25),
-    0 16px 48px rgba(0,0,0,0.5),
-    0 60px 120px rgba(0,0,0,0.3);
-}
-/* Inner stationery frame */
-.card-letter::after {
-  content: '';
-  position: absolute; inset: 10px;
-  border: 1px solid rgba(192,65,90,0.09);
-  border-radius: 14px; pointer-events: none;
-}
-
-/* Wax seal */
-.letter-seal {
-  width: 62px; height: 62px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--rose), var(--rose-dk));
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 24px;
-  box-shadow: 0 6px 20px rgba(192,65,90,0.55), 0 0 0 4px rgba(192,65,90,0.1);
-  font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: 13px; color: rgba(255,255,255,0.96);
-  letter-spacing: 3.5px; font-weight: 300;
+/* Each full-height page */
+.lp {
+  height: 100vh; height: 100dvh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 18px;
   flex-shrink: 0;
 }
 
-/* Letter typography */
-.letter-date {
-  font-size: 9.5px; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-bottom: 16px;
+/* Parchment card */
+.lp-card {
+  width: 100%;
+  max-width: 460px;
+  height: calc(100dvh - 40px);
+  background: #fef9f2;
+  border-radius: 3px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 32px 28px;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.22),
+    0 12px 40px rgba(0,0,0,0.52),
+    0 48px 100px rgba(0,0,0,0.32);
 }
-.letter-salutation {
+/* Inner stationery border */
+.lp-card::before {
+  content: '';
+  position: absolute; inset: 11px;
+  border: 1px solid rgba(192,65,90,0.14);
+  pointer-events: none; z-index: 0;
+}
+/* Subtle texture shimmer */
+.lp-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(192,65,90,0.02) 100%);
+  pointer-events: none; border-radius: 3px;
+}
+
+/* Corner ornaments */
+.lp-corner {
+  position: absolute; font-size: 9px;
+  color: rgba(192,65,90,0.38); z-index: 2;
+  font-family: serif; line-height: 1;
+}
+.lp-corner.tl { top: 6px;  left: 6px; }
+.lp-corner.tr { top: 6px;  right: 6px; }
+.lp-corner.bl { bottom: 6px; left: 6px; }
+.lp-corner.br { bottom: 6px; right: 6px; }
+
+/* ── Cover page ── */
+.lp-cover { justify-content: space-between; text-align: center; }
+.lp-seal {
+  width: 78px; height: 78px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px; flex-shrink: 0;
+  box-shadow: 0 8px 28px rgba(192,65,90,0.6), 0 0 0 6px rgba(192,65,90,0.08);
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 14px; color: rgba(255,255,255,0.96); letter-spacing: 4px; font-weight: 300;
+}
+.lp-cover-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.lp-postmark {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(192,65,90,0.4); font-weight: 500; margin-bottom: 8px;
+  border: 1px solid rgba(192,65,90,0.2); padding: 4px 10px;
+  border-radius: 2px;
+}
+.lp-to-label {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500; margin-bottom: 10px;
+}
+.lp-recipient {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 34px; font-weight: 300; color: var(--ink); line-height: 1.15;
+  margin-bottom: 14px;
+}
+.lp-cover-rule {
+  width: 48px; height: 1px; background: rgba(192,65,90,0.25); margin: 0 auto 14px;
+}
+.lp-cover-sub { font-size: 11px; color: var(--muted-lt); letter-spacing: 1.5px; }
+.lp-scroll-cue {
+  font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(192,65,90,0.45); font-weight: 500;
+  animation: cueFloat 2.2s ease-in-out infinite;
+}
+@keyframes cueFloat {
+  0%,100% { opacity: 0.4; transform: translateY(0); }
+  55%      { opacity: 0.9; transform: translateY(5px); }
+}
+
+/* ── Letter pages ── */
+.lp-date {
+  font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500; margin-bottom: 20px; flex-shrink: 0;
+}
+.lp-salutation {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 30px; font-weight: 300; color: var(--ink);
+  margin-bottom: 22px; line-height: 1.15; flex-shrink: 0;
+}
+.lp-body { flex: 1; overflow: hidden; }
+.lp-body p {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 27px; font-style: italic; font-weight: 400;
-  color: var(--ink); margin-bottom: 24px; line-height: 1.2;
+  font-size: 17px; color: #3c1f2a;
+  line-height: 1.9; margin-bottom: 16px; font-weight: 400;
 }
-.letter-body {
-  display: flex; flex-direction: column; gap: 16px;
-  margin-bottom: 28px;
+.drop-cap {
+  float: left; font-size: 4em; line-height: 0.74;
+  padding-right: 5px; padding-top: 5px;
+  font-family: 'Cormorant Garamond', serif; font-weight: 600; color: var(--rose);
 }
-.letter-body p {
-  font-size: 14.5px; color: #4a2e38;
-  line-height: 1.9; font-weight: 300;
+
+/* Page ornament divider */
+.lp-rule {
+  display: flex; align-items: center; gap: 10px;
+  margin: 4px 0 12px; flex-shrink: 0;
 }
-.letter-question {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 21px;
-  color: var(--ink); text-align: center;
-  margin-bottom: 28px; line-height: 1.4;
-  padding: 20px 0;
+.lp-rule::before, .lp-rule::after {
+  content: ''; flex: 1;
+  height: 1px; background: rgba(192,65,90,0.15);
+}
+.lp-rule span { font-size: 9px; color: rgba(192,65,90,0.3); }
+
+/* Page number */
+.lp-pagenum {
+  text-align: center; font-size: 10px; letter-spacing: 3px;
+  color: rgba(192,65,90,0.3); margin-top: auto; padding-top: 12px;
+  font-weight: 500; flex-shrink: 0;
+}
+
+/* ── Final page ── */
+.lp-question-block {
+  text-align: center; flex-shrink: 0;
+  padding: 20px 0 16px;
   border-top: 1px solid rgba(192,65,90,0.14);
   border-bottom: 1px solid rgba(192,65,90,0.14);
+  margin: 4px 0 16px;
 }
-.card-letter .btn-row { min-height: 52px; }
-.card-letter .btn-primary { flex: 1; justify-content: center; }
+.lp-question-ornament { font-size: 10px; color: rgba(192,65,90,0.3); letter-spacing: 8px; margin-bottom: 12px; }
+.lp-question {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 23px; font-weight: 300; color: var(--ink);
+  margin-bottom: 20px; line-height: 1.4;
+}
+.lp-actions { display: flex; gap: 10px; justify-content: center; }
+.lp-actions .btn-primary { flex: 1; justify-content: center; }
+.lp-sig {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 14px; color: var(--muted); margin-top: auto;
+  text-align: right; flex-shrink: 0;
+}
+.lp-sig strong { color: var(--rose); font-style: normal; font-weight: 600; }
+
+/* Responsive letter */
+@media (min-width: 768px) {
+  .lp { padding: 28px 32px; }
+  .lp-card { max-width: 520px; padding: 44px 40px 36px; }
+  .lp-body p { font-size: 18px; }
+  .lp-salutation { font-size: 34px; }
+  .lp-recipient { font-size: 38px; }
+}
 
 /* ─── Divider ─── */
 .divider {
@@ -1294,32 +1405,84 @@ body::before {
 </div>
 
 <!-- ═══════════════════════════════════
-     SCREEN 0 — The letter
+     SCREEN 0 — The letter (3-page)
 ════════════════════════════════════ -->
 <div class="screen" id="sc0">
-  <div class="card card-letter">
+  <div class="letter-exp">
 
-    <div class="letter-seal">N · F</div>
+    <!-- Page 1: Sealed cover -->
+    <div class="lp">
+      <div class="lp-card lp-cover">
+        <span class="lp-corner tl">◆</span>
+        <span class="lp-corner tr">◆</span>
+        <span class="lp-corner bl">◆</span>
+        <span class="lp-corner br">◆</span>
 
-    <p class="letter-date">20 · 09 · 2022</p>
-    <p class="letter-salutation">Dear Fasya,</p>
+        <div class="lp-seal">N · F</div>
 
-    <div class="letter-body">
-      <p>I wrote this a few times before settling on this version. The earlier ones were too careful. This one is honest.</p>
-      <p>Three years ago you said yes without knowing everything yet. And since then you've just — kept showing up. Driving me to the airport for Jakarta. Making the trip from KL for my graduation. Running 12km beside me in January like that was always something we did together.</p>
-      <p>I notice the quiet things most. The way you go still when something actually matters to you. The way you always find something kind to say, even on days I haven't deserved it.</p>
-      <p>I didn't plan for someone like you. But you happened. And now I can't picture any version of this life that makes sense without you in it.</p>
-      <p>So here it is. Written down, and meant.</p>
+        <div class="lp-cover-body">
+          <p class="lp-postmark">private · sealed</p>
+          <p class="lp-to-label">to,</p>
+          <p class="lp-recipient">Mir Fasya Aina</p>
+          <div class="lp-cover-rule"></div>
+          <p class="lp-cover-sub">a letter · 20 · 09 · 2022</p>
+        </div>
+
+        <p class="lp-scroll-cue">scroll to open ↓</p>
+      </div>
     </div>
 
-    <p class="letter-question">Will you keep being mine?</p>
+    <!-- Page 2: Letter opening -->
+    <div class="lp">
+      <div class="lp-card">
+        <span class="lp-corner tl">◆</span>
+        <span class="lp-corner tr">◆</span>
+        <span class="lp-corner bl">◆</span>
+        <span class="lp-corner br">◆</span>
 
-    <div class="btn-row">
-      <button class="btn-primary" onclick="finale(event)">
-        <i class="ti ti-heart-filled"></i>
-        Always
-      </button>
-      <button class="btn-ghost" id="noBtn0" onmouseover="flee(this)" ontouchstart="flee(this)">No</button>
+        <p class="lp-date">20 · September · 2022</p>
+        <p class="lp-salutation">Dear Fasya,</p>
+
+        <div class="lp-rule"><span>✦</span></div>
+
+        <div class="lp-body">
+          <p><span class="drop-cap">I</span> wrote this a few times before getting to this version. The earlier ones were too careful. This one is honest.</p>
+          <p>Three years ago you said yes without knowing everything yet. And since then you've just — kept showing up.</p>
+          <p>Driving me to the airport for Jakarta. Making the trip from KL for my graduation. Running 12km beside me in January like that was always something we did.</p>
+        </div>
+
+        <p class="lp-pagenum">— i —</p>
+      </div>
+    </div>
+
+    <!-- Page 3: Closing + question -->
+    <div class="lp">
+      <div class="lp-card">
+        <span class="lp-corner tl">◆</span>
+        <span class="lp-corner tr">◆</span>
+        <span class="lp-corner bl">◆</span>
+        <span class="lp-corner br">◆</span>
+
+        <div class="lp-body">
+          <p>I notice the quiet things most. The way you go still when something actually matters. The way you always find something kind to say, even on days I haven't earned it.</p>
+          <p>I didn't plan for someone like you. But you happened — and now I can't picture any version of this life that makes sense without you in it.</p>
+          <p>So here it is. Written down, and meant.</p>
+        </div>
+
+        <div class="lp-question-block">
+          <p class="lp-question-ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
+          <p class="lp-question">Will you keep being mine?</p>
+          <div class="lp-actions">
+            <button class="btn-primary" onclick="finale(event)">
+              <i class="ti ti-heart-filled"></i> Always
+            </button>
+            <button class="btn-ghost" id="noBtn0" onmouseover="flee(this)" ontouchstart="flee(this)">No</button>
+          </div>
+        </div>
+
+        <p class="lp-sig">yours completely, <strong>Najmi Zulhusni</strong></p>
+        <p class="lp-pagenum">— ii —</p>
+      </div>
     </div>
 
   </div>

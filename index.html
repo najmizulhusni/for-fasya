@@ -1219,56 +1219,147 @@ body::before {
 }
 
 /* ─── Vault Puzzle 2: tap-sequence ─── */
-.vp2-wrap          { display: none; }
-.vp2-wrap.active   { display: block; }
+.vp2-wrap        { display: none; }
+.vp2-wrap.active { display: block; }
 
-.vp2-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 20px 0 10px;
+/* Progress strip */
+.vp2-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
 }
-.vp2-card {
-  background: #fff;
-  border: 1.5px solid var(--line);
-  border-radius: 14px;
-  padding: 16px 8px 12px;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1),
-              border-color 0.15s, background 0.15s,
-              box-shadow 0.15s;
-  user-select: none;
-  -webkit-user-select: none;
+.vp2-progress-track {
+  flex: 1;
+  height: 3px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
 }
-.vp2-card:hover:not(.selected) {
-  border-color: var(--rose-md);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(192,65,90,0.1);
+.vp2-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--rose-md), var(--rose));
+  border-radius: 3px;
+  transition: width 0.35s cubic-bezier(.34,1.56,.64,1);
 }
-.vp2-card:active     { transform: scale(0.95); }
-.vp2-card.selected   { border-color: var(--rose); background: var(--rose-lt); }
-.vp2-card.wrong      { border-color: #e05555; background: #fff4f4; }
-
-.vp2-emoji {
-  display: block;
-  font-size: 28px;
-  margin-bottom: 6px;
-  line-height: 1;
-}
-.vp2-hint {
-  display: block;
-  font-size: 8.5px;
-  letter-spacing: 1.5px;
+.vp2-progress-label {
+  font-size: 10px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--muted-lt);
   font-weight: 500;
+  white-space: nowrap;
+  min-width: 36px;
+  text-align: right;
+  transition: color 0.2s;
 }
+.vp2-progress-label.done { color: var(--rose); }
+
+/* Card grid */
+.vp2-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* Individual card */
+.vp2-card {
+  background: #fff;
+  border: 1.5px solid rgba(192,65,90,0.07);
+  border-radius: 18px;
+  padding: 20px 10px 15px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(192,65,90,0.04);
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1),
+              border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* staggered entrance */
+  animation: cardIn 0.45s cubic-bezier(.22,.68,0,1.15) both;
+}
+.vp2-card:nth-child(1) { animation-delay: 0.04s; }
+.vp2-card:nth-child(2) { animation-delay: 0.09s; }
+.vp2-card:nth-child(3) { animation-delay: 0.14s; }
+.vp2-card:nth-child(4) { animation-delay: 0.19s; }
+.vp2-card:nth-child(5) { animation-delay: 0.24s; }
+.vp2-card:nth-child(6) { animation-delay: 0.29s; }
+@keyframes cardIn {
+  from { opacity:0; transform: translateY(14px) scale(0.94); }
+  to   { opacity:1; transform: translateY(0)    scale(1); }
+}
+
+.vp2-card:hover:not(.selected) {
+  border-color: var(--rose-md);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(192,65,90,0.13);
+}
+.vp2-card.selected {
+  border-color: rgba(192,65,90,0.22);
+  background: var(--rose-lt);
+  cursor: default;
+  box-shadow: 0 4px 16px rgba(192,65,90,0.1);
+}
+.vp2-card.wrong {
+  border-color: rgba(224,85,85,0.35);
+  background: #fff4f4;
+  box-shadow: none;
+}
+.vp2-card:active:not(.selected) { transform: scale(0.94); }
+
+/* Icon circle */
+.vp2-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(192,65,90,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.22s cubic-bezier(.34,1.56,.64,1),
+              transform 0.22s cubic-bezier(.34,1.56,.64,1),
+              box-shadow 0.22s;
+}
+.vp2-icon-wrap i {
+  font-size: 22px;
+  color: var(--rose);
+  transition: color 0.18s;
+}
+.vp2-card.selected .vp2-icon-wrap {
+  background: var(--rose);
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(192,65,90,0.38);
+}
+.vp2-card.selected .vp2-icon-wrap i { color: #fff; }
+.vp2-card.wrong    .vp2-icon-wrap   { background: rgba(224,85,85,0.1); }
+.vp2-card.wrong    .vp2-icon-wrap i { color: #e05555; }
+
+/* Hint label */
+.vp2-hint {
+  font-size: 8px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  font-weight: 500;
+  line-height: 1.3;
+  transition: color 0.18s;
+}
+.vp2-card.selected .vp2-hint { color: var(--rose); }
+
+/* Number badge */
 .vp2-badge {
   position: absolute;
-  top: 6px; right: 6px;
-  width: 18px; height: 18px;
+  top: 8px; right: 8px;
+  width: 20px; height: 20px;
   border-radius: 50%;
   background: var(--rose);
   color: #fff;
@@ -1278,24 +1369,18 @@ body::before {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transform: scale(0.4);
-  transition: opacity 0.15s, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  transform: scale(0.3);
+  transition: opacity 0.18s, transform 0.28s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 2px 8px rgba(192,65,90,0.4);
 }
 .vp2-card.selected .vp2-badge { opacity: 1; transform: scale(1); }
-.vp2-counter {
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted-lt);
-  font-weight: 500;
-  text-align: center;
-  margin-bottom: 6px;
-}
+
+/* Reset link */
 .vp2-reset {
   display: block;
-  margin: 0 auto 16px;
-  font-size: 10px;
-  letter-spacing: 1.5px;
+  margin: 2px auto 14px;
+  font-size: 9.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted-lt);
   background: none;
@@ -1307,6 +1392,10 @@ body::before {
   transition: color 0.15s;
 }
 .vp2-reset:hover { color: var(--rose); }
+
+@media (max-width: 360px) {
+  .vp2-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* ─── Reduced motion ─── */
 @media (prefers-reduced-motion: reduce) {
@@ -1772,9 +1861,12 @@ body::before {
       <p class="story-overline">almost there</p>
       <h1 class="story-title">our <em>moments.</em></h1>
       <p class="vault-riddle">Six chapters that made us.<br>Tap them in the order they happened.</p>
+      <div class="vp2-progress">
+        <div class="vp2-progress-track"><div class="vp2-progress-fill" id="vp2Fill"></div></div>
+        <span class="vp2-progress-label" id="vp2Counter">0 / 6</span>
+      </div>
       <div class="vp2-grid" id="vp2Grid"></div>
-      <p class="vp2-counter" id="vp2Counter">0 / 6 selected</p>
-      <button type="button" class="vp2-reset" id="vaultP2Reset">↺ reset</button>
+      <button type="button" class="vp2-reset" id="vaultP2Reset">↺ start over</button>
       <p class="vault-err" id="vaultErr2">not quite — try again.</p>
       <div class="btn-row">
         <button type="button" class="btn-primary" id="vaultP2Btn">
@@ -1873,14 +1965,14 @@ body::before {
 
   const RELATIONSHIP_START = new Date('2022-09-20T00:00:00');
 
-  // Cards displayed in a fixed shuffled order; `order` = correct chronological rank (1 = earliest)
+  // Cards in a fixed shuffled order; `order` = correct chronological rank (1 = earliest)
   const PUZZLE2_CARDS = [
-    { emoji: '✈️', hint: 'a departure',   order: 3 },
-    { emoji: '🌆', hint: 'a new city',    order: 4 },
-    { emoji: '❤️', hint: 'a beginning',   order: 1 },
-    { emoji: '🏃', hint: 'a finish line', order: 6 },
-    { emoji: '🎓', hint: 'a milestone',   order: 5 },
-    { emoji: '🍽️', hint: 'a first meal',  order: 2 },
+    { icon: 'ti-plane',               hint: 'a departure',   order: 3 },
+    { icon: 'ti-building-skyscraper', hint: 'a new city',    order: 4 },
+    { icon: 'ti-heart-filled',        hint: 'a beginning',   order: 1 },
+    { icon: 'ti-trophy',              hint: 'a finish line', order: 6 },
+    { icon: 'ti-school',              hint: 'a milestone',   order: 5 },
+    { icon: 'ti-tools-kitchen-2',     hint: 'a first meal',  order: 2 },
   ];
 
   /* ═══ State ═══ */
@@ -2468,7 +2560,8 @@ body::before {
       el.setAttribute('role', 'button');
       el.setAttribute('tabindex', '0');
       el.setAttribute('aria-label', card.hint);
-      el.innerHTML = `<span class="vp2-emoji">${card.emoji}</span>
+      el.innerHTML = `
+        <div class="vp2-icon-wrap"><i class="ti ${card.icon}"></i></div>
         <span class="vp2-hint">${card.hint}</span>
         <span class="vp2-badge" id="vp2b${idx}" aria-hidden="true"></span>`;
       el.addEventListener('click', () => selectP2Card(idx));
@@ -2484,7 +2577,11 @@ body::before {
     p2Selection.push(idx);
     document.querySelector(`.vp2-card[data-idx="${idx}"]`).classList.add('selected');
     $('vp2b' + idx).textContent = p2Selection.length;
-    $('vp2Counter').textContent = `${p2Selection.length} / ${PUZZLE2_CARDS.length} selected`;
+    const n   = p2Selection.length;
+    const tot = PUZZLE2_CARDS.length;
+    $('vp2Fill').style.width    = (n / tot * 100) + '%';
+    $('vp2Counter').textContent = `${n} / ${tot}`;
+    $('vp2Counter').classList.toggle('done', n === tot);
   }
 
   async function checkPuzzle2() {
@@ -2512,7 +2609,9 @@ body::before {
       if (shake) card.classList.add('wrong');
       card.querySelector('.vp2-badge').textContent = '';
     });
-    $('vp2Counter').textContent = `0 / ${PUZZLE2_CARDS.length} selected`;
+    $('vp2Fill').style.width    = '0%';
+    $('vp2Counter').textContent = `0 / ${PUZZLE2_CARDS.length}`;
+    $('vp2Counter').classList.remove('done');
     if (shake) {
       $('vaultErr2').textContent = 'not quite — try again.';
       $('vaultErr2').classList.add('show');

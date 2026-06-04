@@ -1218,6 +1218,96 @@ body::before {
   border: none; z-index: 0;
 }
 
+/* ─── Vault Puzzle 2: tap-sequence ─── */
+.vp2-wrap          { display: none; }
+.vp2-wrap.active   { display: block; }
+
+.vp2-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 20px 0 10px;
+}
+.vp2-card {
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 8px 12px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1),
+              border-color 0.15s, background 0.15s,
+              box-shadow 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.vp2-card:hover:not(.selected) {
+  border-color: var(--rose-md);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(192,65,90,0.1);
+}
+.vp2-card:active     { transform: scale(0.95); }
+.vp2-card.selected   { border-color: var(--rose); background: var(--rose-lt); }
+.vp2-card.wrong      { border-color: #e05555; background: #fff4f4; }
+
+.vp2-emoji {
+  display: block;
+  font-size: 28px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.vp2-hint {
+  display: block;
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  font-weight: 500;
+}
+.vp2-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--rose);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.15s, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+}
+.vp2-card.selected .vp2-badge { opacity: 1; transform: scale(1); }
+.vp2-counter {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.vp2-reset {
+  display: block;
+  margin: 0 auto 16px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.vp2-reset:hover { color: var(--rose); }
+
 /* ─── Reduced motion ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1677,6 +1767,22 @@ body::before {
       </div>
     </div>
 
+    <!-- Vault Puzzle 2 — tap our moments in chronological order -->
+    <div id="vaultPuzzle2" class="vp2-wrap">
+      <p class="story-overline">almost there</p>
+      <h1 class="story-title">our <em>moments.</em></h1>
+      <p class="vault-riddle">Six chapters that made us.<br>Tap them in the order they happened.</p>
+      <div class="vp2-grid" id="vp2Grid"></div>
+      <p class="vp2-counter" id="vp2Counter">0 / 6 selected</p>
+      <button type="button" class="vp2-reset" id="vaultP2Reset">↺ reset</button>
+      <p class="vault-err" id="vaultErr2">not quite — try again.</p>
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="vaultP2Btn">
+          Check <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- Unlocked content -->
     <div class="vault-content" id="vaultContent">
       <div class="monogram"><hr><span class="monogram-mark">the vault</span><hr></div>
@@ -1767,10 +1873,22 @@ body::before {
 
   const RELATIONSHIP_START = new Date('2022-09-20T00:00:00');
 
+  // Cards displayed in a fixed shuffled order; `order` = correct chronological rank (1 = earliest)
+  const PUZZLE2_CARDS = [
+    { emoji: '✈️', hint: 'a departure',   order: 3 },
+    { emoji: '🌆', hint: 'a new city',    order: 4 },
+    { emoji: '❤️', hint: 'a beginning',   order: 1 },
+    { emoji: '🏃', hint: 'a finish line', order: 6 },
+    { emoji: '🎓', hint: 'a milestone',   order: 5 },
+    { emoji: '🍽️', hint: 'a first meal',  order: 2 },
+  ];
+
   /* ═══ State ═══ */
   let currentScreen = -1; // -1 = login
   let fleeCount     = 0;
   let vaultKey      = null;
+  let puzzle2Solved = false;
+  let p2Selection   = [];
   let musicLoaded   = false;
   let musicPlaying  = false;
   let lbIdx         = 0;
@@ -1839,9 +1957,13 @@ body::before {
 
   function openVaultDoor() {
     if (!vaultKey) return;
-    renderVaultContent();
     $('vaultGate').style.display = 'none';
-    $('vaultContent').classList.add('open');
+    if (puzzle2Solved) {
+      renderVaultContent();
+      $('vaultContent').classList.add('open');
+    } else {
+      showPuzzle2();
+    }
   }
 
   function goToHub() {
@@ -2266,9 +2388,8 @@ body::before {
 
     err.classList.remove('show');
     vaultKey = await deriveVaultKey(answer);
-    await renderVaultContent();
     $('vaultGate').style.display = 'none';
-    $('vaultContent').classList.add('open');
+    showPuzzle2();
   }
 
   async function deriveVaultKey(pw) {
@@ -2329,6 +2450,77 @@ body::before {
     disp.classList.toggle('empty', !text);
     area.classList.remove('editing');
     save.classList.remove('editing');
+  }
+
+  /* ═══ Vault Puzzle 2: tap moments in order ═══ */
+  function showPuzzle2() {
+    buildPuzzle2();
+    $('vaultPuzzle2').classList.add('active');
+  }
+
+  function buildPuzzle2() {
+    const grid = $('vp2Grid');
+    if (grid.childElementCount) return; // already built
+    PUZZLE2_CARDS.forEach((card, idx) => {
+      const el = document.createElement('div');
+      el.className = 'vp2-card';
+      el.dataset.idx = idx;
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', card.hint);
+      el.innerHTML = `<span class="vp2-emoji">${card.emoji}</span>
+        <span class="vp2-hint">${card.hint}</span>
+        <span class="vp2-badge" id="vp2b${idx}" aria-hidden="true"></span>`;
+      el.addEventListener('click', () => selectP2Card(idx));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectP2Card(idx); }
+      });
+      grid.appendChild(el);
+    });
+  }
+
+  function selectP2Card(idx) {
+    if (p2Selection.includes(idx)) return;
+    p2Selection.push(idx);
+    document.querySelector(`.vp2-card[data-idx="${idx}"]`).classList.add('selected');
+    $('vp2b' + idx).textContent = p2Selection.length;
+    $('vp2Counter').textContent = `${p2Selection.length} / ${PUZZLE2_CARDS.length} selected`;
+  }
+
+  async function checkPuzzle2() {
+    if (p2Selection.length < PUZZLE2_CARDS.length) {
+      $('vaultErr2').textContent = `tap all ${PUZZLE2_CARDS.length} first.`;
+      $('vaultErr2').classList.add('show');
+      setTimeout(() => $('vaultErr2').classList.remove('show'), 1800);
+      return;
+    }
+    const correct = p2Selection.every((cardIdx, i) => PUZZLE2_CARDS[cardIdx].order === i + 1);
+    if (correct) {
+      puzzle2Solved = true;
+      $('vaultPuzzle2').classList.remove('active');
+      await renderVaultContent();
+      $('vaultContent').classList.add('open');
+    } else {
+      resetPuzzle2(true);
+    }
+  }
+
+  function resetPuzzle2(shake) {
+    p2Selection = [];
+    document.querySelectorAll('.vp2-card').forEach(card => {
+      card.classList.remove('selected');
+      if (shake) card.classList.add('wrong');
+      card.querySelector('.vp2-badge').textContent = '';
+    });
+    $('vp2Counter').textContent = `0 / ${PUZZLE2_CARDS.length} selected`;
+    if (shake) {
+      $('vaultErr2').textContent = 'not quite — try again.';
+      $('vaultErr2').classList.add('show');
+      setTimeout(() => {
+        document.querySelectorAll('.vp2-card.wrong').forEach(c => c.classList.remove('wrong'));
+        $('vaultErr2').classList.remove('show');
+      }, 900);
+    }
   }
 
   /* ═══ Populate date selects ═══ */
@@ -2404,6 +2596,8 @@ body::before {
     // Vault
     $('vaultUnlockBtn').addEventListener('click', attemptVaultUnlock);
     $('vaultInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptVaultUnlock(); });
+    $('vaultP2Btn').addEventListener('click', () => checkPuzzle2());
+    $('vaultP2Reset').addEventListener('click', () => resetPuzzle2(false));
     $('vaultFolderEdit').addEventListener('click', () => editVault('folder'));
     $('vaultFolderSave').addEventListener('click', () => saveVault('folder'));
     $('vaultBankEdit').addEventListener('click',   () => editVault('bank'));

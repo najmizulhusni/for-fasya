@@ -6,6 +6,7 @@
 <title>For Fasya</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
@@ -1173,6 +1174,59 @@ body::before {
   /* Music chip slightly higher */
   .music-chip      { bottom: max(28px, env(safe-area-inset-bottom, 0px) + 20px); }
 }
+
+/* ─── Accessibility ─── */
+:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── Button states ─── */
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Loading spinner ─── */
+.ti-spin { display: inline-block; animation: spin 0.8s linear infinite; }
+
+/* ─── Shake animation (replaces JS setTimeout approach) ─── */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(7px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(4px); }
+}
+.shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+/* ─── sc3 letter-closing centred overrides (replaces inline styles) ─── */
+#sc3 .lp-rule          { margin-bottom: 28px; }
+#sc3 .lp-salutation,
+#sc3 .lp-sig           { text-align: center; }
+#sc3 .lp-body          { text-align: center; overflow: visible; }
+#sc3 .lp-question-ornament {
+  margin: 24px 0 20px;
+  letter-spacing: 8px;
+  font-size: 11px;
+  color: rgba(192,65,90,0.35);
+}
+
+/* ─── Music iframe (replaces inline style) ─── */
+#musicFrame {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0.01; pointer-events: none;
+  border: none; z-index: 0;
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1180,20 +1234,16 @@ body::before {
 <canvas id="cCanvas"></canvas>
 
 <nav class="hub-nav" id="hubNav">
-  <button class="hub-nav-btn" onclick="goToHub()">
+  <button type="button" class="hub-nav-btn" id="hubNavBtn">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     home
   </button>
 </nav>
 
-<!-- Music chip — iframe hidden inside, no popup -->
+<!-- Music chip — iframe hidden inside, near-zero opacity lets browser render it for autoplay -->
 <div class="music-chip" id="musicChip">
-  <!-- YouTube iframe lives inside chip at near-zero opacity so browser renders it (allows autoplay) -->
-  <iframe id="musicFrame" src=""
-    allow="autoplay; encrypted-media"
-    style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.01;pointer-events:none;border:none;z-index:0;">
-  </iframe>
-  <div class="music-pill" onclick="toggleMusic()" style="position:relative;z-index:1;">
+  <iframe id="musicFrame" src="" allow="autoplay; encrypted-media"></iframe>
+  <div class="music-pill" id="musicPill" style="position:relative;z-index:1;" role="button" tabindex="0" aria-label="Toggle music">
     <div class="music-bars">
       <div class="bar b1"></div>
       <div class="bar b2"></div>
@@ -1203,7 +1253,7 @@ body::before {
       <div class="music-pill-song">Tak Terbatas</div>
       <div class="music-pill-band">Good Morning Everyone</div>
     </div>
-    <div class="music-pill-btn">
+    <div class="music-pill-btn" aria-hidden="true">
       <svg class="ic-play"  width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
       <svg class="ic-pause" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
     </div>
@@ -1211,18 +1261,18 @@ body::before {
 </div>
 
 <!-- Lightbox -->
-<div class="lightbox" id="lightbox">
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo lightbox">
   <div class="lb-bar">
     <span class="lb-count" id="lbCount"></span>
-    <button class="lb-close" onclick="closeLightbox()">×</button>
+    <button type="button" class="lb-close" id="lbClose" aria-label="Close lightbox">×</button>
   </div>
   <div class="lb-img-wrap">
     <img id="lbImg" src="" alt="">
   </div>
   <p class="lb-caption" id="lbCap"></p>
   <div class="lb-footer">
-    <button class="lb-btn" onclick="lbMove(-1)">‹</button>
-    <button class="lb-btn" onclick="lbMove(1)">›</button>
+    <button type="button" class="lb-btn" id="lbPrev" aria-label="Previous photo">‹</button>
+    <button type="button" class="lb-btn" id="lbNext" aria-label="Next photo">›</button>
   </div>
 </div>
 
@@ -1257,7 +1307,7 @@ body::before {
     <div class="door-grid">
 
       <!-- Door 1: a letter for you — OPEN -->
-      <div class="door-card open" onclick="openDoor(0)" role="button" tabindex="0">
+      <div class="door-card open" data-door="sc0" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         </div>
@@ -1270,7 +1320,7 @@ body::before {
       </div>
 
       <!-- Door 2: our story — OPEN -->
-      <div class="door-card open" onclick="openDoor('scStory', true)" role="button" tabindex="0">
+      <div class="door-card open" data-door="scStory" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
         </div>
@@ -1283,7 +1333,7 @@ body::before {
       </div>
 
       <!-- Door 3: our album — OPEN -->
-      <div class="door-card open" onclick="openDoor('scAlbum')" role="button" tabindex="0">
+      <div class="door-card open" data-door="scAlbum" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         </div>
@@ -1309,7 +1359,7 @@ body::before {
       </div>
 
       <!-- Door 5: Future Checklist — OPEN -->
-      <div class="door-card open" onclick="openDoor('scChecklist')" role="button" tabindex="0">
+      <div class="door-card open" data-door="scChecklist" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
@@ -1322,7 +1372,7 @@ body::before {
       </div>
 
       <!-- Door 6: The Vault — OPEN (protected inside) -->
-      <div class="door-card open" onclick="openDoor('scVault')" role="button" tabindex="0">
+      <div class="door-card open" data-door="scVault" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
         </div>
@@ -1389,7 +1439,7 @@ body::before {
     </div>
 
     <div class="btn-row">
-      <button class="btn-primary" onclick="attemptLogin()" id="loginBtn">
+      <button type="button" class="btn-primary" id="loginBtn">
         Open
         <i class="ti ti-arrow-right"></i>
       </button>
@@ -1468,10 +1518,10 @@ body::before {
           <p class="lp-question-ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
           <p class="lp-question">Will you keep being mine?</p>
           <div class="lp-actions">
-            <button class="btn-primary" onclick="finale(event)">
+            <button type="button" class="btn-primary" id="finaleBtn">
               <i class="ti ti-heart-filled"></i> Always
             </button>
-            <button class="btn-ghost" id="noBtn0" onmouseover="flee(this)" ontouchstart="flee(this)">No</button>
+            <button type="button" class="btn-ghost" id="noBtn0">No</button>
           </div>
         </div>
 
@@ -1492,13 +1542,13 @@ body::before {
     <span class="lp-corner tr">◆</span>
     <span class="lp-corner bl">◆</span>
     <span class="lp-corner br">◆</span>
-    <div class="lp-rule" style="margin-bottom:28px;"><span>✦</span></div>
-    <p class="lp-salutation" style="text-align:center;">You're it for me,<br><em>Fasya.</em></p>
-    <div class="lp-body" style="text-align:center;overflow:visible;">
+    <div class="lp-rule"><span>✦</span></div>
+    <p class="lp-salutation">You're it for me,<br><em>Fasya.</em></p>
+    <div class="lp-body">
       <p>No conditions. No footnotes.<br>Just you — exactly as you are.</p>
     </div>
-    <p class="lp-question-ornament" style="margin:24px 0 20px;letter-spacing:8px;font-size:11px;color:rgba(192,65,90,0.35);">✦ &nbsp; ✦ &nbsp; ✦</p>
-    <p class="lp-sig" style="text-align:center;">yours completely, <strong>Najmi Zulhusni</strong></p>
+    <p class="lp-question-ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
+    <p class="lp-sig">yours completely, <strong>Najmi Zulhusni</strong></p>
   </div>
 </div>
 
@@ -1618,11 +1668,10 @@ body::before {
       <h1 class="story-title">the <em>vault.</em></h1>
       <p class="vault-riddle">"What is our word — the one that means we are never apart?"</p>
       <input class="vault-input" id="vaultInput" type="text"
-        placeholder="one word, lowercase…" autocomplete="off" autocorrect="off" autocapitalize="none"
-        onkeydown="if(event.key==='Enter') attemptVaultUnlock()">
+        placeholder="one word, lowercase…" autocomplete="off" autocorrect="off" autocapitalize="none">
       <p class="vault-err" id="vaultErr">not quite right.</p>
       <div class="btn-row">
-        <button class="btn-primary" onclick="attemptVaultUnlock()">
+        <button type="button" class="btn-primary" id="vaultUnlockBtn">
           Enter <i class="ti ti-arrow-right"></i>
         </button>
       </div>
@@ -1646,20 +1695,20 @@ body::before {
       <div class="vault-section">
         <span class="vault-section-label">folder guide</span>
         <div class="vault-body empty" id="vaultFolder"></div>
-        <button class="vault-edit-btn" onclick="editVault('folder')">edit</button>
+        <button type="button" class="vault-edit-btn" id="vaultFolderEdit">edit</button>
         <textarea class="vault-textarea" id="vaultFolderArea"
           placeholder="Describe the folder structure — e.g.&#10;/Photos — sorted by year&#10;/Documents — IDs, insurance"></textarea>
-        <button class="vault-save-btn" id="vaultFolderSave" onclick="saveVault('folder')">save</button>
+        <button type="button" class="vault-save-btn" id="vaultFolderSave">save</button>
       </div>
 
       <!-- Bank accounts -->
       <div class="vault-section">
         <span class="vault-section-label">bank accounts</span>
         <div class="vault-body empty" id="vaultBank"></div>
-        <button class="vault-edit-btn" onclick="editVault('bank')">edit</button>
+        <button type="button" class="vault-edit-btn" id="vaultBankEdit">edit</button>
         <textarea class="vault-textarea" id="vaultBankArea"
           placeholder="Maybank: [account number]&#10;Aeon Bank: [account number]&#10;&#10;Add any other details."></textarea>
-        <button class="vault-save-btn" id="vaultBankSave" onclick="saveVault('bank')">save</button>
+        <button type="button" class="vault-save-btn" id="vaultBankSave">save</button>
       </div>
     </div>
 
@@ -1692,590 +1741,687 @@ body::before {
 </div>
 
 <script>
-/* ═══ State ═══ */
-let cur = -1; // -1 = login
-let fleeCount = 0;
+(function () {
+  'use strict';
 
-// Hash chunks — split so no single readable constant exists in source
-const TH = ['3ba5e5b9','0caef901','c84a46b9','ef90a57b','d5c51af1','86c4fdac','04f62f0e','b5613460'];
-const VH = ['aea995a2','587286a7','41900782','14245ee7','d5d991a2','d638308c','df1bb827','c0822c87'];
+  /* ═══ Constants ═══ */
+  // Hash chunks — split so no single readable constant exists in source
+  const TH = ['3ba5e5b9','0caef901','c84a46b9','ef90a57b','d5c51af1','86c4fdac','04f62f0e','b5613460'];
+  const VH = ['aea995a2','587286a7','41900782','14245ee7','d5d991a2','d638308c','df1bb827','c0822c87'];
 
-let failCount = parseInt(sessionStorage.getItem('lf') || '0');
-let lockUntil = parseInt(sessionStorage.getItem('lu') || '0');
-let lockTimer  = null;
+  const PHOTOS = [
+    { src: 'IMG_0118.JPG',      cap: '10 · 10 · 2022 — our first date' },
+    { src: 'first-airport.png', cap: '25 · 11 · 2023 — KLIA, jakarta trip' },
+    { src: 'first-date-kl.png', cap: '02 · 08 · 2024 — kuala lumpur' },
+    { src: 'IMG_7735.JPG',      cap: '18 · 11 · 2025 — UTM graduation' },
+    { src: 'convocation.png',   cap: '18 · 01 · 2026 — twincity marathon' },
+  ];
 
-// PBKDF2 — 250k iterations makes each brute-force attempt ~47ms
-// so all 4464 date combinations take ~3.5 min, not milliseconds
-async function kdf(password, saltB64, bits) {
-  const enc = new TextEncoder();
-  const km  = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const buf = await crypto.subtle.deriveBits(
-    { name:'PBKDF2', salt: enc.encode(atob(saltB64)), iterations: 250000, hash:'SHA-256' },
-    km, bits
-  );
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+  const CHECKLIST = [
+    { id: 'wagyu',      text: 'Wagyu dinner in KL'  },
+    { id: 'langkawi',   text: 'Langkawi trip'        },
+    { id: 'bali',       text: 'Bali trip'            },
+    { id: 'disneyland', text: 'Disneyland Japan'     },
+    { id: 'omurice',    text: 'Eat omurice at TRX'   },
+  ];
 
-/* ═══ Populate day/year dropdowns ═══ */
-(function() {
-  const dayEl  = document.getElementById('inDay');
-  const yearEl = document.getElementById('inYear');
-  for (let d = 1; d <= 31; d++) {
-    const o = document.createElement('option');
-    o.value = d; o.textContent = d < 10 ? '0' + d : d;
-    dayEl.appendChild(o);
+  const RELATIONSHIP_START = new Date('2022-09-20T00:00:00');
+
+  /* ═══ State ═══ */
+  let currentScreen = -1; // -1 = login
+  let fleeCount     = 0;
+  let vaultKey      = null;
+  let musicLoaded   = false;
+  let musicPlaying  = false;
+  let lbIdx         = 0;
+  let cdTimer       = null;
+  let failCount     = parseInt(sessionStorage.getItem('lf') || '0');
+  let lockUntil     = parseInt(sessionStorage.getItem('lu') || '0');
+  let lockTimer     = null;
+  let lbTouchX      = 0;
+
+  /* ═══ Helpers ═══ */
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, '0');
+
+  /* ═══ Crypto — PBKDF2 ═══ */
+  // 250k iterations: ~47ms per attempt, making brute-force of all date combos ~3.5 min
+  async function kdf(password, saltB64, bits) {
+    const enc = new TextEncoder();
+    const km  = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+    const buf = await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt: enc.encode(atob(saltB64)), iterations: 250000, hash: 'SHA-256' },
+      km, bits
+    );
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
-  for (let y = 2015; y <= 2026; y++) {
-    const o = document.createElement('option');
-    o.value = y; o.textContent = y;
-    yearEl.appendChild(o);
+
+  /* ═══ Navigation ═══ */
+  function setHubNav(show) {
+    $('hubNav').classList.toggle('visible', show);
   }
-})();
 
-/* ═══ Login ═══ */
-async function attemptLogin() {
-  if (Date.now() < lockUntil) return;
+  // Transition from any non-hub screen to a target screen
+  function navigate(targetId) {
+    if (currentScreen !== -1) {
+      const fromEl = $(currentScreen === 'hub' ? 'scHub' : currentScreen);
+      if (fromEl) {
+        fromEl.classList.add('exit');
+        setTimeout(() => fromEl.classList.remove('active', 'exit'), 350);
+      }
+    }
+    currentScreen = targetId;
+    $(targetId).classList.add('active');
+    setHubNav(targetId !== 'scHub');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-  const d = parseInt(document.getElementById('inDay').value);
-  const m = parseInt(document.getElementById('inMonth').value);
-  const y = parseInt(document.getElementById('inYear').value);
-  const err = document.getElementById('loginError');
-  const msg = document.getElementById('loginErrorMsg');
-  const btn = document.getElementById('loginBtn');
+  // Open a door from the hub
+  function handleDoor(targetId) {
+    const hub = $('scHub');
+    hub.classList.add('exit');
+    setTimeout(() => hub.classList.remove('active', 'exit'), 350);
+    currentScreen = targetId;
 
-  if (!d || !m || !y) {
-    msg.textContent = 'Fill in all three — day, month, and year.';
+    const screenInits = {
+      scStory:     buildCounter,
+      scAlbum:     buildAlbum,
+      scChecklist: buildChecklist,
+      scVault:     openVaultDoor,
+    };
+    const init = screenInits[targetId];
+    if (init) init();
+
+    $(targetId).classList.add('active');
+    setHubNav(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openVaultDoor() {
+    if (!vaultKey) return;
+    renderVaultContent();
+    $('vaultGate').style.display = 'none';
+    $('vaultContent').classList.add('open');
+  }
+
+  function goToHub() {
+    setHubNav(false);
+    if (currentScreen !== 'hub') {
+      const prev = $(currentScreen);
+      if (prev) {
+        prev.classList.add('exit');
+        setTimeout(() => prev.classList.remove('active', 'exit'), 350);
+      }
+    }
+    currentScreen = 'hub';
+    $('scHub').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goFromLogin() {
+    $('scLogin').classList.remove('active');
+    currentScreen = 'hub';
+    $('scHub').classList.add('active');
+    setHubNav(false);
+    buildHubMeta();
+    buildCountdown();
+    checkSeptemberUnlock();
+    updateClCount();
+    $('musicChip').classList.add('visible');
+  }
+
+  /* ═══ Login ═══ */
+  async function attemptLogin() {
+    if (Date.now() < lockUntil) return;
+
+    const d   = parseInt($('inDay').value);
+    const m   = parseInt($('inMonth').value);
+    const y   = parseInt($('inYear').value);
+    const err = $('loginError');
+    const msg = $('loginErrorMsg');
+    const btn = $('loginBtn');
+
+    if (!d || !m || !y) {
+      msg.textContent = 'Fill in all three — day, month, and year.';
+      err.classList.add('show');
+      shakeCard(document.querySelector('.login-card'));
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
+
+    // Separator encoded so the date format isn't plainly visible in source
+    const input = [d, m, y].join(atob('fA==')); // fA== = |
+    const hash  = await kdf(input, 'bmYtZ2F0ZS0yMDIy', 256); // = nf-gate-2022
+
+    btn.disabled = false;
+    btn.innerHTML = 'Open <i class="ti ti-arrow-right"></i>';
+
+    if (hash === TH.join('')) {
+      err.classList.remove('show');
+      $('loginLockout').classList.remove('show');
+      sessionStorage.removeItem('lf');
+      sessionStorage.removeItem('lu');
+      showUnlock();
+      return;
+    }
+
+    failCount++;
+    sessionStorage.setItem('lf', failCount);
+    const hints = [
+      "That's not right. Think again.",
+      "Hmm, not that one — you know this 🥺",
+      "Keep trying. You definitely remember.",
+      "The day we became us. You've got this 💕",
+    ];
+    msg.textContent = hints[Math.min(failCount - 1, hints.length - 1)];
     err.classList.add('show');
     shakeCard(document.querySelector('.login-card'));
-    return;
+
+    let wait = 0;
+    if      (failCount >= 8) wait = 60;
+    else if (failCount >= 5) wait = 30;
+    else if (failCount >= 3) wait = 10;
+    if (wait > 0) startLockout(wait);
   }
 
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin .8s linear infinite;display:inline-block"></i>';
-
-  // Format obfuscated: separator encoded so format isn't plainly visible
-  const input = [d, m, y].join(atob('fA==')); // fA== = |
-  const hash  = await kdf(input, 'bmYtZ2F0ZS0yMDIy', 256); // bmYt... = nf-gate-2022
-
-  btn.disabled = false;
-  btn.innerHTML = 'Open <i class="ti ti-arrow-right"></i>';
-
-  if (hash === TH.join('')) {
-    err.classList.remove('show');
-    document.getElementById('loginLockout').classList.remove('show');
-    sessionStorage.removeItem('lf');
-    sessionStorage.removeItem('lu');
-    showUnlock();
-    return;
-  }
-
-  failCount++;
-  sessionStorage.setItem('lf', failCount);
-  const hints = [
-    "That's not right. Think again.",
-    "Hmm, not that one — you know this 🥺",
-    "Keep trying. You definitely remember.",
-    "The day we became us. You've got this 💕",
-  ];
-  msg.textContent = hints[Math.min(failCount - 1, hints.length - 1)];
-  err.classList.add('show');
-  shakeCard(document.querySelector('.login-card'));
-
-  let wait = 0;
-  if (failCount >= 8) wait = 60;
-  else if (failCount >= 5) wait = 30;
-  else if (failCount >= 3) wait = 10;
-  if (wait > 0) startLockout(wait);
-}
-
-function startLockout(seconds) {
-  lockUntil = Date.now() + seconds * 1000;
-  sessionStorage.setItem('lu', lockUntil);
-  const btn     = document.getElementById('loginBtn');
-  const lockDiv = document.getElementById('loginLockout');
-  const lockMsg = document.getElementById('lockoutMsg');
-  btn.disabled = true;
-  btn.style.opacity = '0.4';
-  btn.style.cursor  = 'not-allowed';
-  lockDiv.classList.add('show');
-  clearInterval(lockTimer);
-  let rem = seconds;
-  const tick = () => {
-    lockMsg.textContent = `wait ${rem}s before trying again`;
-    rem--;
-    if (rem < 0) {
-      clearInterval(lockTimer);
-      lockUntil = 0;
-      btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = '';
-      lockDiv.classList.remove('show');
-    }
-  };
-  tick();
-  lockTimer = setInterval(tick, 1000);
-}
-
-function shakeCard(el) {
-  el.style.animation = 'none';
-  el.style.transform = 'translateX(-8px)';
-  setTimeout(() => { el.style.transition = 'transform 0.4s cubic-bezier(.36,.07,.19,.97)'; el.style.transform = 'translateX(0)'; }, 50);
-  setTimeout(() => { el.style.transition = ''; }, 450);
-}
-
-function showUnlock() {
-  const overlay = document.getElementById('unlockOverlay');
-  overlay.classList.add('show');
-  launchConfetti();
-  setTimeout(() => {
-    overlay.classList.add('fade');
-    setTimeout(() => {
-      overlay.classList.remove('show', 'fade');
-      goFromLogin();
-    }, 500);
-  }, 1800);
-}
-
-function setHubNav(show) {
-  document.getElementById('hubNav').classList.toggle('visible', show);
-}
-
-function buildHubMeta() {
-  const start = new Date('2022-09-20T00:00:00');
-  const days  = Math.floor((new Date() - start) / 86400000);
-  const el = document.getElementById('hubMeta');
-  if (el) el.innerHTML = `<strong>${days.toLocaleString()}</strong> days together &nbsp;·&nbsp; since 20 · 09 · 2022`;
-}
-
-function goFromLogin() {
-  document.getElementById('scLogin').classList.remove('active');
-  cur = 'hub';
-  document.getElementById('scHub').classList.add('active');
-  setHubNav(false);
-  buildHubMeta();
-  buildCountdown();
-  checkSeptemberUnlock();
-  updateClCount();
-  document.getElementById('musicChip').classList.add('visible');
-}
-
-function screenId(c) {
-  if (c === 'hub') return 'scHub';
-  return typeof c === 'number' ? 'sc' + c : c;
-}
-
-function openDoor(id, isStory) {
-  const hub = document.getElementById('scHub');
-  hub.classList.add('exit');
-  setTimeout(() => hub.classList.remove('active', 'exit'), 350);
-  cur = id;
-  if (isStory) buildCounter();
-  if (id === 'scAlbum')     buildAlbum();
-  if (id === 'scChecklist') buildChecklist();
-  if (id === 'scVault' && vaultKey) { renderVaultContent(); document.getElementById('vaultGate').style.display='none'; document.getElementById('vaultContent').classList.add('open'); }
-  document.getElementById(screenId(id)).classList.add('active');
-  setHubNav(true);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function goToHub() {
-  setHubNav(false);
-  const prev = cur === 'hub' ? null : document.getElementById(screenId(cur));
-  if (prev) { prev.classList.add('exit'); setTimeout(() => prev.classList.remove('active', 'exit'), 350); }
-  cur = 'hub';
-  document.getElementById('scHub').classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ═══ Navigation ═══ */
-function go(n) {
-  const prev = document.getElementById(screenId(cur));
-  if (prev) { prev.classList.add('exit'); setTimeout(() => prev.classList.remove('active', 'exit'), 350); }
-  cur = n;
-  document.getElementById('sc' + n).classList.add('active');
-  setHubNav(true);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ═══ Flee button ═══ */
-function flee(btn) {
-  fleeCount++;
-  btn.style.position = 'fixed';
-  btn.style.transition = 'left 0.18s ease, top 0.18s ease';
-  const bw = btn.offsetWidth + 16, bh = btn.offsetHeight + 16;
-  const x = Math.random() * (window.innerWidth  - bw);
-  const y = Math.random() * (window.innerHeight - bh);
-  btn.style.left = x + 'px';
-  btn.style.top  = y + 'px';
-  if (fleeCount > 4) { btn.style.opacity = '0.3'; btn.style.fontSize = '11px'; }
-  if (fleeCount > 7) { btn.style.opacity = '0'; btn.style.pointerEvents = 'none'; }
-}
-
-/* ═══ Counter ═══ */
-function buildCounter() {
-  const start  = new Date('2022-09-20T00:00:00');
-  const now    = new Date();
-  const diffMs = now - start;
-  const days   = Math.floor(diffMs / 86400000);
-  const months = Math.floor(days / 30.4375);
-  const years  = Math.floor(days / 365.25);
-  const el = document.getElementById('storyCounter');
-  if (!el) return;
-  el.innerHTML = [
-    { num: years,  label: 'Years'  },
-    { num: months, label: 'Months' },
-    { num: days,   label: 'Days'   }
-  ].map(({ num, label }) =>
-    `<div class="s-pill"><span class="s-num">${num}</span><span class="s-label">${label}</span></div>`
-  ).join('');
-}
-
-/* ═══ Finale ═══ */
-function finale(e) {
-  spawnHearts(e.currentTarget);
-  launchConfetti();
-  setTimeout(() => go(3), 600);
-}
-
-/* ═══ Heart burst ═══ */
-function spawnHearts(btn) {
-  const r  = btn.getBoundingClientRect();
-  const cx = r.left + r.width / 2;
-  const cy = r.top  + r.height / 2;
-  const emojis = ['🤍', '💕', '🌸', '✨'];
-  for (let i = 0; i < 9; i++) {
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'hburst';
-      el.style.fontSize = (14 + Math.random() * 10) + 'px';
-      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      el.style.left = (cx + (Math.random() - 0.5) * 60) + 'px';
-      el.style.top  = cy + 'px';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1200);
-    }, i * 65);
-  }
-}
-
-/* ═══ Confetti ═══ */
-function launchConfetti() {
-  const cv  = document.getElementById('cCanvas');
-  const ctx = cv.getContext('2d');
-  cv.width  = window.innerWidth;
-  cv.height = window.innerHeight;
-  const cols = ['#e8a0b0','#c0415a','#fdf3f6','#b8975a','#f7c9d4','#a8364c','#fff0f4','#ffd6e0'];
-  const pieces = Array.from({ length: 90 }, () => ({
-    x: Math.random() * cv.width,
-    y: Math.random() * -cv.height,
-    r: Math.random() * 6 + 3,
-    d: Math.random() * 3.5 + 1,
-    color: cols[Math.floor(Math.random() * cols.length)],
-    ta: 0, ts: Math.random() * 0.07 + 0.035,
-    shape: Math.random() > 0.5 ? 'rect' : 'circle'
-  }));
-  let f = 0;
-  function draw() {
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    pieces.forEach(p => {
-      p.ta += p.ts; p.y += p.d;
-      const tilt = Math.sin(p.ta) * 12;
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = 0.85;
-      if (p.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(p.x + tilt, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.save();
-        ctx.translate(p.x + tilt, p.y);
-        ctx.rotate(p.ta);
-        ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
-        ctx.restore();
+  function startLockout(seconds) {
+    lockUntil = Date.now() + seconds * 1000;
+    sessionStorage.setItem('lu', lockUntil);
+    const btn     = $('loginBtn');
+    const lockDiv = $('loginLockout');
+    const lockMsg = $('lockoutMsg');
+    btn.disabled = true;
+    lockDiv.classList.add('show');
+    clearInterval(lockTimer);
+    let rem = seconds;
+    const tick = () => {
+      lockMsg.textContent = `wait ${rem}s before trying again`;
+      rem--;
+      if (rem < 0) {
+        clearInterval(lockTimer);
+        lockUntil    = 0;
+        btn.disabled = false;
+        lockDiv.classList.remove('show');
       }
-      if (p.y > cv.height) { p.y = -10; p.x = Math.random() * cv.width; }
+    };
+    tick();
+    lockTimer = setInterval(tick, 1000);
+  }
+
+  function shakeCard(el) {
+    el.classList.remove('shake');
+    void el.offsetWidth; // force reflow so re-adding the class re-triggers the animation
+    el.classList.add('shake');
+    el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true });
+  }
+
+  function showUnlock() {
+    const overlay = $('unlockOverlay');
+    overlay.classList.add('show');
+    launchConfetti();
+    setTimeout(() => {
+      overlay.classList.add('fade');
+      setTimeout(() => {
+        overlay.classList.remove('show', 'fade');
+        goFromLogin();
+      }, 500);
+    }, 1800);
+  }
+
+  /* ═══ Hub ═══ */
+  function buildHubMeta() {
+    const days = Math.floor((Date.now() - RELATIONSHIP_START) / 86400000);
+    const el   = $('hubMeta');
+    if (el) el.innerHTML = `<strong>${days.toLocaleString()}</strong> days together &nbsp;·&nbsp; since 20 · 09 · 2022`;
+  }
+
+  function checkSeptemberUnlock() {
+    const now      = new Date();
+    const unlocked = (now.getMonth() === 8 && now.getDate() >= 20) || now.getMonth() > 8;
+    if (!unlocked) return;
+    const card = $('doorSeptember');
+    if (!card || card.classList.contains('open')) return;
+    card.classList.replace('locked', 'open');
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.dataset.door = 'scSeptember';
+    card.addEventListener('click', () => handleDoor('scSeptember'));
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDoor('scSeptember'); }
     });
-    ctx.globalAlpha = 1;
-    f++;
-    if (f < 160) requestAnimationFrame(draw);
-    else ctx.clearRect(0, 0, cv.width, cv.height);
+    $('doorSepDot').className   = 'door-dot dot-open';
+    $('doorSepLabel').className = 'door-label label-open';
+    $('doorSepLabel').textContent = 'open';
   }
-  draw();
-}
 
-/* ═══ Petals ═══ */
-function spawnPetals() {
-  for (let i = 0; i < 7; i++) {
-    const el   = document.createElement('div');
-    el.className = 'petal';
-    el.style.left            = Math.random() * 100 + 'vw';
-    el.style.animationDuration = (Math.random() * 8 + 7) + 's';
-    el.style.animationDelay    = (Math.random() * 12) + 's';
-    const size = Math.random() * 14 + 10;
-    el.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${Math.random() > 0.5 ? '#e8a0b0' : '#f7c9d4'}">
-      <path d="M12 2C8 2 4 6 4 10c0 5 8 12 8 12s8-7 8-12c0-4-4-8-8-8z"/>
-    </svg>`;
-    document.body.appendChild(el);
+  /* ═══ Story counter ═══ */
+  function buildCounter() {
+    const diffMs = Date.now() - RELATIONSHIP_START;
+    const days   = Math.floor(diffMs / 86400000);
+    const months = Math.floor(days / 30.4375);
+    const years  = Math.floor(days / 365.25);
+    const el = $('storyCounter');
+    if (!el) return;
+    el.innerHTML = [
+      { num: years,  label: 'Years'  },
+      { num: months, label: 'Months' },
+      { num: days,   label: 'Days'   },
+    ].map(({ num, label }) =>
+      `<div class="s-pill"><span class="s-num">${num}</span><span class="s-label">${label}</span></div>`
+    ).join('');
   }
-}
-spawnPetals();
 
-/* ═══ Restore lockout on reload ═══ */
-(function() {
-  const rem = lockUntil - Date.now();
-  if (rem > 0) startLockout(Math.ceil(rem / 1000));
+  /* ═══ Countdown ═══ */
+  function buildCountdown() {
+    function tick() {
+      const now    = new Date();
+      let target   = new Date(now.getFullYear(), 8, 20); // Sep 20
+      if (now >= target) target = new Date(now.getFullYear() + 1, 8, 20);
+      const diff   = target - now;
+      const d      = Math.floor(diff / 86400000);
+      const h      = Math.floor((diff % 86400000) / 3600000);
+      const m      = Math.floor((diff % 3600000) / 60000);
+      $('cdDays').textContent  = d;
+      $('cdHours').textContent = pad(h);
+      $('cdMins').textContent  = pad(m);
+      $('cdSub').textContent   = `20 · 09 · ${target.getFullYear()} — year ${target.getFullYear() - 2022}`;
+    }
+    tick();
+    clearInterval(cdTimer);
+    cdTimer = setInterval(tick, 30000);
+  }
+
+  /* ═══ Letter finale ═══ */
+  function finale(e) {
+    spawnHearts(e.currentTarget);
+    launchConfetti();
+    setTimeout(() => navigate('sc3'), 600);
+  }
+
+  function flee(btn) {
+    fleeCount++;
+    btn.style.position   = 'fixed';
+    btn.style.transition = 'left 0.18s ease, top 0.18s ease';
+    const x = Math.random() * (window.innerWidth  - btn.offsetWidth  - 16);
+    const y = Math.random() * (window.innerHeight - btn.offsetHeight - 16);
+    btn.style.left = x + 'px';
+    btn.style.top  = y + 'px';
+    if (fleeCount > 4) { btn.style.opacity = '0.3'; btn.style.fontSize = '11px'; }
+    if (fleeCount > 7) { btn.style.opacity = '0';   btn.style.pointerEvents = 'none'; }
+  }
+
+  /* ═══ Hearts ═══ */
+  function spawnHearts(btn) {
+    const r      = btn.getBoundingClientRect();
+    const cx     = r.left + r.width  / 2;
+    const cy     = r.top  + r.height / 2;
+    const emojis = ['🤍', '💕', '🌸', '✨'];
+    for (let i = 0; i < 9; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className   = 'hburst';
+        el.style.fontSize = (14 + Math.random() * 10) + 'px';
+        el.textContent    = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left     = (cx + (Math.random() - 0.5) * 60) + 'px';
+        el.style.top      = cy + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1200);
+      }, i * 65);
+    }
+  }
+
+  /* ═══ Confetti ═══ */
+  function launchConfetti() {
+    const cv  = $('cCanvas');
+    const ctx = cv.getContext('2d');
+    cv.width  = window.innerWidth;
+    cv.height = window.innerHeight;
+    const cols = ['#e8a0b0','#c0415a','#fdf3f6','#b8975a','#f7c9d4','#a8364c','#fff0f4','#ffd6e0'];
+    const pieces = Array.from({ length: 90 }, () => ({
+      x: Math.random() * cv.width,
+      y: Math.random() * -cv.height,
+      r: Math.random() * 6 + 3,
+      d: Math.random() * 3.5 + 1,
+      color: cols[Math.floor(Math.random() * cols.length)],
+      ta: 0, ts: Math.random() * 0.07 + 0.035,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    }));
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      pieces.forEach(p => {
+        p.ta += p.ts; p.y += p.d;
+        const tilt = Math.sin(p.ta) * 12;
+        ctx.fillStyle  = p.color;
+        ctx.globalAlpha = 0.85;
+        if (p.shape === 'circle') {
+          ctx.beginPath();
+          ctx.arc(p.x + tilt, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.save();
+          ctx.translate(p.x + tilt, p.y);
+          ctx.rotate(p.ta);
+          ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+          ctx.restore();
+        }
+        if (p.y > cv.height) { p.y = -10; p.x = Math.random() * cv.width; }
+      });
+      ctx.globalAlpha = 1;
+      frame++;
+      if (frame < 160) requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, cv.width, cv.height);
+    }
+    draw();
+  }
+
+  /* ═══ Petals ═══ */
+  function spawnPetals() {
+    for (let i = 0; i < 7; i++) {
+      const el = document.createElement('div');
+      el.className = 'petal';
+      el.style.left              = Math.random() * 100 + 'vw';
+      el.style.animationDuration = (Math.random() * 8 + 7) + 's';
+      el.style.animationDelay    = (Math.random() * 12) + 's';
+      const size  = Math.random() * 14 + 10;
+      const color = Math.random() > 0.5 ? '#e8a0b0' : '#f7c9d4';
+      el.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}">
+        <path d="M12 2C8 2 4 6 4 10c0 5 8 12 8 12s8-7 8-12c0-4-4-8-8-8z"/>
+      </svg>`;
+      document.body.appendChild(el);
+    }
+  }
+
+  /* ═══ Album ═══ */
+  function buildAlbum() {
+    const grid = $('albumGrid');
+    if (!grid || grid.childElementCount) return;
+    PHOTOS.forEach((p, i) => {
+      const el = document.createElement('div');
+      el.className = 'album-thumb';
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', p.cap);
+      el.addEventListener('click', () => openLightbox(i));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i); }
+      });
+      el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy">
+        <div class="album-hover-cap" aria-hidden="true">${p.cap}</div>`;
+      grid.appendChild(el);
+    });
+  }
+
+  /* ═══ Lightbox ═══ */
+  function openLightbox(i) {
+    lbIdx = i;
+    renderLb();
+    $('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    $('lbClose').focus();
+  }
+
+  function closeLightbox() {
+    $('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function lbMove(dir) {
+    lbIdx = (lbIdx + dir + PHOTOS.length) % PHOTOS.length;
+    renderLb();
+  }
+
+  function renderLb() {
+    const p = PHOTOS[lbIdx];
+    $('lbImg').src             = p.src;
+    $('lbImg').alt             = p.cap;
+    $('lbCap').textContent     = p.cap;
+    $('lbCount').textContent   = `${lbIdx + 1} / ${PHOTOS.length}`;
+  }
+
+  /* ═══ Music ═══ */
+  function toggleMusic() {
+    const frame = $('musicFrame');
+    if (!musicLoaded) {
+      frame.src    = 'https://www.youtube.com/embed/QLVei17AIUY?autoplay=1&controls=0&rel=0&enablejsapi=1&playsinline=1';
+      musicLoaded  = true;
+      musicPlaying = true;
+    } else if (musicPlaying) {
+      frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+      musicPlaying = false;
+    } else {
+      frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo',  args: [] }), '*');
+      musicPlaying = true;
+    }
+    $('musicChip').classList.toggle('playing', musicPlaying);
+  }
+
+  /* ═══ Checklist ═══ */
+  function buildChecklist() {
+    const list = $('checklistItems');
+    if (list.childElementCount) { updateClCount(); return; }
+    const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
+    CHECKLIST.forEach(item => {
+      const done = !!saved[item.id];
+      const row  = document.createElement('div');
+      row.className = 'cl-item' + (done ? ' done' : '');
+      row.id = 'cl_' + item.id;
+
+      const btn = document.createElement('button');
+      btn.type      = 'button';
+      btn.className = 'cl-check';
+      btn.setAttribute('aria-label', item.text);
+      btn.textContent = done ? '✓' : '';
+      btn.addEventListener('click', () => toggleCheck(item.id));
+
+      const label = document.createElement('span');
+      label.className   = 'cl-label';
+      label.textContent = item.text;
+
+      row.append(btn, label);
+      list.appendChild(row);
+    });
+    updateClCount();
+  }
+
+  function toggleCheck(id) {
+    const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
+    saved[id] = !saved[id];
+    localStorage.setItem('cl_state', JSON.stringify(saved));
+    const done = saved[id];
+    const row  = $('cl_' + id);
+    row.classList.toggle('done', done);
+    row.querySelector('.cl-check').textContent = done ? '✓' : '';
+    updateClCount();
+  }
+
+  function updateClCount() {
+    const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
+    const n     = CHECKLIST.filter(i => saved[i.id]).length;
+    const el    = $('checklistCount');
+    if (el) el.textContent = `${n} of ${CHECKLIST.length} done`;
+    const lbl = $('clDoorLabel');
+    if (lbl) lbl.textContent = n === CHECKLIST.length ? 'all done ✓' : `${n}/${CHECKLIST.length}`;
+  }
+
+  /* ═══ Vault ═══ */
+  async function attemptVaultUnlock() {
+    const answer = $('vaultInput').value.trim().toLowerCase();
+    const err    = $('vaultErr');
+    const btn    = $('vaultUnlockBtn');
+    if (!answer) { err.textContent = 'enter your answer first.'; err.classList.add('show'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
+
+    // Same slow PBKDF2 derivation as login gate
+    const hash = await kdf(answer, 'bmYtdmF1bHQtMjAyMg==', 256); // = nf-vault-2022
+
+    btn.disabled  = false;
+    btn.innerHTML = 'Enter <i class="ti ti-arrow-right"></i>';
+
+    if (hash !== VH.join('')) { err.textContent = 'not quite right.'; err.classList.add('show'); return; }
+
+    err.classList.remove('show');
+    vaultKey = await deriveVaultKey(answer);
+    await renderVaultContent();
+    $('vaultGate').style.display = 'none';
+    $('vaultContent').classList.add('open');
+  }
+
+  async function deriveVaultKey(pw) {
+    const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: new TextEncoder().encode('vfp-vault-2022'), iterations: 100000, hash: 'SHA-256' },
+      raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+  }
+
+  const b64  = a => btoa(String.fromCharCode(...new Uint8Array(a)));
+  const ub64 = s => new Uint8Array([...atob(s)].map(c => c.charCodeAt(0)));
+
+  async function vaultEncrypt(text) {
+    const iv  = crypto.getRandomValues(new Uint8Array(12));
+    const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, vaultKey, new TextEncoder().encode(text));
+    return JSON.stringify({ iv: b64(iv), d: b64(enc) });
+  }
+
+  async function vaultDecrypt(stored) {
+    try {
+      const { iv, d } = JSON.parse(stored);
+      const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub64(iv) }, vaultKey, ub64(d));
+      return new TextDecoder().decode(dec);
+    } catch { return ''; }
+  }
+
+  async function renderVaultContent() {
+    for (const sec of ['folder', 'bank']) {
+      const stored = localStorage.getItem('vault_' + sec);
+      const cap    = sec[0].toUpperCase() + sec.slice(1);
+      const el     = $('vault' + cap);
+      if (!el) continue;
+      const text = stored ? await vaultDecrypt(stored) : '';
+      el.textContent = text;
+      el.classList.toggle('empty', !text);
+    }
+  }
+
+  function editVault(sec) {
+    const cap  = sec[0].toUpperCase() + sec.slice(1);
+    const area = $('vault' + cap + 'Area');
+    const save = $('vault' + cap + 'Save');
+    const disp = $('vault' + cap);
+    area.value = disp.textContent;
+    area.classList.add('editing');
+    save.classList.add('editing');
+  }
+
+  async function saveVault(sec) {
+    const cap  = sec[0].toUpperCase() + sec.slice(1);
+    const area = $('vault' + cap + 'Area');
+    const save = $('vault' + cap + 'Save');
+    const disp = $('vault' + cap);
+    const text = area.value.trim();
+    localStorage.setItem('vault_' + sec, await vaultEncrypt(text));
+    disp.textContent = text;
+    disp.classList.toggle('empty', !text);
+    area.classList.remove('editing');
+    save.classList.remove('editing');
+  }
+
+  /* ═══ Populate date selects ═══ */
+  function populateDateSelects() {
+    const dayEl  = $('inDay');
+    const yearEl = $('inYear');
+    for (let d = 1; d <= 31; d++) {
+      const o = document.createElement('option');
+      o.value = d;
+      o.textContent = d < 10 ? '0' + d : d;
+      dayEl.appendChild(o);
+    }
+    for (let y = 2015; y <= 2026; y++) {
+      const o = document.createElement('option');
+      o.value = y;
+      o.textContent = y;
+      yearEl.appendChild(o);
+    }
+  }
+
+  /* ═══ Init — wire up all event listeners ═══ */
+  function init() {
+    populateDateSelects();
+    spawnPetals();
+
+    // Restore lockout from a previous session
+    const rem = lockUntil - Date.now();
+    if (rem > 0) startLockout(Math.ceil(rem / 1000));
+
+    // Hub nav
+    $('hubNavBtn').addEventListener('click', goToHub);
+
+    // Music pill (click and Enter/Space keyboard)
+    const musicPill = $('musicPill');
+    musicPill.addEventListener('click', toggleMusic);
+    musicPill.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMusic(); }
+    });
+
+    // Lightbox controls
+    $('lbClose').addEventListener('click', closeLightbox);
+    $('lbPrev').addEventListener('click', () => lbMove(-1));
+    $('lbNext').addEventListener('click', () => lbMove(1));
+
+    // Lightbox touch swipe
+    const lb = $('lightbox');
+    lb.addEventListener('touchstart', e => { lbTouchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend',   e => {
+      const dx = e.changedTouches[0].clientX - lbTouchX;
+      if (Math.abs(dx) > 48) lbMove(dx < 0 ? 1 : -1);
+    });
+
+    // Door cards (open ones with data-door attribute)
+    document.querySelectorAll('.door-card[data-door]').forEach(card => {
+      const doorId = card.dataset.door;
+      card.addEventListener('click', () => handleDoor(doorId));
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDoor(doorId); }
+      });
+    });
+
+    // Login
+    $('loginBtn').addEventListener('click', attemptLogin);
+
+    // Finale "Always" button
+    $('finaleBtn').addEventListener('click', finale);
+
+    // Flee "No" button
+    const noBtn = $('noBtn0');
+    noBtn.addEventListener('mouseover',  () => flee(noBtn));
+    noBtn.addEventListener('touchstart', () => flee(noBtn), { passive: true });
+
+    // Vault
+    $('vaultUnlockBtn').addEventListener('click', attemptVaultUnlock);
+    $('vaultInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptVaultUnlock(); });
+    $('vaultFolderEdit').addEventListener('click', () => editVault('folder'));
+    $('vaultFolderSave').addEventListener('click', () => saveVault('folder'));
+    $('vaultBankEdit').addEventListener('click',   () => editVault('bank'));
+    $('vaultBankSave').addEventListener('click',   () => saveVault('bank'));
+
+    // Global keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && currentScreen === -1) { attemptLogin(); return; }
+      if (lb.classList.contains('open')) {
+        if (e.key === 'ArrowLeft')  lbMove(-1);
+        if (e.key === 'ArrowRight') lbMove(1);
+        if (e.key === 'Escape')     closeLightbox();
+      }
+    });
+  }
+
+  init();
 })();
-
-/* ═══ Photos ═══ */
-const PHOTOS = [
-  { src: 'IMG_0118.JPG',      cap: '10 · 10 · 2022 — our first date' },
-  { src: 'first-airport.png', cap: '25 · 11 · 2023 — KLIA, jakarta trip' },
-  { src: 'first-date-kl.png', cap: '02 · 08 · 2024 — kuala lumpur' },
-  { src: 'IMG_7735.JPG',      cap: '18 · 11 · 2025 — UTM graduation' },
-  { src: 'convocation.png',   cap: '18 · 01 · 2026 — twincity marathon' },
-];
-let lbIdx = 0;
-
-/* ═══ Album ═══ */
-function buildAlbum() {
-  const grid = document.getElementById('albumGrid');
-  if (!grid || grid.childElementCount) return;
-  PHOTOS.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.className = 'album-thumb';
-    el.onclick = () => openLightbox(i);
-    el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy">
-      <div class="album-hover-cap">${p.cap}</div>`;
-    grid.appendChild(el);
-  });
-}
-
-/* ═══ Lightbox ═══ */
-function openLightbox(i) {
-  lbIdx = i; renderLb();
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-}
-function lbMove(dir) {
-  lbIdx = (lbIdx + dir + PHOTOS.length) % PHOTOS.length;
-  renderLb();
-}
-function renderLb() {
-  const p = PHOTOS[lbIdx];
-  document.getElementById('lbImg').src = p.src;
-  document.getElementById('lbCap').textContent = p.cap;
-  document.getElementById('lbCount').textContent = `${lbIdx + 1} / ${PHOTOS.length}`;
-}
-
-// Touch swipe on lightbox
-let lbTx = 0;
-document.getElementById('lightbox').addEventListener('touchstart', e => { lbTx = e.touches[0].clientX; }, { passive: true });
-document.getElementById('lightbox').addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - lbTx;
-  if (Math.abs(dx) > 48) lbMove(dx < 0 ? 1 : -1);
-});
-
-/* ═══ Countdown ═══ */
-let cdTimer = null;
-function buildCountdown() {
-  function tick() {
-    const now = new Date();
-    let target = new Date(now.getFullYear(), 8, 20); // Sep 20
-    if (now >= target) target = new Date(now.getFullYear() + 1, 8, 20);
-    const diff = target - now;
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const pad = n => String(n).padStart(2, '0');
-    document.getElementById('cdDays').textContent  = d;
-    document.getElementById('cdHours').textContent = pad(h);
-    document.getElementById('cdMins').textContent  = pad(m);
-    document.getElementById('cdSub').textContent   =
-      `20 · 09 · ${target.getFullYear()} — year ${target.getFullYear() - 2022}`;
-  }
-  tick();
-  clearInterval(cdTimer);
-  cdTimer = setInterval(tick, 30000);
-}
-
-/* ═══ September auto-unlock ═══ */
-function checkSeptemberUnlock() {
-  const now = new Date();
-  const unlocked = (now.getMonth() === 8 && now.getDate() >= 20) || now.getMonth() > 8;
-  if (!unlocked) return;
-  const card = document.getElementById('doorSeptember');
-  if (!card || card.classList.contains('open')) return;
-  card.classList.remove('locked');
-  card.classList.add('open');
-  card.setAttribute('role', 'button');
-  card.setAttribute('tabindex', '0');
-  card.onclick = () => openDoor('scSeptember');
-  document.getElementById('doorSepDot').className = 'door-dot dot-open';
-  document.getElementById('doorSepLabel').className = 'door-label label-open';
-  document.getElementById('doorSepLabel').textContent = 'open';
-}
-
-/* ═══ Music ═══ */
-let musicLoaded = false, musicPlaying = false;
-
-function toggleMusic() {
-  const frame = document.getElementById('musicFrame');
-  if (!musicLoaded) {
-    frame.src = 'https://www.youtube.com/embed/QLVei17AIUY?autoplay=1&controls=0&rel=0&enablejsapi=1&playsinline=1';
-    musicLoaded = true;
-    musicPlaying = true;
-  } else if (musicPlaying) {
-    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*');
-    musicPlaying = false;
-  } else {
-    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*');
-    musicPlaying = true;
-  }
-  document.getElementById('musicChip').classList.toggle('playing', musicPlaying);
-}
-
-/* ═══ Checklist ═══ */
-const CHECKLIST = [
-  { id: 'wagyu',      text: 'Wagyu dinner in KL'    },
-  { id: 'langkawi',   text: 'Langkawi trip'          },
-  { id: 'bali',       text: 'Bali trip'              },
-  { id: 'disneyland', text: 'Disneyland Japan'       },
-  { id: 'omurice',    text: 'Eat omurice at TRX'     },
-];
-
-function buildChecklist() {
-  const list = document.getElementById('checklistItems');
-  if (list.childElementCount) { updateClCount(); return; }
-  const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
-  CHECKLIST.forEach(item => {
-    const done = !!saved[item.id];
-    const el = document.createElement('div');
-    el.className = 'cl-item' + (done ? ' done' : '');
-    el.id = 'cl_' + item.id;
-    el.innerHTML = `<button class="cl-check" onclick="toggleCheck('${item.id}')" aria-label="${item.text}">${done ? '✓' : ''}</button><span class="cl-label">${item.text}</span>`;
-    list.appendChild(el);
-  });
-  updateClCount();
-}
-
-function toggleCheck(id) {
-  const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
-  saved[id] = !saved[id];
-  localStorage.setItem('cl_state', JSON.stringify(saved));
-  const done = saved[id];
-  const item = document.getElementById('cl_' + id);
-  item.classList.toggle('done', done);
-  item.querySelector('.cl-check').textContent = done ? '✓' : '';
-  updateClCount();
-}
-
-function updateClCount() {
-  const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
-  const n = CHECKLIST.filter(i => saved[i.id]).length;
-  const el = document.getElementById('checklistCount');
-  if (el) el.textContent = `${n} of ${CHECKLIST.length} done`;
-  const lbl = document.getElementById('clDoorLabel');
-  if (lbl) lbl.textContent = n === CHECKLIST.length ? 'all done ✓' : `${n}/${CHECKLIST.length}`;
-}
-
-/* ═══ Vault ═══ */
-let vaultKey = null;
-
-async function attemptVaultUnlock() {
-  const answer = document.getElementById('vaultInput').value.trim().toLowerCase();
-  const err    = document.getElementById('vaultErr');
-  const btn    = document.querySelector('#vaultGate .btn-primary');
-  if (!answer) { err.textContent = 'enter your answer first.'; err.classList.add('show'); return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin .8s linear infinite;display:inline-block"></i>';
-
-  // PBKDF2 check — same slow derivation as login
-  const hash = await kdf(answer, 'bmYtdmF1bHQtMjAyMg==', 256); // = nf-vault-2022
-
-  btn.disabled = false;
-  btn.innerHTML = 'Enter <i class="ti ti-arrow-right"></i>';
-
-  if (hash !== VH.join('')) { err.textContent = 'not quite right.'; err.classList.add('show'); return; }
-
-  err.classList.remove('show');
-  vaultKey = await deriveVaultKey(answer);
-  await renderVaultContent();
-  document.getElementById('vaultGate').style.display = 'none';
-  document.getElementById('vaultContent').classList.add('open');
-}
-
-async function deriveVaultKey(pw) {
-  const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: new TextEncoder().encode('vfp-vault-2022'), iterations: 100000, hash: 'SHA-256' },
-    raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
-  );
-}
-
-const b64 = a => btoa(String.fromCharCode(...new Uint8Array(a)));
-const ub64 = s => new Uint8Array([...atob(s)].map(c => c.charCodeAt(0)));
-
-async function vaultEncrypt(text) {
-  const iv  = crypto.getRandomValues(new Uint8Array(12));
-  const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, vaultKey, new TextEncoder().encode(text));
-  return JSON.stringify({ iv: b64(iv), d: b64(enc) });
-}
-
-async function vaultDecrypt(stored) {
-  try {
-    const { iv, d } = JSON.parse(stored);
-    const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub64(iv) }, vaultKey, ub64(d));
-    return new TextDecoder().decode(dec);
-  } catch { return ''; }
-}
-
-async function renderVaultContent() {
-  for (const sec of ['folder', 'bank']) {
-    const stored = localStorage.getItem('vault_' + sec);
-    const cap = sec[0].toUpperCase() + sec.slice(1);
-    const el  = document.getElementById('vault' + cap);
-    if (!el) continue;
-    const text = stored ? await vaultDecrypt(stored) : '';
-    el.textContent = text;
-    el.classList.toggle('empty', !text);
-  }
-}
-
-function editVault(sec) {
-  const cap  = sec[0].toUpperCase() + sec.slice(1);
-  const area = document.getElementById('vault' + cap + 'Area');
-  const save = document.getElementById('vault' + cap + 'Save');
-  const disp = document.getElementById('vault' + cap);
-  area.value = disp.textContent;
-  area.classList.add('editing');
-  save.classList.add('editing');
-}
-
-async function saveVault(sec) {
-  const cap  = sec[0].toUpperCase() + sec.slice(1);
-  const area = document.getElementById('vault' + cap + 'Area');
-  const save = document.getElementById('vault' + cap + 'Save');
-  const disp = document.getElementById('vault' + cap);
-  const text = area.value.trim();
-  localStorage.setItem('vault_' + sec, await vaultEncrypt(text));
-  disp.textContent = text;
-  disp.classList.toggle('empty', !text);
-  area.classList.remove('editing');
-  save.classList.remove('editing');
-}
-
-/* ═══ Keyboard ═══ */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && cur === -1) { attemptLogin(); return; }
-  const lb = document.getElementById('lightbox');
-  if (lb.classList.contains('open')) {
-    if (e.key === 'ArrowLeft')  lbMove(-1);
-    if (e.key === 'ArrowRight') lbMove(1);
-    if (e.key === 'Escape')     closeLightbox();
-  }
-});
 </script>
 </body>
 </html>

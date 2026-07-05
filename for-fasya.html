@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>For Fasya</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
+<meta name="theme-color" content="#c0415a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="For Fasya">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
@@ -445,7 +449,8 @@ body::before {
   font-size: 30px; font-weight: 300; color: var(--ink);
   margin-bottom: 22px; line-height: 1.15; flex-shrink: 0;
 }
-.lp-body { flex: 1; overflow: hidden; }
+.lp-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.lp-body::-webkit-scrollbar { display: none; }
 .lp-body p {
   font-family: 'Cormorant Garamond', serif;
   font-size: 17px; color: #3c1f2a;
@@ -1113,13 +1118,21 @@ body::before {
 }
 .vault-textarea.editing { display: block; }
 .vault-textarea:focus { border-color: var(--rose-md); }
+.vault-edit-actions { display: none; align-items: center; gap: 8px; margin-top: 8px; }
+.vault-edit-actions.editing { display: flex; }
 .vault-save-btn {
   font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
   color: #fff; background: var(--rose); border: none; cursor: pointer;
   padding: 8px 16px; border-radius: 50px; font-weight: 500;
-  margin-top: 8px; display: none; font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
-.vault-save-btn.editing { display: inline-block; }
+.vault-cancel-btn {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); background: none; border: 1px solid var(--line); cursor: pointer;
+  padding: 8px 16px; border-radius: 50px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; transition: border-color 0.18s, color 0.18s;
+}
+.vault-cancel-btn:hover { border-color: var(--muted-lt); color: var(--ink-soft); }
 
 /* ─── Responsive ─── */
 @media (max-width: 520px) {
@@ -1529,6 +1542,76 @@ body::before {
   line-height: 1.7; margin-bottom: 14px;
 }
 
+/* ─── Countdown seconds ─── */
+.cd-num-sm { font-size: 22px; }
+
+/* ─── Countdown anniversary today banner ─── */
+.countdown-today {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--rose);
+  line-height: 1.4;
+  display: none;
+}
+.countdown-today.show { display: block; }
+
+/* ─── Hub reply block ─── */
+.hub-reply {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--rose-lt);
+  border-radius: 12px;
+  border: 1px solid rgba(192,65,90,0.10);
+  animation: hubItemIn 0.45s cubic-bezier(.22,.68,0,1.15) both;
+}
+.hub-reply-label {
+  font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; opacity: 0.8; margin-bottom: 6px;
+}
+.hub-reply-text {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 16px; color: var(--ink-soft); line-height: 1.65;
+}
+
+/* ─── sc3 scroll (note section can overflow on small phones) ─── */
+#sc3 { align-items: flex-start; padding-top: 40px; padding-bottom: 40px; overflow-y: auto; }
+
+/* ─── Fasya note on sc3 ─── */
+.fasya-note-wrap { margin-top: 4px; text-align: center; }
+.fasya-note-prompt {
+  font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500; margin-bottom: 12px;
+}
+.fasya-note-area {
+  width: 100%; min-height: 80px; padding: 12px 14px;
+  border: 1.5px solid var(--line); border-radius: 12px;
+  font-family: 'Cormorant Garamond', serif; font-size: 16px;
+  color: var(--ink); resize: none; outline: none;
+  transition: border-color 0.2s; text-align: center;
+  background: rgba(255,255,255,0.7);
+}
+.fasya-note-area:focus { border-color: var(--rose-md); }
+.fasya-note-area::placeholder { font-style: italic; color: var(--muted-lt); }
+.fasya-note-save-btn { width: 100%; justify-content: center; margin-top: 10px; }
+.fasya-note-display {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 18px; color: var(--ink); line-height: 1.7; margin-bottom: 8px;
+}
+.fasya-note-edit-link {
+  font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted-lt); background: none; border: none;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500;
+  padding: 0; transition: color 0.15s;
+}
+.fasya-note-edit-link:hover { color: var(--rose); }
+.sc3-home-btn { width: 100%; justify-content: center; margin-top: 20px; }
+
+/* ─── Album captions always visible on touch devices ─── */
+@media (hover: none) {
+  .album-hover-cap { opacity: 0.88; }
+}
+
 /* ─── Reduced motion ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1610,15 +1693,21 @@ body::before {
       <p class="hub-eyebrow">private · for you only</p>
       <h1 class="hub-name">Fasya.</h1>
       <p class="hub-meta" id="hubMeta"></p>
+      <div class="hub-reply" id="hubReply" hidden>
+        <p class="hub-reply-label">she wrote back</p>
+        <p class="hub-reply-text" id="hubReplyText"></p>
+      </div>
     </div>
 
     <!-- Countdown -->
     <div class="hub-countdown">
-      <div class="countdown-label">until our next anniversary</div>
-      <div class="countdown-display">
+      <div class="countdown-label" id="cdLabel">until our next anniversary</div>
+      <div class="countdown-today" id="cdToday"></div>
+      <div class="countdown-display" id="cdDisplay">
         <div class="cd-unit"><span class="cd-num" id="cdDays">—</span><span class="cd-label">days</span></div>
         <div class="cd-unit"><span class="cd-num" id="cdHours">—</span><span class="cd-label">hrs</span></div>
         <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
+        <div class="cd-unit"><span class="cd-num cd-num-sm" id="cdSecs">—</span><span class="cd-label">sec</span></div>
       </div>
       <div class="countdown-sub" id="cdSub"></div>
     </div>
@@ -1868,6 +1957,26 @@ body::before {
     </div>
     <p class="lp-question-ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
     <p class="lp-sig">yours completely, <strong>Najmi Zulhusni</strong></p>
+
+    <!-- Fasya writes back -->
+    <div class="fasya-note-wrap">
+      <div class="lp-rule" style="margin:20px 0 14px"><span>✦</span></div>
+      <p class="fasya-note-prompt">write something back</p>
+      <div id="fasyaNoteInput">
+        <textarea class="fasya-note-area" id="fasyaNoteArea" placeholder="anything at all…" maxlength="300" rows="3"></textarea>
+        <button type="button" class="btn-primary fasya-note-save-btn" id="fasyaNoteSave">
+          <i class="ti ti-heart-filled"></i> leave this for him
+        </button>
+      </div>
+      <div id="fasyaNoteSaved" hidden>
+        <p class="fasya-note-display" id="fasyaNoteDisplay"></p>
+        <button type="button" class="fasya-note-edit-link" id="fasyaNoteEdit">edit</button>
+      </div>
+    </div>
+
+    <button type="button" class="btn-ghost sc3-home-btn" id="sc3HomeBtn">
+      explore your space <i class="ti ti-arrow-right"></i>
+    </button>
   </div>
 </div>
 
@@ -2036,7 +2145,10 @@ body::before {
         <button type="button" class="vault-edit-btn" id="vaultFolderEdit">edit</button>
         <textarea class="vault-textarea" id="vaultFolderArea"
           placeholder="Describe the folder structure — e.g.&#10;/Photos — sorted by year&#10;/Documents — IDs, insurance"></textarea>
-        <button type="button" class="vault-save-btn" id="vaultFolderSave">save</button>
+        <div class="vault-edit-actions" id="vaultFolderActions">
+          <button type="button" class="vault-save-btn" id="vaultFolderSave">save</button>
+          <button type="button" class="vault-cancel-btn" id="vaultFolderCancel">cancel</button>
+        </div>
       </div>
 
       <!-- Bank accounts -->
@@ -2046,7 +2158,10 @@ body::before {
         <button type="button" class="vault-edit-btn" id="vaultBankEdit">edit</button>
         <textarea class="vault-textarea" id="vaultBankArea"
           placeholder="Maybank: [account number]&#10;Aeon Bank: [account number]&#10;&#10;Add any other details."></textarea>
-        <button type="button" class="vault-save-btn" id="vaultBankSave">save</button>
+        <div class="vault-edit-actions" id="vaultBankActions">
+          <button type="button" class="vault-save-btn" id="vaultBankSave">save</button>
+          <button type="button" class="vault-cancel-btn" id="vaultBankCancel">cancel</button>
+        </div>
       </div>
     </div>
 
@@ -2129,6 +2244,7 @@ body::before {
   let lockUntil     = parseInt(sessionStorage.getItem('lu') || '0');
   let lockTimer     = null;
   let lbTouchX      = 0;
+  let lbOpener      = null;
 
   /* ═══ Helpers ═══ */
   const $ = id => document.getElementById(id);
@@ -2157,7 +2273,7 @@ body::before {
   function navigate(targetId) {
     setHubNav(targetId !== 'scHub');
     if (currentScreen !== -1) {
-      const fromEl = $(currentScreen === 'hub' ? 'scHub' : currentScreen);
+      const fromEl = $(currentScreen);
       if (fromEl) {
         fromEl.classList.add('exit');
         setTimeout(() => fromEl.classList.remove('active', 'exit'), EXIT_MS);
@@ -2207,7 +2323,7 @@ body::before {
 
   function goToHub() {
     setHubNav(false);
-    if (currentScreen !== 'hub') {
+    if (currentScreen !== 'scHub') {
       const prev = $(currentScreen);
       if (prev) {
         prev.classList.add('exit');
@@ -2215,7 +2331,7 @@ body::before {
       }
     }
     setTimeout(() => {
-      currentScreen = 'hub';
+      currentScreen = 'scHub';
       $('scHub').classList.add('active');
       window.scrollTo({ top: 0, behavior: 'instant' });
     }, EXIT_MS * 0.7);
@@ -2223,7 +2339,7 @@ body::before {
 
   function goFromLogin() {
     $('scLogin').classList.remove('active');
-    currentScreen = 'hub';
+    currentScreen = 'scHub';
     const hub = $('scHub');
     hub.classList.add('active', 'hub-reveal');
     setHubNav(false);
@@ -2231,6 +2347,7 @@ body::before {
     buildCountdown();
     checkSeptemberUnlock();
     updateClCount();
+    buildHubReply();
     // Remove hub-reveal after all stagger animations finish (~0.9s total)
     setTimeout(() => hub.classList.remove('hub-reveal'), 950);
     // Music chip slides up after cards are visible
@@ -2401,38 +2518,59 @@ body::before {
   }
 
   /* ═══ Countdown ═══ */
+  function ordinal(n) {
+    const s = ['th','st','nd','rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
   function buildCountdown() {
     function tick() {
-      const now    = new Date();
-      let target   = new Date(now.getFullYear(), 8, 20); // Sep 20
+      const now         = new Date();
+      const isTodaySep20 = now.getMonth() === 8 && now.getDate() === 20;
+
+      if (isTodaySep20) {
+        const yr = now.getFullYear() - 2022;
+        $('cdLabel').textContent = 'today is our day';
+        $('cdDisplay').style.display = 'none';
+        $('cdToday').textContent = `happy ${ordinal(yr)} anniversary, Fasya 🎉`;
+        $('cdToday').classList.add('show');
+        $('cdSub').textContent = `20 · 09 · ${now.getFullYear()} — ${ordinal(yr)} year together`;
+        return;
+      }
+
+      let target = new Date(now.getFullYear(), 8, 20);
       if (now >= target) target = new Date(now.getFullYear() + 1, 8, 20);
-      const diff   = target - now;
-      const d      = Math.floor(diff / 86400000);
-      const h      = Math.floor((diff % 86400000) / 3600000);
-      const m      = Math.floor((diff % 3600000) / 60000);
+      const diff = target - now;
+      const d    = Math.floor(diff / 86400000);
+      const h    = Math.floor((diff % 86400000) / 3600000);
+      const m    = Math.floor((diff % 3600000) / 60000);
+      const s    = Math.floor((diff % 60000) / 1000);
+
       $('cdDays').textContent  = d;
       $('cdHours').textContent = pad(h);
       $('cdMins').textContent  = pad(m);
-      $('cdSub').textContent   = `20 · 09 · ${target.getFullYear()} — year ${target.getFullYear() - 2022}`;
+      $('cdSecs').textContent  = pad(s);
+      $('cdSub').textContent   = `20 · 09 · ${target.getFullYear()} — our ${ordinal(target.getFullYear() - 2022)} anniversary`;
     }
     tick();
     clearInterval(cdTimer);
-    cdTimer = setInterval(tick, 30000);
+    cdTimer = setInterval(tick, 1000);
   }
 
   /* ═══ Letter finale ═══ */
   function finale(e) {
     spawnHearts(e.currentTarget);
     launchConfetti();
-    setTimeout(() => navigate('sc3'), 600);
+    setTimeout(() => { navigate('sc3'); initFasyaNote(); }, 600);
   }
 
   function flee(btn) {
     fleeCount++;
     btn.style.position   = 'fixed';
     btn.style.transition = 'left 0.18s ease, top 0.18s ease';
-    const x = Math.random() * (window.innerWidth  - btn.offsetWidth  - 16);
-    const y = Math.random() * (window.innerHeight - btn.offsetHeight - 16);
+    const x = Math.max(8, Math.random() * (window.innerWidth  - btn.offsetWidth  - 16));
+    const y = Math.max(8, Math.random() * (window.innerHeight - btn.offsetHeight - 16));
     btn.style.left = x + 'px';
     btn.style.top  = y + 'px';
     if (fleeCount > 4) { btn.style.opacity = '0.3'; btn.style.fontSize = '11px'; }
@@ -2535,7 +2673,7 @@ body::before {
       el.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i); }
       });
-      el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy">
+      el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy" onerror="this.closest('.album-thumb').style.display='none'">
         <div class="album-hover-cap" aria-hidden="true">${p.cap}</div>`;
       grid.appendChild(el);
     });
@@ -2543,7 +2681,8 @@ body::before {
 
   /* ═══ Lightbox ═══ */
   function openLightbox(i) {
-    lbIdx = i;
+    lbIdx    = i;
+    lbOpener = document.querySelectorAll('.album-thumb')[i] || null;
     renderLb();
     $('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2553,6 +2692,7 @@ body::before {
   function closeLightbox() {
     $('lightbox').classList.remove('open');
     document.body.style.overflow = '';
+    if (lbOpener) lbOpener.focus();
   }
 
   function lbMove(dir) {
@@ -2562,10 +2702,10 @@ body::before {
 
   function renderLb() {
     const p = PHOTOS[lbIdx];
-    $('lbImg').src             = p.src;
-    $('lbImg').alt             = p.cap;
-    $('lbCap').textContent     = p.cap;
-    $('lbCount').textContent   = `${lbIdx + 1} / ${PHOTOS.length}`;
+    $('lbImg').src           = p.src;
+    $('lbImg').alt           = `Photo: ${p.cap}`;
+    $('lbCap').textContent   = p.cap;
+    $('lbCount').textContent = `${lbIdx + 1} / ${PHOTOS.length}`;
   }
 
   /* ═══ Music ═══ */
@@ -2600,6 +2740,7 @@ body::before {
       btn.type      = 'button';
       btn.className = 'cl-check';
       btn.setAttribute('aria-label', item.text);
+      btn.setAttribute('aria-pressed', done ? 'true' : 'false');
       btn.textContent = done ? '✓' : '';
       btn.addEventListener('click', () => toggleCheck(item.id));
 
@@ -2620,8 +2761,14 @@ body::before {
     const done = saved[id];
     const row  = $('cl_' + id);
     row.classList.toggle('done', done);
-    row.querySelector('.cl-check').textContent = done ? '✓' : '';
+    const checkBtn = row.querySelector('.cl-check');
+    checkBtn.textContent = done ? '✓' : '';
+    checkBtn.setAttribute('aria-pressed', done ? 'true' : 'false');
     updateClCount();
+    if (CHECKLIST.every(i => saved[i.id])) {
+      launchConfetti();
+      spawnHearts(checkBtn);
+    }
   }
 
   function updateClCount() {
@@ -2695,26 +2842,36 @@ body::before {
   }
 
   function editVault(sec) {
-    const cap  = sec[0].toUpperCase() + sec.slice(1);
-    const area = $('vault' + cap + 'Area');
-    const save = $('vault' + cap + 'Save');
-    const disp = $('vault' + cap);
+    const cap     = sec[0].toUpperCase() + sec.slice(1);
+    const area    = $('vault' + cap + 'Area');
+    const actions = $('vault' + cap + 'Actions');
+    const disp    = $('vault' + cap);
     area.value = disp.textContent;
     area.classList.add('editing');
-    save.classList.add('editing');
+    actions.classList.add('editing');
+    area.focus();
+  }
+
+  function cancelVault(sec) {
+    const cap     = sec[0].toUpperCase() + sec.slice(1);
+    const area    = $('vault' + cap + 'Area');
+    const actions = $('vault' + cap + 'Actions');
+    area.classList.remove('editing');
+    actions.classList.remove('editing');
+    $('vault' + cap + 'Edit').focus();
   }
 
   async function saveVault(sec) {
-    const cap  = sec[0].toUpperCase() + sec.slice(1);
-    const area = $('vault' + cap + 'Area');
-    const save = $('vault' + cap + 'Save');
-    const disp = $('vault' + cap);
-    const text = area.value.trim();
+    const cap     = sec[0].toUpperCase() + sec.slice(1);
+    const area    = $('vault' + cap + 'Area');
+    const actions = $('vault' + cap + 'Actions');
+    const disp    = $('vault' + cap);
+    const text    = area.value.trim();
     localStorage.setItem('vault_' + sec, await vaultEncrypt(text));
     disp.textContent = text;
     disp.classList.toggle('empty', !text);
     area.classList.remove('editing');
-    save.classList.remove('editing');
+    actions.classList.remove('editing');
   }
 
   /* ═══ Vault Puzzle 2: tap moments in order ═══ */
@@ -2795,6 +2952,48 @@ body::before {
     }
   }
 
+  /* ═══ Fasya's reply note ═══ */
+  function initFasyaNote() {
+    const saved = localStorage.getItem('fasya_note');
+    if (saved) {
+      $('fasyaNoteDisplay').textContent = saved;
+      $('fasyaNoteInput').hidden = true;
+      $('fasyaNoteSaved').hidden = false;
+    } else {
+      $('fasyaNoteInput').hidden = false;
+      $('fasyaNoteSaved').hidden = true;
+    }
+  }
+
+  function saveFasyaNote() {
+    const text = $('fasyaNoteArea').value.trim();
+    if (!text) return;
+    localStorage.setItem('fasya_note', text);
+    $('fasyaNoteDisplay').textContent = text;
+    $('fasyaNoteInput').hidden = true;
+    $('fasyaNoteSaved').hidden = false;
+    spawnHearts($('fasyaNoteSave'));
+  }
+
+  function editFasyaNote() {
+    $('fasyaNoteArea').value = localStorage.getItem('fasya_note') || '';
+    $('fasyaNoteInput').hidden = false;
+    $('fasyaNoteSaved').hidden = true;
+    $('fasyaNoteArea').focus();
+  }
+
+  function buildHubReply() {
+    const note = localStorage.getItem('fasya_note');
+    const el   = $('hubReply');
+    if (!el) return;
+    if (note) {
+      $('hubReplyText').textContent = note;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  }
+
   /* ═══ Populate date selects ═══ */
   function populateDateSelects() {
     const dayEl  = $('inDay');
@@ -2805,7 +3004,7 @@ body::before {
       o.textContent = d < 10 ? '0' + d : d;
       dayEl.appendChild(o);
     }
-    for (let y = 2015; y <= 2026; y++) {
+    for (let y = 2020; y <= 2026; y++) {
       const o = document.createElement('option');
       o.value = y;
       o.textContent = y;
@@ -2854,26 +3053,42 @@ body::before {
       });
     });
 
+    // Login — clear error as soon as any selector changes
+    ['inDay', 'inMonth', 'inYear'].forEach(id => {
+      $(id).addEventListener('change', () => $('loginError').classList.remove('show'));
+    });
+
     // Login
     $('loginBtn').addEventListener('click', attemptLogin);
 
     // Finale "Always" button
     $('finaleBtn').addEventListener('click', finale);
 
+    // sc3 — Fasya's note + home button
+    $('fasyaNoteSave').addEventListener('click', saveFasyaNote);
+    $('fasyaNoteEdit').addEventListener('click', editFasyaNote);
+    $('fasyaNoteArea').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveFasyaNote(); }
+    });
+    $('sc3HomeBtn').addEventListener('click', goToHub);
+
     // Flee "No" button
     const noBtn = $('noBtn0');
-    noBtn.addEventListener('mouseover',  () => flee(noBtn));
+    noBtn.addEventListener('mouseenter', () => flee(noBtn));
     noBtn.addEventListener('touchstart', () => flee(noBtn), { passive: true });
 
     // Vault
     $('vaultUnlockBtn').addEventListener('click', attemptVaultUnlock);
     $('vaultInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptVaultUnlock(); });
+    $('vaultInput').addEventListener('input',   () => $('vaultErr').classList.remove('show'));
     $('vaultP2Btn').addEventListener('click', () => checkPuzzle2());
     $('vaultP2Reset').addEventListener('click', () => resetPuzzle2(false));
-    $('vaultFolderEdit').addEventListener('click', () => editVault('folder'));
-    $('vaultFolderSave').addEventListener('click', () => saveVault('folder'));
-    $('vaultBankEdit').addEventListener('click',   () => editVault('bank'));
-    $('vaultBankSave').addEventListener('click',   () => saveVault('bank'));
+    $('vaultFolderEdit').addEventListener('click',   () => editVault('folder'));
+    $('vaultFolderSave').addEventListener('click',   () => saveVault('folder'));
+    $('vaultFolderCancel').addEventListener('click', () => cancelVault('folder'));
+    $('vaultBankEdit').addEventListener('click',     () => editVault('bank'));
+    $('vaultBankSave').addEventListener('click',     () => saveVault('bank'));
+    $('vaultBankCancel').addEventListener('click',   () => cancelVault('bank'));
 
     // Global keyboard shortcuts
     document.addEventListener('keydown', e => {

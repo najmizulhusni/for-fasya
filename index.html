@@ -2718,7 +2718,7 @@ body::before {
       <div class="card">
         <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
         <p class="eyebrow" id="sepEyebrow">20 · 09</p>
-        <h1 class="headline">Happy anniversary,<br><em>Fasya.</em></h1>
+        <h1 class="headline">Happy Anniversary,<br><em>Fasya.</em></h1>
 
         <div class="scratch" id="scratchWrap">
           <div class="tk" id="tkCard">
@@ -2811,7 +2811,7 @@ body::before {
     rows: [
       ['where',  'Monograph KL'],
       ['when',   '6 Sept 2026 · 8:00 PM'],
-      ['wear',   'something you feel good in'],
+      ['wear',   'black — that’s the theme'],
       ['guests', '2 of 2'],
     ],
     note: 'Our day is the 20th. I just could not wait, and I could not be away for it.',
@@ -3256,8 +3256,10 @@ body::before {
     const cv   = $('scratchCanvas');
     if (!wrap || !cv) return;
 
-    // Already opened on a previous visit — don't make her do it twice
-    if (localStorage.getItem('sep_scratched')) {
+    // sessionStorage, not localStorage: within one visit she never has to
+    // scratch the same card twice, but a fresh visit brings the foil back
+    // so the reveal isn't spent permanently after the first open
+    if (sessionStorage.getItem('sep_scratched')) {
       wrap.classList.add('revealed');
       return;
     }
@@ -3365,7 +3367,7 @@ body::before {
     const wrap = $('scratchWrap');
     if (!wrap || wrap.classList.contains('revealed')) return;
     wrap.classList.add('revealed');
-    localStorage.setItem('sep_scratched', '1');
+    sessionStorage.setItem('sep_scratched', '1');
     if (celebrate) {
       launchConfetti();
       spawnHearts($('tkCard'));

@@ -56,21 +56,43 @@ body::before {
   pointer-events: none;
 }
 
-/* ─── Petals ─── */
+/* ─── Falling hearts ───────────────────────────────────
+   Three nested layers so the motions compose independently:
+   .petal      → vertical fall  (linear, constant speed)
+   .petal-sway → horizontal drift (eased, alternating)
+   .petal-spin → rotation        (linear, own period)
+   Composing them separately is what makes the drift read as
+   air resistance rather than a straight diagonal line.
+──────────────────────────────────────────────────────── */
 .petal {
   position: fixed;
-  top: -50px;
+  top: -12vh;
   pointer-events: none;
   z-index: 1;
-  opacity: 0;
-  animation: petalFall linear infinite;
-  will-change: transform;
+  animation: petalFall var(--dur, 15s) linear var(--delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+.petal-sway {
+  display: block;
+  animation: petalSway var(--swayDur, 4s) ease-in-out var(--swayDelay, 0s) infinite alternate;
+}
+.petal-spin {
+  display: block;
+  animation: petalSpin var(--spinDur, 10s) linear var(--spinDelay, 0s) infinite;
 }
 @keyframes petalFall {
-  0%   { transform: translateY(0) rotate(0deg) translateX(0) scale(1); opacity:0; }
-  6%   { opacity: 0.5; }
-  88%  { opacity: 0.28; }
-  100% { transform: translateY(108vh) rotate(480deg) translateX(40px) scale(0.8); opacity:0; }
+  0%   { transform: translate3d(0, 0, 0);      opacity: 0; }
+  10%  { opacity: var(--op, 0.4); }
+  90%  { opacity: var(--op, 0.4); }
+  100% { transform: translate3d(0, 118vh, 0);  opacity: 0; }
+}
+@keyframes petalSway {
+  from { transform: translate3d(calc(var(--sway, 26px) * -1), 0, 0); }
+  to   { transform: translate3d(var(--sway, 26px), 0, 0); }
+}
+@keyframes petalSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(var(--spin, 360deg)); }
 }
 
 /* ─── Screen system ─── */
@@ -86,20 +108,23 @@ body::before {
 }
 .screen.active {
   display: flex;
-  animation: screenIn 0.65s cubic-bezier(.22,.68,0,1.15) both;
+  /* Decelerate curve with no overshoot — page-level springiness reads
+     as cheap, and scaling a full screen re-rasterizes text on iOS,
+     which is what made these transitions look soft. Translate only. */
+  animation: screenIn 0.52s cubic-bezier(.16,.84,.24,1) both;
 }
 .screen.exit {
   display: flex;
-  animation: screenOut 0.35s cubic-bezier(.4,0,1,1) both;
+  animation: screenOut 0.3s cubic-bezier(.4,0,.7,.2) both;
   pointer-events: none;
 }
 @keyframes screenIn {
-  from { opacity:0; transform: translateY(32px) scale(0.98); }
-  to   { opacity:1; transform: translateY(0)    scale(1); }
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes screenOut {
-  from { opacity:1; transform: translateY(0) scale(1); }
-  to   { opacity:0; transform: translateY(-16px) scale(0.97); }
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to   { opacity: 0; transform: translate3d(0, -14px, 0); }
 }
 
 /* ─── Card ─── */
@@ -522,14 +547,35 @@ body::before {
   pointer-events: none; z-index: 200;
 }
 
-/* ─── Heart burst ─── */
+/* ─── Heart burst ───────────────────────────────────────
+   Each glyph gets its own --dx/--dy vector so the group
+   fans out as a fountain instead of a single column.
+   Fast attack (pop in by 14%), long eased drift out.
+──────────────────────────────────────────────────────── */
 .hburst {
   position: fixed; pointer-events: none; z-index: 150;
-  animation: hbAnim 1.1s ease-out forwards;
+  line-height: 1;
+  animation: hbAnim var(--dur, 1.35s) cubic-bezier(.16,.7,.3,1) forwards;
+  will-change: transform, opacity;
 }
 @keyframes hbAnim {
-  from { opacity:1; transform:translate(-50%,-50%) scale(0.5); }
-  to   { opacity:0; transform:translate(-50%, calc(-50% - 90px)) scale(1.2); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35) rotate(0deg);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, -50%)
+               translate3d(calc(var(--dx, 0px) * 0.22), calc(var(--dy, -100px) * 0.18), 0)
+               scale(1.12) rotate(calc(var(--rot, 0deg) * 0.18));
+  }
+  70% { opacity: 0.85; }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+               translate3d(var(--dx, 0px), var(--dy, -100px), 0)
+               scale(0.72) rotate(var(--rot, 0deg));
+  }
 }
 
 /* ════════════════════════════════════
@@ -550,7 +596,7 @@ body::before {
     0 4px 16px rgba(192,65,90,0.07),
     0 20px 56px rgba(0,0,0,0.07),
     0 48px 100px rgba(0,0,0,0.04);
-  animation: screenIn 0.65s cubic-bezier(.22,.68,0,1.15) both;
+  animation: screenIn 0.6s cubic-bezier(.16,.84,.24,1) both;
 }
 
 /* Monogram — shared between login and letter closing */
@@ -579,45 +625,86 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
   font-size: 44px; font-weight: 300;
   color: var(--ink); line-height: 1.08;
-  margin-bottom: 44px; letter-spacing: -0.5px;
+  margin-bottom: 10px; letter-spacing: -0.5px;
 }
 .login-title em { font-style: italic; color: var(--rose); }
 
-/* Underline date selects */
-.date-selectors {
-  display: flex; gap: 24px; justify-content: center;
-  margin-bottom: 36px;
+.login-sub {
+  font-size: 9.5px; letter-spacing: 2.6px;
+  text-transform: uppercase; color: var(--muted-lt);
+  font-weight: 500; margin-bottom: 34px;
 }
-.date-sel-wrap {
-  display: flex; flex-direction: column; align-items: center;
-  width: 82px;
-}
-.date-sel-wrap.day-wrap  { width: 54px; }
-.date-sel-wrap.year-wrap { width: 100px; }
-.date-sel {
-  width: 100%; padding: 0 2px 12px;
+
+/* ─── Passcode field ─────────────────────────────────── */
+.pin-field { position: relative; }
+
+.pin-input {
+  width: 100%;
+  /* right padding clears the reveal button; text-indent re-centres
+     the string against the trailing letter-spacing gap */
+  padding: 0 44px 14px 16px;
+  text-indent: 14px;
   background: transparent; color: var(--ink);
-  border: none; border-bottom: 1.5px solid rgba(192,65,90,0.2);
+  border: none;
+  border-bottom: 1.5px solid rgba(192,65,90,0.22);
   border-radius: 0;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 38px; font-weight: 600; text-align: center;
+  /* 30px is far above the 16px floor iOS Safari uses to decide
+     whether to auto-zoom the viewport on focus */
+  font-size: 30px; font-weight: 600; line-height: 1.25;
+  text-align: center; letter-spacing: 14px;
   -webkit-appearance: none; appearance: none;
-  cursor: pointer; outline: none; line-height: 1;
-  transition: border-color 0.18s, color 0.18s;
+  outline: none;
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
-.date-sel:focus {
-  border-bottom-color: var(--rose);
-  color: var(--rose);
+.pin-input::placeholder {
+  color: rgba(192,65,90,0.2);
+  font-weight: 400; letter-spacing: 12px;
 }
-.date-sel option {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 400; color: var(--ink);
+.pin-input.masked {
+  /* keeps the numeric keypad (type=text + inputmode) while still
+     reading as a secret — type=password would force the full keyboard */
+  -webkit-text-security: disc;
+  letter-spacing: 12px;
 }
-.date-sel-sub {
-  font-size: 8.5px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-top: 10px;
+.pin-input:focus { border-bottom-color: var(--rose); }
+
+/* Focus glow — a soft rose wash that fades up under the rule */
+.pin-glow {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1.5px; background: var(--rose);
+  transform: scaleX(0); transform-origin: 50% 50%;
+  transition: transform 0.45s cubic-bezier(.22,.68,0,1);
+  pointer-events: none;
 }
+.pin-input:focus ~ .pin-glow { transform: scaleX(1); }
+
+.pin-reveal {
+  position: absolute; right: 0; bottom: 6px;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted-lt); padding: 0;
+  transition: color 0.2s ease;
+}
+.pin-reveal:hover { color: var(--rose); }
+.pin-reveal svg { display: block; }
+.pin-reveal .ic-eye-off { display: none; }
+.pin-reveal.revealed .ic-eye     { display: none; }
+.pin-reveal.revealed .ic-eye-off { display: block; }
+
+/* Progress dots — feedback while the digits stay hidden */
+.pin-dots {
+  display: flex; gap: 9px; justify-content: center;
+  margin: 20px 0 26px;
+}
+.pin-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(192,65,90,0.15);
+  transition: background 0.3s ease,
+              transform 0.34s cubic-bezier(.34,1.56,.64,1);
+}
+.pin-dot.filled { background: var(--rose); transform: scale(1.45); }
 
 /* Error */
 .login-error {
@@ -728,14 +815,17 @@ body::before {
   background: linear-gradient(90deg, var(--rose), var(--rose-md));
   opacity: 0; transition: opacity 0.22s;
 }
-.door-card.open { cursor: pointer; }
-.door-card.open:hover {
+.door-card.open,
+.door-card.peek { cursor: pointer; }
+.door-card.open:hover,
+.door-card.peek:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 40px rgba(192,65,90,0.11), 0 2px 8px rgba(0,0,0,0.05);
   border-color: rgba(192,65,90,0.18);
 }
 .door-card.open:hover::before { opacity: 1; }
-.door-card.open:active { transform: scale(0.97) translateY(0); box-shadow: none; }
+.door-card.open:active,
+.door-card.peek:active { transform: scale(0.97) translateY(0); box-shadow: none; }
 .door-card.locked {
   background: rgba(250,245,247,0.65);
   border-color: rgba(192,65,90,0.05);
@@ -990,6 +1080,86 @@ body::before {
   color: var(--muted-lt); text-align: center; line-height: 1.6;
 }
 
+/* ════════════════════════════════════
+   SOMETHING FOR SEPTEMBER — 20.09
+   Three states: sealed → ready → revealed
+════════════════════════════════════ */
+#scSeptember { flex-direction: column; }
+.sep-wrap { max-width: 440px; width: 100%; margin: 0 auto; text-align: center; }
+
+.sep-state { display: none; }
+.sep-state.active {
+  display: block;
+  animation: screenIn 0.55s cubic-bezier(.16,.84,.24,1) both;
+}
+
+.sep-lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; color: var(--muted);
+  line-height: 1.75; margin-bottom: 34px;
+}
+
+/* ─── Wax seal ─── */
+.sep-seal {
+  position: relative;
+  width: 116px; height: 116px;
+  margin: 0 auto 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+  box-shadow: 0 12px 36px rgba(192,65,90,0.42),
+              0 0 0 7px rgba(192,65,90,0.07),
+              inset 0 2px 6px rgba(255,255,255,0.22);
+  border: none; padding: 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 17px; letter-spacing: 5px;
+  color: rgba(255,255,255,0.96);
+  /* the deckled edge of pressed wax */
+  clip-path: polygon(
+    50% 0%,  63% 4%,  76% 3%,  86% 11%, 95% 21%, 97% 34%,
+    100% 50%, 96% 64%, 96% 77%, 87% 87%, 78% 95%, 64% 96%,
+    50% 100%, 36% 97%, 23% 96%, 13% 88%, 4% 78%,  3% 64%,
+    0% 50%,   3% 36%,  4% 23%,  12% 13%, 22% 4%,  36% 3%
+  );
+}
+.sep-seal.locked { filter: grayscale(0.55) brightness(0.92); opacity: 0.72; }
+
+/* Tappable state — a slow breathing ring that invites the press */
+.sep-seal-btn { cursor: pointer; animation: sealBreathe 2.8s ease-in-out infinite; }
+.sep-seal-btn:active { transform: scale(0.94); }
+@keyframes sealBreathe {
+  0%, 100% { transform: scale(1);    box-shadow: 0 12px 36px rgba(192,65,90,0.42), 0 0 0 0   rgba(192,65,90,0.30); }
+  55%      { transform: scale(1.04); box-shadow: 0 16px 44px rgba(192,65,90,0.5),  0 0 0 22px rgba(192,65,90,0); }
+}
+/* The break — seal punches toward the viewer, then clears */
+.sep-seal-btn.breaking { animation: sealBreak 0.6s cubic-bezier(.3,.9,.3,1) forwards; }
+@keyframes sealBreak {
+  0%   { transform: scale(1)    rotate(0deg);  opacity: 1; }
+  35%  { transform: scale(1.22) rotate(-7deg); opacity: 1; }
+  100% { transform: scale(2.1)  rotate(9deg);  opacity: 0; }
+}
+
+.sep-tap-cue {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; opacity: 0.8;
+  animation: cueFloat 2.2s ease-in-out infinite;
+}
+
+/* ─── Countdown to the day ─── */
+.sep-countdown {
+  display: flex; gap: 26px; justify-content: center;
+  padding: 26px 0 0;
+  margin-top: 30px;
+  border-top: 1px solid var(--line);
+}
+.sep-date-line {
+  margin-top: 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 13px;
+  color: var(--muted-lt); letter-spacing: 1.5px;
+}
+
 /* ─── Vault ─── */
 #scVault { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
 .vault-wrap { max-width: 480px; width: 100%; margin: 0 auto; }
@@ -1001,9 +1171,12 @@ body::before {
 .vault-input {
   width: 100%; padding: 14px 16px;
   border: 1.5px solid var(--line); border-radius: 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  /* 16px floor — anything smaller makes iOS Safari zoom the viewport on focus */
+  font-size: 16px;
   color: var(--ink); background: #fff; outline: none;
   transition: border-color 0.2s; margin-bottom: 10px; display: block;
+  -webkit-appearance: none; appearance: none;
 }
 .vault-input:focus { border-color: var(--rose-md); }
 .vault-err {
@@ -1043,9 +1216,10 @@ body::before {
 .vault-textarea {
   width: 100%; min-height: 96px; padding: 12px;
   border: 1.5px solid var(--line); border-radius: 10px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; /* iOS zoom floor */
   color: var(--ink); resize: vertical; outline: none;
   transition: border-color 0.2s; display: none; margin-top: 8px;
+  -webkit-appearance: none; appearance: none;
 }
 .vault-textarea.editing { display: block; }
 .vault-textarea:focus { border-color: var(--rose-md); }
@@ -1061,19 +1235,25 @@ body::before {
 @media (max-width: 520px) {
   .card            { padding: 40px 24px; }
   .headline        { font-size: 28px; }
-  .login-card      { padding: 44px 28px 40px; }
-  .login-title     { font-size: 34px; margin-bottom: 36px; }
-  .date-selectors  { gap: 16px; }
-  .date-sel        { font-size: 28px; padding: 0 2px 10px; }
+  .login-card      { padding: 44px 26px 40px; }
+  .login-title     { font-size: 34px; }
+  .login-sub       { margin-bottom: 28px; }
+  /* stays >=16px so iOS Safari never auto-zooms on focus */
+  .pin-input       { font-size: 26px; letter-spacing: 11px; text-indent: 11px; }
+  .pin-input.masked { letter-spacing: 10px; }
   .btn-primary     { padding: 13px 28px; font-size: 13.5px; }
   .hub-name        { font-size: 42px; letter-spacing: -1px; }
   .door-card       { padding: 16px 14px 14px; }
   .door-desc       { font-size: 12px; }
+  .sep-seal        { width: 100px; height: 100px; font-size: 15px; }
+  .sep-countdown   { gap: 20px; }
 }
 @media (max-width: 360px) {
-  .date-selectors  { gap: 10px; }
-  .date-sel        { font-size: 24px; }
+  .pin-input       { font-size: 22px; letter-spacing: 8px; text-indent: 8px; padding-right: 38px; }
+  .pin-input.masked { letter-spacing: 7px; }
+  .pin-dots        { gap: 7px; }
   .door-grid       { grid-template-columns: 1fr; }
+  .sep-countdown   { gap: 14px; }
 }
 /* ── Tablet (768px+) ── */
 @media (min-width: 768px) {
@@ -1391,6 +1571,51 @@ body::before {
   .vp2-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ════════════════════════════════════
+   TOUCH / iOS POLISH
+════════════════════════════════════ */
+
+/* Kill the grey flash Safari paints over tapped elements */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Guarantee a 44x44pt touch target on the small controls */
+.pin-reveal, .lb-btn, .lb-close, .cl-check {
+  min-width: 44px; min-height: 44px;
+}
+
+/* On touch screens :hover latches after a tap and leaves the element
+   stuck in its lifted state — collapse those to the resting look and
+   let :active carry the feedback instead. */
+@media (hover: none) {
+  .door-card.open:hover,
+  .door-card.peek:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: rgba(192,65,90,0.08);
+  }
+  .door-card.open:hover::before { opacity: 0; }
+  .album-thumb:hover   { transform: none; box-shadow: none; }
+  .music-pill:hover    { transform: none; background: #fff; border-color: rgba(192,65,90,0.14); }
+  .btn-primary:hover   { transform: none; box-shadow: 0 4px 18px rgba(192,65,90,0.35); }
+  .btn-ghost:hover     { background: transparent; }
+  .hub-nav-btn:hover {
+    transform: none; background: rgba(255,255,255,0.92);
+    color: var(--ink-soft); border-color: rgba(192,65,90,0.14);
+  }
+  .vault-drive-btn:hover { transform: none; }
+  .pin-reveal:hover      { color: var(--muted-lt); }
+  /* captions are hover-only on desktop; always show them on touch */
+  .album-thumb .album-hover-cap { opacity: 1; }
+}
+
+/* Keep the last item clear of the fixed music pill and the home bar */
+#scStory, #scAlbum, #scChecklist, #scVault, #scSeptember {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Contain the letter's momentum scroll so it doesn't chain to the page */
+.letter-exp { overscroll-behavior-y: contain; }
+
 /* ─── Reduced motion ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1399,6 +1624,8 @@ body::before {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* ambient hearts add nothing without motion */
+  .petal { display: none; }
 }
 </style>
 </head>
@@ -1518,8 +1745,10 @@ body::before {
         </div>
       </div>
 
-      <!-- Door 4: something for september — locked until 20 Sep -->
-      <div class="door-card locked" id="doorSeptember">
+      <!-- Door 4: something for september — sealed until 20 Sep, but
+           always tappable so the countdown is reachable -->
+      <div class="door-card locked peek" id="doorSeptember"
+           data-door="scSeptember" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </div>
@@ -1573,50 +1802,42 @@ body::before {
     </div>
 
     <h1 class="login-title">tell me<br>our <em>date.</em></h1>
+    <p class="login-sub">day · month · year</p>
 
-    <div class="date-selectors">
-      <div class="date-sel-wrap day-wrap">
-        <select class="date-sel" id="inDay" aria-label="Day">
-          <option value="">—</option>
-        </select>
-        <span class="date-sel-sub">day</span>
+    <form id="loginForm" novalidate>
+      <div class="pin-field">
+        <input class="pin-input masked" id="inCode"
+               type="text" inputmode="numeric" pattern="[0-9]*"
+               maxlength="8" placeholder="········"
+               autocomplete="off" autocorrect="off"
+               autocapitalize="off" spellcheck="false"
+               aria-label="Our date — eight digits, day month year">
+        <span class="pin-glow" aria-hidden="true"></span>
+        <button type="button" class="pin-reveal" id="pinReveal" aria-label="Show the date">
+          <svg class="ic-eye" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="ic-eye-off" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a18 18 0 0 1-2.16 3.19M6.6 6.6A18 18 0 0 0 2 11s3.6 7 10 7a9.1 9.1 0 0 0 4.24-1"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="m2 2 20 20"/></svg>
+        </button>
       </div>
-      <div class="date-sel-wrap">
-        <select class="date-sel" id="inMonth" aria-label="Month">
-          <option value="">—</option>
-          <option value="1">Jan</option><option value="2">Feb</option>
-          <option value="3">Mar</option><option value="4">Apr</option>
-          <option value="5">May</option><option value="6">Jun</option>
-          <option value="7">Jul</option><option value="8">Aug</option>
-          <option value="9">Sep</option><option value="10">Oct</option>
-          <option value="11">Nov</option><option value="12">Dec</option>
-        </select>
-        <span class="date-sel-sub">month</span>
+
+      <div class="pin-dots" id="pinDots" aria-hidden="true"></div>
+
+      <div class="login-error" id="loginError">
+        <i class="ti ti-alert-circle"></i>
+        <span id="loginErrorMsg">That's not right. Think again.</span>
       </div>
-      <div class="date-sel-wrap year-wrap">
-        <select class="date-sel" id="inYear" aria-label="Year">
-          <option value="">—</option>
-        </select>
-        <span class="date-sel-sub">year</span>
+
+      <div class="login-lockout" id="loginLockout">
+        <i class="ti ti-clock"></i>
+        <span id="lockoutMsg"></span>
       </div>
-    </div>
 
-    <div class="login-error" id="loginError">
-      <i class="ti ti-alert-circle"></i>
-      <span id="loginErrorMsg">That's not right. Think again.</span>
-    </div>
-
-    <div class="login-lockout" id="loginLockout">
-      <i class="ti ti-clock"></i>
-      <span id="lockoutMsg"></span>
-    </div>
-
-    <div class="btn-row">
-      <button type="button" class="btn-primary" id="loginBtn">
-        Open
-        <i class="ti ti-arrow-right"></i>
-      </button>
-    </div>
+      <div class="btn-row">
+        <button type="submit" class="btn-primary" id="loginBtn">
+          Open
+          <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </form>
 
     <p class="login-hint">the day we became us 🌙</p>
   </div>
@@ -1955,13 +2176,48 @@ body::before {
      SEPTEMBER — Anniversary reveal
 ════════════════════════════════════ -->
 <div class="screen" id="scSeptember">
-  <div class="card">
-    <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
-    <p class="eyebrow">20 · 09 · 2026</p>
-    <h1 class="headline">Happy anniversary,<br><em>Fasya.</em></h1>
-    <p class="body-text">Four years. Every single one worth it.<br>Here's to forever more.</p>
-    <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
-    <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
+  <div class="sep-wrap">
+
+    <!-- STATE A — before 20 September -->
+    <div class="sep-state" id="sepSealed">
+      <p class="story-overline">something for september</p>
+      <h1 class="story-title">not <em>yet.</em></h1>
+
+      <div class="sep-seal locked" aria-hidden="true">N · F</div>
+
+      <p class="sep-lede">There's something waiting in here for<br>our anniversary. It opens on the day.</p>
+
+      <div class="sep-countdown">
+        <div class="cd-unit"><span class="cd-num" id="sepDays">—</span><span class="cd-label">days</span></div>
+        <div class="cd-unit"><span class="cd-num" id="sepHours">—</span><span class="cd-label">hrs</span></div>
+        <div class="cd-unit"><span class="cd-num" id="sepMins">—</span><span class="cd-label">min</span></div>
+      </div>
+      <p class="sep-date-line" id="sepDateLine">20 · 09</p>
+    </div>
+
+    <!-- STATE B — the day has arrived, seal is breakable -->
+    <div class="sep-state" id="sepReady">
+      <p class="story-overline" id="sepReadyDate">20 · 09</p>
+      <h1 class="story-title">it's <em>today.</em></h1>
+
+      <button type="button" class="sep-seal sep-seal-btn" id="sepSealBtn"
+              aria-label="Open the anniversary letter">N · F</button>
+
+      <p class="sep-tap-cue">tap the seal</p>
+    </div>
+
+    <!-- STATE C — revealed -->
+    <div class="sep-state" id="sepReveal">
+      <div class="card">
+        <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
+        <p class="eyebrow" id="sepEyebrow">20 · 09</p>
+        <h1 class="headline">Happy anniversary,<br><em>Fasya.</em></h1>
+        <p class="body-text" id="sepBody"></p>
+        <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
+        <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1971,7 +2227,7 @@ body::before {
 
   /* ═══ Constants ═══ */
   // Hash chunks — split so no single readable constant exists in source
-  const TH = ['3ba5e5b9','0caef901','c84a46b9','ef90a57b','d5c51af1','86c4fdac','04f62f0e','b5613460'];
+  const TH = ['cf8159df','1232014a','dac16341','004a4e8a','94bd6bbd','d2484994','233d3b76','37ef91c1'];
   const VH = ['aea995a2','587286a7','41900782','14245ee7','d5d991a2','d638308c','df1bb827','c0822c87'];
 
   const PHOTOS = [
@@ -2013,10 +2269,24 @@ body::before {
   let lockUntil     = parseInt(sessionStorage.getItem('lu') || '0');
   let lockTimer     = null;
   let lbTouchX      = 0;
+  let sepTimer      = null;
+  let confettiRaf   = 0;
 
   /* ═══ Helpers ═══ */
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2, '0');
+
+  // Live query — respects the setting being changed after load
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced     = () => motionQuery.matches;
+
+  const rand   = (min, max) => min + Math.random() * (max - min);
+  const pick   = arr => arr[Math.floor(Math.random() * arr.length)];
+  const signed = () => (Math.random() < 0.5 ? -1 : 1);
+
+  // A real heart — two lobes and a point. The old path had a single
+  // apex, which is why it read as half a heart / a teardrop.
+  const HEART_PATH = 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
 
   /* ═══ Crypto — PBKDF2 ═══ */
   // 250k iterations: ~47ms per attempt, making brute-force of all date combos ~3.5 min
@@ -2061,6 +2331,7 @@ body::before {
       scStory:     buildCounter,
       scAlbum:     buildAlbum,
       scChecklist: buildWaitingCountdown,
+      scSeptember: buildSeptember,
       scVault:     openVaultDoor,
     };
     const init = screenInits[targetId];
@@ -2111,15 +2382,15 @@ body::before {
   async function attemptLogin() {
     if (Date.now() < lockUntil) return;
 
-    const d   = parseInt($('inDay').value);
-    const m   = parseInt($('inMonth').value);
-    const y   = parseInt($('inYear').value);
-    const err = $('loginError');
-    const msg = $('loginErrorMsg');
-    const btn = $('loginBtn');
+    const code = $('inCode').value.replace(/\D/g, '');
+    const err  = $('loginError');
+    const msg  = $('loginErrorMsg');
+    const btn  = $('loginBtn');
 
-    if (!d || !m || !y) {
-      msg.textContent = 'Fill in all three — day, month, and year.';
+    if (code.length !== PIN_LEN) {
+      msg.textContent = code.length
+        ? `${PIN_LEN} digits — day, month, then year.`
+        : 'Type our date to open.';
       err.classList.add('show');
       shakeCard(document.querySelector('.login-card'));
       return;
@@ -2128,9 +2399,7 @@ body::before {
     btn.disabled = true;
     btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
 
-    // Separator encoded so the date format isn't plainly visible in source
-    const input = [d, m, y].join(atob('fA==')); // fA== = |
-    const hash  = await kdf(input, 'bmYtZ2F0ZS0yMDIy', 256); // = nf-gate-2022
+    const hash = await kdf(code, 'bmYtZ2F0ZS0yMDIy', 256); // = nf-gate-2022
 
     btn.disabled = false;
     btn.innerHTML = 'Open <i class="ti ti-arrow-right"></i>';
@@ -2155,6 +2424,11 @@ body::before {
     msg.textContent = hints[Math.min(failCount - 1, hints.length - 1)];
     err.classList.add('show');
     shakeCard(document.querySelector('.login-card'));
+
+    // Clear so the next try starts from an empty field rather than
+    // forcing her to backspace eight digits
+    $('inCode').value = '';
+    syncPinDots();
 
     let wait = 0;
     if      (failCount >= 8) wait = 60;
@@ -2214,23 +2488,89 @@ body::before {
     if (el) el.innerHTML = `<strong>${days.toLocaleString()}</strong> days together &nbsp;·&nbsp; since 20 · 09 · 2022`;
   }
 
+  /* ═══ Something for September ═══ */
+  const YEAR_WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
+                      'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+
+  // The anniversary that matters right now: this year's 20 Sep. Before
+  // that date it is the target to count toward; on/after it, it is the
+  // one being celebrated — so one expression covers both states.
+  function septemberInfo() {
+    const now   = new Date();
+    const day   = new Date(now.getFullYear(), 8, 20); // month 8 = September
+    return {
+      date:     day,
+      unlocked: now >= day,
+      years:    day.getFullYear() - RELATIONSHIP_START.getFullYear(),
+      label:    `20 · 09 · ${day.getFullYear()}`,
+    };
+  }
+
+  // Reflects the countdown on the hub door itself, so the wait is
+  // visible without opening anything
   function checkSeptemberUnlock() {
-    const now      = new Date();
-    const unlocked = (now.getMonth() === 8 && now.getDate() >= 20) || now.getMonth() > 8;
-    if (!unlocked) return;
+    const { unlocked, date, label } = septemberInfo();
     const card = $('doorSeptember');
-    if (!card || card.classList.contains('open')) return;
-    card.classList.replace('locked', 'open');
-    card.setAttribute('role', 'button');
-    card.setAttribute('tabindex', '0');
-    card.dataset.door = 'scSeptember';
-    card.addEventListener('click', () => handleDoor('scSeptember'));
-    card.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDoor('scSeptember'); }
+    if (!card) return;
+
+    if (unlocked) {
+      card.classList.remove('locked', 'peek');
+      card.classList.add('open');
+      $('doorSepDot').className     = 'door-dot dot-open';
+      $('doorSepLabel').className   = 'door-label label-open';
+      $('doorSepLabel').textContent = 'open';
+      card.querySelector('.door-desc').textContent = `it's time — ${label}`;
+    } else {
+      // floor, matching the days figure the countdown screen shows —
+      // ceil here made the door and the screen disagree by one
+      const days = Math.floor((date - Date.now()) / 86400000);
+      $('doorSepLabel').textContent =
+        days === 0 ? 'tomorrow' : days === 1 ? '1 day' : `${days} days`;
+    }
+  }
+
+  function showSepState(id) {
+    ['sepSealed', 'sepReady', 'sepReveal'].forEach(s => {
+      $(s).classList.toggle('active', s === id);
     });
-    $('doorSepDot').className   = 'door-dot dot-open';
-    $('doorSepLabel').className = 'door-label label-open';
-    $('doorSepLabel').textContent = 'open';
+  }
+
+  function buildSeptember() {
+    const { unlocked, date, label, years } = septemberInfo();
+    clearInterval(sepTimer);
+
+    if (!unlocked) {
+      showSepState('sepSealed');
+      $('sepDateLine').textContent = label;
+      const tick = () => {
+        const diff = Math.max(0, date - Date.now());
+        $('sepDays').textContent  = Math.floor(diff / 86400000);
+        $('sepHours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+        $('sepMins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
+      };
+      tick();
+      sepTimer = setInterval(tick, 30000);
+      return;
+    }
+
+    // Unlocked. Show the reveal directly if she already opened it this year.
+    const seenKey = 'sep_opened_' + date.getFullYear();
+    $('sepReadyDate').textContent = label;
+    $('sepEyebrow').textContent   = label;
+    $('sepBody').innerHTML =
+      `${YEAR_WORDS[years] || years} years. Every single one worth it.<br>Here's to forever more.`;
+
+    if (localStorage.getItem(seenKey)) { showSepState('sepReveal'); return; }
+
+    showSepState('sepReady');
+    const seal = $('sepSealBtn');
+    seal.classList.remove('breaking');
+    seal.onclick = () => {
+      seal.classList.add('breaking');
+      spawnHearts(seal);
+      localStorage.setItem(seenKey, '1');
+      setTimeout(() => { showSepState('sepReveal'); launchConfetti(); }, 520);
+    };
   }
 
   /* ═══ Story counter ═══ */
@@ -2289,86 +2629,164 @@ body::before {
     if (fleeCount > 7) { btn.style.opacity = '0';   btn.style.pointerEvents = 'none'; }
   }
 
-  /* ═══ Hearts ═══ */
-  function spawnHearts(btn) {
-    const r      = btn.getBoundingClientRect();
+  /* ═══ Heart burst ═══ */
+  // Fans glyphs across an upward arc from the element's centre, so the
+  // group reads as a fountain rather than one column of emoji.
+  function spawnHearts(el) {
+    if (reduced()) return;
+    const r      = el.getBoundingClientRect();
     const cx     = r.left + r.width  / 2;
     const cy     = r.top  + r.height / 2;
-    const emojis = ['🤍', '💕', '🌸', '✨'];
-    for (let i = 0; i < 9; i++) {
+    const glyphs = ['🤍', '💕', '🌸', '✨', '💗'];
+    const N      = 12;
+    const ARC    = 150; // degrees of spread, centred on straight up
+
+    // Even coverage of the arc (-90° = straight up), but emitted in a
+    // shuffled order — walking the arc in sequence made the burst read
+    // as a left-to-right wipe instead of scattering outward.
+    const angles = Array.from({ length: N }, (_, i) =>
+      -90 + ((i / (N - 1)) - 0.5) * ARC + rand(-8, 8)
+    );
+    for (let i = angles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [angles[i], angles[j]] = [angles[j], angles[i]];
+    }
+
+    for (let i = 0; i < N; i++) {
       setTimeout(() => {
-        const el = document.createElement('div');
-        el.className   = 'hburst';
-        el.style.fontSize = (14 + Math.random() * 10) + 'px';
-        el.textContent    = emojis[Math.floor(Math.random() * emojis.length)];
-        el.style.left     = (cx + (Math.random() - 0.5) * 60) + 'px';
-        el.style.top      = cy + 'px';
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1200);
-      }, i * 65);
+        const h = document.createElement('div');
+        h.className   = 'hburst';
+        h.textContent = pick(glyphs);
+        h.style.fontSize = Math.round(rand(15, 27)) + 'px';
+        h.style.left     = cx + 'px';
+        h.style.top      = cy + 'px';
+
+        const a    = angles[i] * Math.PI / 180;
+        const dist = rand(80, 165);
+        h.style.setProperty('--dx',  Math.round(Math.cos(a) * dist) + 'px');
+        h.style.setProperty('--dy',  Math.round(Math.sin(a) * dist) + 'px');
+        h.style.setProperty('--rot', Math.round(signed() * rand(25, 90)) + 'deg');
+        h.style.setProperty('--dur', rand(1.15, 1.75).toFixed(2) + 's');
+
+        document.body.appendChild(h);
+        h.addEventListener('animationend', () => h.remove(), { once: true });
+      }, i * 42);
     }
   }
 
   /* ═══ Confetti ═══ */
   function launchConfetti() {
+    if (reduced()) return;
+
     const cv  = $('cCanvas');
     const ctx = cv.getContext('2d');
-    cv.width  = window.innerWidth;
-    cv.height = window.innerHeight;
+
+    // Match the backing store to the device pixel ratio, or the whole
+    // burst renders soft on retina iPhones. Capped at 2 to bound cost
+    // on DPR-3 panels.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W   = window.innerWidth;
+    const H   = window.innerHeight;
+    cv.width  = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
     const cols = ['#e8a0b0','#c0415a','#fdf3f6','#b8975a','#f7c9d4','#a8364c','#fff0f4','#ffd6e0'];
-    const pieces = Array.from({ length: 90 }, () => ({
-      x: Math.random() * cv.width,
-      y: Math.random() * -cv.height,
-      r: Math.random() * 6 + 3,
-      d: Math.random() * 3.5 + 1,
-      color: cols[Math.floor(Math.random() * cols.length)],
-      ta: 0, ts: Math.random() * 0.07 + 0.035,
-      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    const N    = W < 480 ? 70 : 130;
+
+    const pieces = Array.from({ length: N }, () => ({
+      x: Math.random() * W,
+      y: -20 - Math.random() * H * 0.7,
+      r: rand(3, 8),
+      vy: rand(1.7, 4.2),
+      vx: rand(-0.6, 0.6),
+      a: Math.random() * Math.PI * 2,
+      spin: signed() * rand(0.03, 0.13),
+      flutter: rand(0.4, 1.1),
+      color: pick(cols),
+      rect: Math.random() > 0.42,
     }));
-    let frame = 0;
-    function draw() {
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      pieces.forEach(p => {
-        p.ta += p.ts; p.y += p.d;
-        const tilt = Math.sin(p.ta) * 12;
-        ctx.fillStyle  = p.color;
-        ctx.globalAlpha = 0.85;
-        if (p.shape === 'circle') {
-          ctx.beginPath();
-          ctx.arc(p.x + tilt, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
+
+    const FALL = 3000; // ms at full opacity
+    const FADE = 1000; // ms tail, so it dissolves instead of vanishing
+    const start = performance.now();
+    cancelAnimationFrame(confettiRaf);
+
+    function frame(now) {
+      const t = now - start;
+      ctx.clearRect(0, 0, W, H);
+      const fade = t > FALL ? Math.max(0, 1 - (t - FALL) / FADE) : 1;
+
+      for (const p of pieces) {
+        p.vy += 0.014;                        // gravity
+        p.y  += p.vy;
+        p.x  += p.vx + Math.sin(p.a) * p.flutter;
+        p.a  += p.spin;
+
+        ctx.globalAlpha = 0.9 * fade;
+        ctx.fillStyle   = p.color;
+        if (p.rect) {
           ctx.save();
-          ctx.translate(p.x + tilt, p.y);
-          ctx.rotate(p.ta);
-          ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.a);
+          ctx.fillRect(-p.r, -p.r * 0.45, p.r * 2, p.r * 0.9);
           ctx.restore();
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 0.6, 0, Math.PI * 2);
+          ctx.fill();
         }
-        if (p.y > cv.height) { p.y = -10; p.x = Math.random() * cv.width; }
-      });
+      }
       ctx.globalAlpha = 1;
-      frame++;
-      if (frame < 160) requestAnimationFrame(draw);
-      else ctx.clearRect(0, 0, cv.width, cv.height);
+
+      // Pieces are never recycled, so the screen empties naturally
+      if (t < FALL + FADE) confettiRaf = requestAnimationFrame(frame);
+      else { ctx.clearRect(0, 0, W, H); confettiRaf = 0; }
     }
-    draw();
+    confettiRaf = requestAnimationFrame(frame);
   }
 
-  /* ═══ Petals ═══ */
+  /* ═══ Ambient falling hearts ═══ */
   function spawnPetals() {
-    for (let i = 0; i < 7; i++) {
-      const el = document.createElement('div');
-      el.className = 'petal';
-      el.style.left              = Math.random() * 100 + 'vw';
-      el.style.animationDuration = (Math.random() * 8 + 7) + 's';
-      el.style.animationDelay    = (Math.random() * 12) + 's';
-      const size  = Math.random() * 14 + 10;
-      const color = Math.random() > 0.5 ? '#e8a0b0' : '#f7c9d4';
-      el.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}">
-        <path d="M12 2C8 2 4 6 4 10c0 5 8 12 8 12s8-7 8-12c0-4-4-8-8-8z"/>
-      </svg>`;
-      document.body.appendChild(el);
+    if (reduced()) return;
+
+    const count = window.innerWidth < 480 ? 9 : 14;
+    const tones = ['#e8a0b0', '#f7c9d4', '#ffd6e0', '#c0415a'];
+    const frag  = document.createDocumentFragment();
+
+    for (let i = 0; i < count; i++) {
+      const size = rand(9, 21);
+
+      const fall = document.createElement('div');
+      fall.className = 'petal';
+      // Seed one per column band, then jitter — pure random clumps
+      fall.style.left = (((i + Math.random()) / count) * 100).toFixed(2) + 'vw';
+      fall.style.setProperty('--dur', rand(12, 22).toFixed(1) + 's');
+      // Negative delay starts each mid-cycle, so hearts are already
+      // spread down the screen on load instead of arriving in a wave
+      fall.style.setProperty('--delay', (-rand(0, 22)).toFixed(1) + 's');
+      fall.style.setProperty('--op', rand(0.2, 0.5).toFixed(2));
+
+      const sway = document.createElement('div');
+      sway.className = 'petal-sway';
+      sway.style.setProperty('--sway', Math.round(rand(14, 44)) + 'px');
+      sway.style.setProperty('--swayDur', rand(3, 6.5).toFixed(1) + 's');
+      sway.style.setProperty('--swayDelay', (-rand(0, 6)).toFixed(1) + 's');
+
+      const spin = document.createElement('div');
+      spin.className = 'petal-spin';
+      spin.style.setProperty('--spin', Math.round(signed() * rand(200, 420)) + 'deg');
+      spin.style.setProperty('--spinDur', rand(7, 15).toFixed(1) + 's');
+      spin.style.setProperty('--spinDelay', (-rand(0, 15)).toFixed(1) + 's');
+      spin.innerHTML =
+        `<svg width="${size.toFixed(1)}" height="${size.toFixed(1)}" viewBox="0 0 24 24" ` +
+        `fill="${pick(tones)}" aria-hidden="true"><path d="${HEART_PATH}"/></svg>`;
+
+      sway.appendChild(spin);
+      fall.appendChild(sway);
+      frag.appendChild(fall);
     }
+    document.body.appendChild(frag);
   }
 
   /* ═══ Album ═══ */
@@ -2614,27 +3032,47 @@ body::before {
     }
   }
 
-  /* ═══ Populate date selects ═══ */
-  function populateDateSelects() {
-    const dayEl  = $('inDay');
-    const yearEl = $('inYear');
-    for (let d = 1; d <= 31; d++) {
-      const o = document.createElement('option');
-      o.value = d;
-      o.textContent = d < 10 ? '0' + d : d;
-      dayEl.appendChild(o);
+  /* ═══ Passcode field ═══ */
+  const PIN_LEN = 8;
+
+  function buildPinDots() {
+    const wrap = $('pinDots');
+    for (let i = 0; i < PIN_LEN; i++) {
+      const d = document.createElement('span');
+      d.className = 'pin-dot';
+      wrap.appendChild(d);
     }
-    for (let y = 2015; y <= 2026; y++) {
-      const o = document.createElement('option');
-      o.value = y;
-      o.textContent = y;
-      yearEl.appendChild(o);
+  }
+
+  function syncPinDots() {
+    const n    = $('inCode').value.length;
+    const dots = $('pinDots').children;
+    for (let i = 0; i < dots.length; i++) {
+      dots[i].classList.toggle('filled', i < n);
     }
+  }
+
+  function onPinInput() {
+    const el = $('inCode');
+    // Digits only — strips pasted separators like "20/09/2022"
+    const clean = el.value.replace(/\D/g, '').slice(0, PIN_LEN);
+    if (clean !== el.value) el.value = clean;
+    syncPinDots();
+    $('loginError').classList.remove('show');
+  }
+
+  function togglePinReveal() {
+    const el  = $('inCode');
+    const btn = $('pinReveal');
+    const hidden = el.classList.toggle('masked');
+    btn.classList.toggle('revealed', !hidden);
+    btn.setAttribute('aria-label', hidden ? 'Show the date' : 'Hide the date');
+    el.focus();
   }
 
   /* ═══ Init — wire up all event listeners ═══ */
   function init() {
-    populateDateSelects();
+    buildPinDots();
     spawnPetals();
 
     // Restore lockout from a previous session
@@ -2673,8 +3111,10 @@ body::before {
       });
     });
 
-    // Login
-    $('loginBtn').addEventListener('click', attemptLogin);
+    // Login — submit via the form so Enter and the button share one path
+    $('loginForm').addEventListener('submit', e => { e.preventDefault(); attemptLogin(); });
+    $('inCode').addEventListener('input', onPinInput);
+    $('pinReveal').addEventListener('click', togglePinReveal);
 
     // Finale "Always" button
     $('finaleBtn').addEventListener('click', finale);
@@ -2696,7 +3136,7 @@ body::before {
 
     // Global keyboard shortcuts
     document.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && currentScreen === -1) { attemptLogin(); return; }
+      // Login Enter is handled by the form's submit event
       if (lb.classList.contains('open')) {
         if (e.key === 'ArrowLeft')  lbMove(-1);
         if (e.key === 'ArrowRight') lbMove(1);

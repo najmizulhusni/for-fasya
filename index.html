@@ -1294,24 +1294,6 @@ body::before {
   animation: cueFloat 2.2s ease-in-out infinite;
 }
 
-/* ─── Passcode gate ─── */
-.sep-code {
-  max-width: 232px;
-  margin: 0 auto 4px;
-}
-.sep-code .pin-cells { gap: 8px; justify-content: center; }
-.sep-code .pin-group { flex: 1; }
-.sep-code .pin-cell  { font-size: 24px; }
-
-.sep-err {
-  font-size: 12px; color: var(--rose);
-  min-height: 17px; margin: 14px 0 4px;
-  opacity: 0; transition: opacity 0.2s ease;
-}
-.sep-err.show { opacity: 1; }
-
-.sep-unlock-btn { margin-top: 6px; }
-
 /* ─── Countdown to the day ─── */
 .sep-countdown {
   display: flex; gap: 26px; justify-content: center;
@@ -2139,7 +2121,7 @@ body::before {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </div>
         <div class="door-title">something for september</div>
-        <div class="door-desc">wait for it — 20.09 🌙</div>
+        <div class="door-desc">wait for it — 07.09, 8pm 🌙</div>
         <div class="door-foot">
           <div class="door-dot dot-lock" id="doorSepDot"></div>
           <span class="door-label label-lock" id="doorSepLabel">locked</span>
@@ -2601,46 +2583,21 @@ body::before {
     <!-- STATE A — passcode gate -->
     <div class="sep-state" id="sepGate">
       <p class="story-overline">something for september</p>
-      <h1 class="story-title">sealed <em>for now.</em></h1>
+      <h1 class="story-title">not <em>yet.</em></h1>
 
       <div class="sep-seal locked" aria-hidden="true">N · F</div>
 
-      <p class="sep-lede">This one is locked with four digits.<br>I'll tell you when it's time.</p>
-
-      <form id="sepForm" novalidate>
-        <div class="sep-code">
-          <div class="pin-wrap" id="sepWrap">
-            <input class="pin-real" id="sepCode"
-                   type="text" inputmode="numeric" pattern="[0-9]*"
-                   maxlength="4"
-                   autocomplete="off" autocorrect="off"
-                   autocapitalize="off" spellcheck="false"
-                   aria-label="Four digit passcode">
-            <div class="pin-cells" id="sepCells" aria-hidden="true">
-              <div class="pin-group">
-                <span class="pin-cell"></span><span class="pin-cell"></span>
-                <span class="pin-cell"></span><span class="pin-cell"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p class="sep-err" id="sepErr">not that one.</p>
-
-        <div class="btn-row">
-          <button type="submit" class="btn-primary sep-unlock-btn" id="sepUnlockBtn">
-            Unlock
-            <i class="ti ti-lock-open-2"></i>
-          </button>
-        </div>
-      </form>
+      <p class="sep-lede">
+        Our day is the 20th — but I won't be with you then.<br>
+        So this one opens early, on the 7th at 8 in the evening.
+      </p>
 
       <div class="sep-countdown">
         <div class="cd-unit"><span class="cd-num" id="sepDays">—</span><span class="cd-label">days</span></div>
         <div class="cd-unit"><span class="cd-num" id="sepHours">—</span><span class="cd-label">hrs</span></div>
         <div class="cd-unit"><span class="cd-num" id="sepMins">—</span><span class="cd-label">min</span></div>
       </div>
-      <p class="sep-date-line" id="sepDateLine">20 · 09</p>
+      <p class="sep-date-line" id="sepDateLine">07 · 09 · 2026 · 8:00 PM</p>
     </div>
 
     <!-- STATE B — unlocked: scratch the foil off the gift -->
@@ -2722,17 +2679,28 @@ body::before {
   const WAITING_FOR_DATE = new Date('2027-12-17T00:00:00');
 
   /* ═══ Something for September ═══
-   * The gift details are AES-GCM ciphertext, not plaintext behind a gate,
-   * so they are not readable in this file. The 4-digit passcode derives
-   * the key; a wrong code simply fails to decrypt.
-   * To change the gift: edit tools/september-gift.json, run
-   *   node tools/seal-september.mjs <passcode>
-   * and paste the new blob here.
+   * The anniversary is the 20th, but the surprise happens in person on
+   * 7 Sep at 8pm — so time is the lock, not a passcode. Before this
+   * moment the door shows a countdown; from it onward, the gift.
+   *
+   * NOTE: with the passcode gone there is no key to encrypt against, so
+   * the details below are plain text in this file. The date gate is a UI
+   * gate only — anyone reading the page source can read them early.
    */
-  const SEP_LEN = 4;
-  const SEP_BLOB = {
-    iv: 'gKjF+1+zB9vwPwzy',
-    d:  'jLTzrUm3yd9q94vh9QJfpOn9KDDPK5ecr9ZZsFYkA6YaafDaL+BiwFp2XzapXUJmOp2Ng5ybEI6BWOTklx1TQfcW0Q6gNlp1Gli6KWtm4ZGY4PiPy3uzkU9vO50f2XCbdLI5FDMBsmXXA3/swl4xYQsJKCo7K0bmZfz2XpjYF7ot48odqTZJJTRaZx9q++FITsFqYTwqO0XeAGZc9BlJIOsstWdqnn7rXtnsEbGU0YQ40GO5OCDKeQhJOTMHP0S8tBLDiyzSOJLX+fi5UFsjBHtY3MR9jJclxC9WMoF5cT7Qy9H5TnrQv77K8JJ88nfhRiq4iS5wHIsUSOUOow3nFY7pW5Lrl/YGeYjxRkSbTux+94bUsPVtjf9QgFNIjTPAzDnvU/C1s5nIdBSBa0g4Fsmo4GthQ5WooBYmjQkSEHUzRuI1vr4OOV/IbNlPIpf4',
+  const SEP_REVEAL_AT = new Date('2026-09-07T20:00:00');
+
+  const SEP_GIFT = {
+    kicker: 'your anniversary gift',
+    headline: 'Four Years',
+    date: '07 · 09 · 2026',
+    rows: [
+      ['where',  "I'll tell you in person"],
+      ['when',   '7 Sept 2026 · 8:00 PM'],
+      ['wear',   'something you feel good in'],
+      ['guests', '2 of 2'],
+    ],
+    note: 'Our day is the 20th. I just could not wait, and I could not be away for it.',
+    serial: 'NF · 07 · 09 · 2026',
   };
 
   /* ═══ The journey to 17.12.2027 ═══
@@ -3021,40 +2989,29 @@ body::before {
   }
 
   /* ═══ Something for September ═══ */
-  // The anniversary that matters right now: this year's 20 Sep. Before
-  // that date it is the target to count toward; on/after it, it is the
-  // one being celebrated — so one expression covers both states.
-  function septemberInfo() {
-    const now   = new Date();
-    const day   = new Date(now.getFullYear(), 8, 20); // month 8 = September
-    return {
-      date:     day,
-      unlocked: now >= day,
-      years:    day.getFullYear() - RELATIONSHIP_START.getFullYear(),
-      label:    `20 · 09 · ${day.getFullYear()}`,
-    };
-  }
+  const SEP_LABEL = '07 · 09 · 2026';
+
+  function septemberUnlocked() { return Date.now() >= SEP_REVEAL_AT; }
 
   // Reflects the countdown on the hub door itself, so the wait is
   // visible without opening anything
   function checkSeptemberUnlock() {
-    const { unlocked, date, label } = septemberInfo();
     const card = $('doorSeptember');
     if (!card) return;
 
-    if (unlocked) {
+    if (septemberUnlocked()) {
       card.classList.remove('locked', 'peek');
       card.classList.add('open');
       $('doorSepDot').className     = 'door-dot dot-open';
       $('doorSepLabel').className   = 'door-label label-open';
       $('doorSepLabel').textContent = 'open';
-      card.querySelector('.door-desc').textContent = `it's time — ${label}`;
+      card.querySelector('.door-desc').textContent = `it's time — ${SEP_LABEL}`;
     } else {
       // floor, matching the days figure the countdown screen shows —
       // ceil here made the door and the screen disagree by one
-      const days = Math.floor((date - Date.now()) / 86400000);
+      const days = Math.floor((SEP_REVEAL_AT - Date.now()) / 86400000);
       $('doorSepLabel').textContent =
-        days === 0 ? 'tomorrow' : days === 1 ? '1 day' : `${days} days`;
+        days <= 0 ? 'today' : days === 1 ? '1 day' : `${days} days`;
     }
   }
 
@@ -3064,24 +3021,22 @@ body::before {
     });
   }
 
-  // Always opens on the gate — the letter stays encrypted until the
-  // passcode is entered, so it is not readable from the page source.
+  // Time is the only lock now: before 7 Sep 8pm the door shows a
+  // countdown, from that moment on it shows the gift.
   function buildSeptember() {
-    const { date, label } = septemberInfo();
     clearInterval(sepTimer);
 
+    if (septemberUnlocked()) { revealSeptember(); return; }
+
     showSepState('sepGate');
-    $('sepDateLine').textContent = label;
-    $('sepCode').value = '';
-    renderCells('sepCode', 'sepCells', false);
-    $('sepErr').classList.remove('show');
+    $('sepDateLine').textContent = SEP_LABEL + ' · 8:00 PM';
 
     const tick = () => {
-      const diff = date - Date.now();
+      const diff = SEP_REVEAL_AT - Date.now();
       if (diff <= 0) {
-        $('sepDays').textContent  = '0';
-        $('sepHours').textContent = '00';
-        $('sepMins').textContent  = '00';
+        // The moment arrives while she is sitting on this screen
+        clearInterval(sepTimer);
+        revealSeptember();
         return;
       }
       $('sepDays').textContent  = Math.floor(diff / 86400000);
@@ -3092,63 +3047,11 @@ body::before {
     sepTimer = setInterval(tick, 30000);
   }
 
-  // AES-GCM key from the passcode. Must match tools/seal-september.mjs.
-  async function sepKey(code) {
-    const enc = new TextEncoder();
-    const raw = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey(
-      { name: 'PBKDF2', salt: enc.encode('nf-sep-2026'), iterations: 200000, hash: 'SHA-256' },
-      raw, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
-    );
-  }
+  function revealSeptember() {
+    const gift  = SEP_GIFT;
+    const years = SEP_REVEAL_AT.getFullYear() - RELATIONSHIP_START.getFullYear();
 
-  async function attemptSeptember() {
-    const code = cleanCode('sepCode', SEP_LEN);
-    const err  = $('sepErr');
-    const btn  = $('sepUnlockBtn');
-
-    if (code.length !== SEP_LEN) {
-      err.textContent = `${SEP_LEN} digits.`;
-      err.classList.add('show');
-      shakeCard($('sepWrap'));
-      return;
-    }
-
-    btn.disabled  = true;
-    btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
-
-    let gift = null;
-    try {
-      const key = await sepKey(code);
-      const buf = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: ub64(SEP_BLOB.iv) }, key, ub64(SEP_BLOB.d)
-      );
-      gift = JSON.parse(new TextDecoder().decode(buf));
-    } catch {
-      // AES-GCM authentication failure is the wrong-passcode signal —
-      // no separate hash comparison needed
-      gift = null;
-    }
-
-    btn.disabled  = false;
-    btn.innerHTML = 'Unlock <i class="ti ti-lock-open-2"></i>';
-
-    if (gift === null) {
-      err.textContent = 'not that one.';
-      err.classList.add('show');
-      shakeCard($('sepWrap'));
-      $('sepCode').value = '';
-      renderCells('sepCode', 'sepCells', false);
-      return;
-    }
-
-    revealSeptember(gift);
-  }
-
-  function revealSeptember(gift) {
-    const { label, years } = septemberInfo();
-
-    $('sepEyebrow').textContent   = label;
+    $('sepEyebrow').textContent   = SEP_LABEL;
     $('sepStatYears').textContent = years;
     $('sepStatDays').textContent  =
       Math.floor((Date.now() - RELATIONSHIP_START) / 86400000).toLocaleString();
@@ -3966,13 +3869,8 @@ body::before {
     });
     $('pinReveal').addEventListener('click', togglePinReveal);
 
-    // September passcode gate
-    $('sepForm').addEventListener('submit', e => { e.preventDefault(); attemptSeptember(); });
+    // September — no passcode; the scratch fallback is the only control
     $('scratchSkip').addEventListener('click', () => finishScratch(true));
-    wireCodeField('sepCode', 'sepWrap', SEP_LEN, () => {
-      renderCells('sepCode', 'sepCells', false);
-      $('sepErr').classList.remove('show');
-    });
 
     // Finale "Always" button
     $('finaleBtn').addEventListener('click', finale);

@@ -1103,29 +1103,136 @@ body::before {
 .cl-wrap { max-width: 440px; width: 100%; margin: 0 auto; }
 .wf-countdown {
   display: flex; gap: 32px;
-  padding-bottom: 32px; margin-bottom: 32px;
+  padding-bottom: 30px; margin-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
-.wf-frame {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 14px;
-  padding: 56px 24px;
-  border: 1.5px dashed var(--rose-md);
-  border-radius: var(--radius-sm);
-  background: rgba(192,65,90,0.02);
+
+/* ─── The journey to 17.12.2027 ───────────────────────
+   A numbered rail of stages, each with its own frame so a
+   photo can drop in as that stage actually happens.
+──────────────────────────────────────────────────────── */
+.jr-head {
+  padding-top: 34px;
+  margin-bottom: 26px;
 }
-.wf-frame svg { stroke: var(--muted-lt); opacity: 0.7; }
-.wf-frame-text {
+.jr-head-label {
+  font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; opacity: 0.75;
+  margin-bottom: 8px;
+}
+.jr-head-title {
   font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-size: 14px;
-  color: var(--muted-lt); text-align: center; line-height: 1.6;
+  font-size: 27px; font-weight: 300; color: var(--ink);
+  line-height: 1.25;
 }
+.jr-head-title em { font-style: italic; color: var(--rose); }
+.jr-progress {
+  margin-top: 14px;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500;
+}
+
+.jr-list { position: relative; padding-left: 36px; }
+.jr-list::before {
+  content: '';
+  position: absolute; left: 13px; top: 14px; bottom: 14px;
+  width: 1px;
+  background: linear-gradient(180deg,
+    var(--rose-md) 0%, rgba(192,65,90,0.14) 70%, rgba(192,65,90,0.05) 100%);
+}
+
+.jr-item { position: relative; margin-bottom: 34px; }
+.jr-item:last-child { margin-bottom: 0; }
+
+.jr-num {
+  position: absolute; left: -36px; top: 2px;
+  width: 27px; height: 27px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--white);
+  border: 1.5px solid var(--rose-md);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px; font-weight: 600; color: var(--rose);
+  z-index: 1;
+}
+/* The wedding day itself gets the filled marker */
+.jr-item.final .jr-num {
+  background: var(--rose); border-color: var(--rose); color: #fff;
+  box-shadow: 0 0 0 4px rgba(192,65,90,0.12);
+}
+.jr-item.done .jr-num {
+  background: var(--rose); border-color: var(--rose); color: #fff;
+}
+
+.jr-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 23px; font-weight: 400; color: var(--ink);
+  line-height: 1.2;
+}
+.jr-en {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 13px;
+  color: var(--rose); opacity: 0.85;
+  margin-top: 2px;
+}
+.jr-note {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.7; margin-top: 9px;
+}
+
+/* Photo frame — dashed while empty, real once a file is set */
+.jr-frame {
+  margin-top: 14px;
+  /* Empty frames stay compact so six stages remain scannable; a real
+     photo drops the fixed height and shows at its own proportions */
+  height: 132px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  border: 1.5px dashed rgba(192,65,90,0.3);
+  background: rgba(192,65,90,0.025);
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+.jr-frame.has-photo {
+  height: auto;
+  /* block, not flex — centring shrink-wraps the image instead of
+     letting width:100% fill the frame */
+  display: block;
+  border: 1px solid rgba(192,65,90,0.1);
+  background: none;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05);
+}
+.jr-frame img { width: 100%; height: auto; display: block; }
+.jr-frame svg { stroke: var(--rose-md); opacity: 0.6; }
+.jr-frame-hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 12.5px;
+  color: var(--muted-lt); text-align: center; padding: 0 16px;
+}
+
+.jr-foot {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px;
+}
+.jr-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--muted-lt); flex-shrink: 0;
+}
+.jr-item.done .jr-dot  { background: var(--rose); }
+.jr-item.final .jr-dot { background: var(--rose); animation: dotPulse 2.5s ease-in-out infinite; }
+.jr-when {
+  font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500;
+}
+.jr-item.done .jr-when,
+.jr-item.final .jr-when { color: var(--rose); }
 
 /* ════════════════════════════════════
    SOMETHING FOR SEPTEMBER — 20.09
    Three states: sealed → ready → revealed
 ════════════════════════════════════ */
-#scSeptember { flex-direction: column; }
+/* padding-top clears the fixed home pill, matching the other inner screens */
+#scSeptember { flex-direction: column; padding-top: 72px; }
 .sep-wrap { max-width: 440px; width: 100%; margin: 0 auto; text-align: center; }
 
 .sep-state { display: none; }
@@ -1187,11 +1294,29 @@ body::before {
   animation: cueFloat 2.2s ease-in-out infinite;
 }
 
+/* ─── Passcode gate ─── */
+.sep-code {
+  max-width: 232px;
+  margin: 0 auto 4px;
+}
+.sep-code .pin-cells { gap: 8px; justify-content: center; }
+.sep-code .pin-group { flex: 1; }
+.sep-code .pin-cell  { font-size: 24px; }
+
+.sep-err {
+  font-size: 12px; color: var(--rose);
+  min-height: 17px; margin: 14px 0 4px;
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.sep-err.show { opacity: 1; }
+
+.sep-unlock-btn { margin-top: 6px; }
+
 /* ─── Countdown to the day ─── */
 .sep-countdown {
   display: flex; gap: 26px; justify-content: center;
   padding: 26px 0 0;
-  margin-top: 30px;
+  margin-top: 34px;
   border-top: 1px solid var(--line);
 }
 .sep-date-line {
@@ -1199,6 +1324,36 @@ body::before {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic; font-size: 13px;
   color: var(--muted-lt); letter-spacing: 1.5px;
+}
+
+/* ─── Revealed letter ─── */
+.sep-letter {
+  text-align: left;
+  margin: 4px 0 26px;
+}
+.sep-letter p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16.5px; color: #3c1f2a;
+  line-height: 1.85; margin-bottom: 15px;
+}
+.sep-letter p:last-child { margin-bottom: 0; }
+
+.sep-stats {
+  display: flex;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0; margin-bottom: 24px;
+}
+.sep-stat { flex: 1; padding: 0 8px; border-right: 1px solid var(--line); }
+.sep-stat:last-child { border-right: none; }
+.sep-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px; font-weight: 600; color: var(--rose);
+  line-height: 1;
+}
+.sep-stat-lbl {
+  font-size: 8.5px; letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--muted); margin-top: 6px;
 }
 
 /* ─── Vault ─── */
@@ -1329,6 +1484,15 @@ body::before {
   .album-wrap      { max-width: 600px; }
   .album-grid      { grid-template-columns: repeat(3, 1fr); }
 
+  /* September */
+  #scSeptember     { padding-top: 90px; }
+
+  /* Journey */
+  #scChecklist     { padding-top: 90px; }
+  .cl-wrap         { max-width: 560px; }
+  .jr-head-title   { font-size: 31px; }
+  .jr-frame        { height: 168px; }
+
   /* Countdown */
   .cd-num          { font-size: 40px; }
 }
@@ -1383,6 +1547,10 @@ body::before {
   /* Album — 3 wide columns */
   .album-wrap      { max-width: 780px; }
   .album-grid      { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  /* Journey */
+  .cl-wrap         { max-width: 620px; }
+  .jr-frame        { height: 190px; }
 
   /* Login — see the split-layout block below for the two-panel version */
 
@@ -2202,10 +2370,13 @@ body::before {
       <div class="cd-unit"><span class="cd-num" id="wfMins">—</span><span class="cd-label">min</span></div>
     </div>
 
-    <div class="wf-frame">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-      <p class="wf-frame-text">a photo goes here,<br>when the day comes.</p>
+    <div class="jr-head">
+      <p class="jr-head-label">the road there</p>
+      <h2 class="jr-head-title">Every step, <em>in order.</em></h2>
+      <p class="jr-progress" id="jrProgress"></p>
     </div>
+
+    <div class="jr-list" id="jrList"></div>
   </div>
 </div>
 
@@ -2304,14 +2475,42 @@ body::before {
 <div class="screen" id="scSeptember">
   <div class="sep-wrap">
 
-    <!-- STATE A — before 20 September -->
-    <div class="sep-state" id="sepSealed">
+    <!-- STATE A — passcode gate -->
+    <div class="sep-state" id="sepGate">
       <p class="story-overline">something for september</p>
-      <h1 class="story-title">not <em>yet.</em></h1>
+      <h1 class="story-title">sealed <em>for now.</em></h1>
 
       <div class="sep-seal locked" aria-hidden="true">N · F</div>
 
-      <p class="sep-lede">There's something waiting in here for<br>our anniversary. It opens on the day.</p>
+      <p class="sep-lede">This one is locked with four digits.<br>I'll tell you when it's time.</p>
+
+      <form id="sepForm" novalidate>
+        <div class="sep-code">
+          <div class="pin-wrap" id="sepWrap">
+            <input class="pin-real" id="sepCode"
+                   type="text" inputmode="numeric" pattern="[0-9]*"
+                   maxlength="4"
+                   autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false"
+                   aria-label="Four digit passcode">
+            <div class="pin-cells" id="sepCells" aria-hidden="true">
+              <div class="pin-group">
+                <span class="pin-cell"></span><span class="pin-cell"></span>
+                <span class="pin-cell"></span><span class="pin-cell"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="sep-err" id="sepErr">not that one.</p>
+
+        <div class="btn-row">
+          <button type="submit" class="btn-primary sep-unlock-btn" id="sepUnlockBtn">
+            Unlock
+            <i class="ti ti-lock-open-2"></i>
+          </button>
+        </div>
+      </form>
 
       <div class="sep-countdown">
         <div class="cd-unit"><span class="cd-num" id="sepDays">—</span><span class="cd-label">days</span></div>
@@ -2321,24 +2520,30 @@ body::before {
       <p class="sep-date-line" id="sepDateLine">20 · 09</p>
     </div>
 
-    <!-- STATE B — the day has arrived, seal is breakable -->
-    <div class="sep-state" id="sepReady">
-      <p class="story-overline" id="sepReadyDate">20 · 09</p>
-      <h1 class="story-title">it's <em>today.</em></h1>
-
-      <button type="button" class="sep-seal sep-seal-btn" id="sepSealBtn"
-              aria-label="Open the anniversary letter">N · F</button>
-
-      <p class="sep-tap-cue">tap the seal</p>
-    </div>
-
-    <!-- STATE C — revealed -->
+    <!-- STATE B — unlocked -->
     <div class="sep-state" id="sepReveal">
       <div class="card">
         <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
         <p class="eyebrow" id="sepEyebrow">20 · 09</p>
         <h1 class="headline">Happy anniversary,<br><em>Fasya.</em></h1>
-        <p class="body-text" id="sepBody"></p>
+
+        <div class="sep-stats">
+          <div class="sep-stat">
+            <div class="sep-stat-num" id="sepStatYears">—</div>
+            <div class="sep-stat-lbl">years</div>
+          </div>
+          <div class="sep-stat">
+            <div class="sep-stat-num" id="sepStatDays">—</div>
+            <div class="sep-stat-lbl">days together</div>
+          </div>
+          <div class="sep-stat">
+            <div class="sep-stat-num" id="sepStatWed">—</div>
+            <div class="sep-stat-lbl">days to 17.12</div>
+          </div>
+        </div>
+
+        <div class="sep-letter" id="sepLetter"></div>
+
         <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
         <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
       </div>
@@ -2367,6 +2572,59 @@ body::before {
   ];
 
   const WAITING_FOR_DATE = new Date('2027-12-17T00:00:00');
+
+  /* ═══ Something for September ═══
+   * The letter is AES-GCM ciphertext, not plaintext behind a gate, so the
+   * words are not readable in this file. The 4-digit passcode derives the
+   * key; a wrong code simply fails to decrypt.
+   * To change the wording: edit tools/september-letter.txt, run
+   *   node tools/seal-september.mjs <passcode>
+   * and paste the new blob here.
+   */
+  const SEP_LEN = 4;
+  const SEP_BLOB = {
+    iv: 'cEnSQNQRWkdPwihu',
+    d:  'As39bIIXM0bzH9wdcS13Xfa13GvjPtaYdb7cyWj33SUsid5v89i6kFOPcCXnT4algKO3MaWOhJ8FlhWFb2k7PXJRjbd7PlIb6tCTIPXVjnpwSasCQWly7Vm4qqI69V9eWuM+kwBsVpXEnq0dsdoQyPBeuULG7/9DD6eruhEr/Ak7vDKOrIEWQyJugnH50Z4aH4rPU8J9GGja+Dl1dM8lQCnXb7MICKTTQfGxknC4h8sN5CKyaWNz/IbYgKgwOvBJKzAroSm8tkTgFghJ+6kSVPVlfAHO1U9xQH+2ba+hsY5PTL6r9wGkfC6tieURTk2Xr853OO5jsEYi2zpFLOfDd26n8ckFYl+wla0Hb2XWm7ZTlCWHIJq6jHN7OOqX4cUcSv/060ThCCQuxHS5xeG0d2ItaSmiUVy+OCL3LaU11LRRWKpbCO765klFVxxENIrub2CbuuLB4EqAaEChsghHY0WVxerm/bsVkovLDlh0u5IKCdEb69qPAecOLKL50PbW1PMkfItU2olwwMq+WUmueD1dSzy9Lt5BFqCjqOMue9oeApGeJoK9szkJ9Xieb4j3YkWuTiRI3FAdn0c6aNC784ZvrlcRbC69PasmSTSZmIDyLl/2AJn9ksi0BS9amkxfFfIe4S13QWrXGd6FY/tNeV5dXHahd/Mb02SFky/e650j+GdxRpj3uwMRYJNAKt45hyJtnL82T5g1gdgBR4doNwA31SCZ1ZfW1BszSUjLu5Ze63dMPbhT57awtIGAZ46yBcDtdvxR9A4ArpeQnv7hQvJlZdA5tN/MUynTYkyUWO0IPaLI5cyGVKyXsjG4XfamFjjKVm92',
+  };
+
+  /* ═══ The journey to 17.12.2027 ═══
+   * Each stage renders its own frame. To add a photo, drop the file
+   * beside index.html and set `photo` to its filename; the frame swaps
+   * from the dashed placeholder to the image automatically.
+   * Set `done: true` once a stage has happened.
+   */
+  const JOURNEY = [
+    {
+      title: 'Tunang', en: 'the engagement',
+      note: 'Rings, both families in one room, and the first date written on a calendar.',
+      when: 'to be set', photo: null, done: false,
+    },
+    {
+      title: 'Kursus Kahwin', en: 'the wedding course',
+      note: 'The module we both sit through, and the certificate the nikah needs.',
+      when: 'to be set', photo: null, done: false,
+    },
+    {
+      title: 'Persiapan', en: 'wedding preparation',
+      note: 'Venue, catering, photographer, the guest list — the hundred small decisions nobody warns you about.',
+      when: 'to be set', photo: null, done: false,
+    },
+    {
+      title: 'Baju & Fitting', en: 'choosing what we wear',
+      note: 'Picking the colour, the fittings, the alterations — and finally agreeing on one.',
+      when: 'to be set', photo: null, done: false,
+    },
+    {
+      title: 'Nikah', en: 'the solemnisation',
+      note: 'The words that actually make it real. Everything before this is preparation.',
+      when: 'to be set', photo: null, done: false,
+    },
+    {
+      title: 'Majlis', en: 'the wedding day',
+      note: 'Everyone we love, in one room, on the day we have been counting down to.',
+      when: '17 · 12 · 2027', photo: null, done: false, final: true,
+    },
+  ];
 
   const RELATIONSHIP_START = new Date('2022-09-20T00:00:00');
 
@@ -2615,9 +2873,6 @@ body::before {
   }
 
   /* ═══ Something for September ═══ */
-  const YEAR_WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
-                      'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
-
   // The anniversary that matters right now: this year's 20 Sep. Before
   // that date it is the target to count toward; on/after it, it is the
   // one being celebrated — so one expression covers both states.
@@ -2656,47 +2911,116 @@ body::before {
   }
 
   function showSepState(id) {
-    ['sepSealed', 'sepReady', 'sepReveal'].forEach(s => {
+    ['sepGate', 'sepReveal'].forEach(s => {
       $(s).classList.toggle('active', s === id);
     });
   }
 
+  // Always opens on the gate — the letter stays encrypted until the
+  // passcode is entered, so it is not readable from the page source.
   function buildSeptember() {
-    const { unlocked, date, label, years } = septemberInfo();
+    const { date, label } = septemberInfo();
     clearInterval(sepTimer);
 
-    if (!unlocked) {
-      showSepState('sepSealed');
-      $('sepDateLine').textContent = label;
-      const tick = () => {
-        const diff = Math.max(0, date - Date.now());
-        $('sepDays').textContent  = Math.floor(diff / 86400000);
-        $('sepHours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
-        $('sepMins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
-      };
-      tick();
-      sepTimer = setInterval(tick, 30000);
+    showSepState('sepGate');
+    $('sepDateLine').textContent = label;
+    $('sepCode').value = '';
+    renderCells('sepCode', 'sepCells', false);
+    $('sepErr').classList.remove('show');
+
+    const tick = () => {
+      const diff = date - Date.now();
+      if (diff <= 0) {
+        $('sepDays').textContent  = '0';
+        $('sepHours').textContent = '00';
+        $('sepMins').textContent  = '00';
+        return;
+      }
+      $('sepDays').textContent  = Math.floor(diff / 86400000);
+      $('sepHours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+      $('sepMins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
+    };
+    tick();
+    sepTimer = setInterval(tick, 30000);
+  }
+
+  // AES-GCM key from the passcode. Must match tools/seal-september.mjs.
+  async function sepKey(code) {
+    const enc = new TextEncoder();
+    const raw = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: enc.encode('nf-sep-2026'), iterations: 200000, hash: 'SHA-256' },
+      raw, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+    );
+  }
+
+  async function attemptSeptember() {
+    const code = cleanCode('sepCode', SEP_LEN);
+    const err  = $('sepErr');
+    const btn  = $('sepUnlockBtn');
+
+    if (code.length !== SEP_LEN) {
+      err.textContent = `${SEP_LEN} digits.`;
+      err.classList.add('show');
+      shakeCard($('sepWrap'));
       return;
     }
 
-    // Unlocked. Show the reveal directly if she already opened it this year.
-    const seenKey = 'sep_opened_' + date.getFullYear();
-    $('sepReadyDate').textContent = label;
-    $('sepEyebrow').textContent   = label;
-    $('sepBody').innerHTML =
-      `${YEAR_WORDS[years] || years} years. Every single one worth it.<br>Here's to forever more.`;
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
 
-    if (localStorage.getItem(seenKey)) { showSepState('sepReveal'); return; }
+    let text = null;
+    try {
+      const key = await sepKey(code);
+      const buf = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: ub64(SEP_BLOB.iv) }, key, ub64(SEP_BLOB.d)
+      );
+      text = new TextDecoder().decode(buf);
+    } catch {
+      // AES-GCM authentication failure is the wrong-passcode signal —
+      // no separate hash comparison needed
+      text = null;
+    }
 
-    showSepState('sepReady');
-    const seal = $('sepSealBtn');
-    seal.classList.remove('breaking');
-    seal.onclick = () => {
-      seal.classList.add('breaking');
-      spawnHearts(seal);
-      localStorage.setItem(seenKey, '1');
-      setTimeout(() => { showSepState('sepReveal'); launchConfetti(); }, 520);
-    };
+    btn.disabled  = false;
+    btn.innerHTML = 'Unlock <i class="ti ti-lock-open-2"></i>';
+
+    if (text === null) {
+      err.textContent = 'not that one.';
+      err.classList.add('show');
+      shakeCard($('sepWrap'));
+      $('sepCode').value = '';
+      renderCells('sepCode', 'sepCells', false);
+      return;
+    }
+
+    revealSeptember(text);
+  }
+
+  function revealSeptember(text) {
+    const { label, years } = septemberInfo();
+
+    $('sepEyebrow').textContent  = label;
+    $('sepStatYears').textContent = years;
+    $('sepStatDays').textContent  =
+      Math.floor((Date.now() - RELATIONSHIP_START) / 86400000).toLocaleString();
+    $('sepStatWed').textContent   =
+      Math.max(0, Math.floor((WAITING_FOR_DATE - Date.now()) / 86400000)).toLocaleString();
+
+    const wrap = $('sepLetter');
+    wrap.textContent = '';
+    text.split(/\n\s*\n/).forEach(para => {
+      const p = document.createElement('p');
+      p.textContent = para.trim();
+      wrap.appendChild(p);
+    });
+
+    showSepState('sepReveal');
+    clearInterval(sepTimer);
+    // The reveal is taller than the gate; without this the page stays
+    // where the gate left it and opens mid-letter
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    launchConfetti();
   }
 
   /* ═══ Story counter ═══ */
@@ -2994,6 +3318,93 @@ body::before {
     tick();
     clearInterval(wfTimer);
     wfTimer = setInterval(tick, 30000);
+
+    buildJourney();
+  }
+
+  function buildJourney() {
+    const list = $('jrList');
+    if (!list || list.childElementCount) return; // build once
+
+    JOURNEY.forEach((stage, i) => {
+      const item = document.createElement('div');
+      item.className = 'jr-item'
+        + (stage.done  ? ' done'  : '')
+        + (stage.final ? ' final' : '');
+
+      const num = document.createElement('div');
+      num.className   = 'jr-num';
+      num.textContent = stage.done ? '✓' : i + 1;
+
+      const title = document.createElement('h3');
+      title.className   = 'jr-title';
+      title.textContent = stage.title;
+
+      const en = document.createElement('p');
+      en.className   = 'jr-en';
+      en.textContent = stage.en;
+
+      const note = document.createElement('p');
+      note.className   = 'jr-note';
+      note.textContent = stage.note;
+
+      // Frame: the photo if there is one, otherwise the waiting placeholder
+      const frame = document.createElement('div');
+      frame.className = 'jr-frame';
+      if (stage.photo) {
+        frame.classList.add('has-photo');
+        const img = document.createElement('img');
+        img.src     = stage.photo;
+        img.alt     = `${stage.title} — ${stage.en}`;
+        img.loading = 'lazy';
+        // If the file is missing, fall back to the placeholder look
+        img.addEventListener('error', () => {
+          frame.classList.remove('has-photo');
+          img.remove();
+          frame.append(...placeholderParts());
+        });
+        frame.appendChild(img);
+      } else {
+        frame.append(...placeholderParts());
+      }
+
+      const foot = document.createElement('div');
+      foot.className = 'jr-foot';
+      const dot = document.createElement('span');
+      dot.className = 'jr-dot';
+      const when = document.createElement('span');
+      when.className   = 'jr-when';
+      when.textContent = stage.when;
+      foot.append(dot, when);
+
+      item.append(num, title, en, note, frame, foot);
+      list.appendChild(item);
+    });
+
+    const done = JOURNEY.filter(s => s.done).length;
+    $('jrProgress').textContent = `${done} of ${JOURNEY.length} done`;
+  }
+
+  // The dashed empty-frame contents, reused by the error fallback
+  function placeholderParts() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '26');
+    svg.setAttribute('height', '26');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke-width', '1.5');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.innerHTML =
+      '<rect x="3" y="3" width="18" height="18" rx="2"/>' +
+      '<circle cx="8.5" cy="8.5" r="1.5"/>' +
+      '<path d="m21 15-5-5L5 21"/>';
+
+    const hint = document.createElement('p');
+    hint.className   = 'jr-frame-hint';
+    hint.textContent = 'a photo goes here';
+
+    return [svg, hint];
   }
 
   /* ═══ Vault ═══ */
@@ -3162,37 +3573,50 @@ body::before {
   const PIN_LEN = 8;
   let pinRevealed = false;
 
-  // Paints the value into the presentation cells and marks which cell
-  // is next, so the invisible input's state is always mirrored.
-  function syncPinCells() {
-    const val   = $('inCode').value;
-    const cells = $('pinCells').querySelectorAll('.pin-cell');
+  // Paints a value into presentation cells and marks which cell is next,
+  // so the invisible input's state is always mirrored. Shared by the
+  // 8-digit login field and the 4-digit September gate.
+  function renderCells(inputId, cellsId, revealed) {
+    const val   = $(inputId).value;
+    const cells = $(cellsId).querySelectorAll('.pin-cell');
 
     cells.forEach((cell, i) => {
       const ch = val[i];
       cell.classList.toggle('filled', ch !== undefined);
       cell.classList.toggle('current', i === val.length);
+      cell.textContent = '';
 
-      if (ch === undefined) { cell.textContent = ''; return; }
-      if (pinRevealed) {
-        cell.textContent = ch;
-      } else {
-        cell.textContent = '';
-        const dot = document.createElement('span');
-        dot.className = 'pin-bullet';
-        cell.appendChild(dot);
-      }
+      if (ch === undefined) return;
+      if (revealed) { cell.textContent = ch; return; }
+      const dot = document.createElement('span');
+      dot.className = 'pin-bullet';
+      cell.appendChild(dot);
     });
   }
 
-  function onPinInput() {
-    const el = $('inCode');
-    // Digits only — also strips separators from a pasted "20/09/2022"
-    const clean = el.value.replace(/\D/g, '').slice(0, PIN_LEN);
+  // Digits only, clamped to length — also strips separators from a
+  // pasted "20/09/2022". Returns the cleaned value.
+  function cleanCode(inputId, len) {
+    const el    = $(inputId);
+    const clean = el.value.replace(/\D/g, '').slice(0, len);
     if (clean !== el.value) el.value = clean;
-    syncPinCells();
-    $('loginError').classList.remove('show');
+    return clean;
   }
+
+  function wireCodeField(inputId, wrapId, len, onChange) {
+    const el = $(inputId);
+    el.addEventListener('input', () => { cleanCode(inputId, len); onChange(); });
+    el.addEventListener('focus', () => $(wrapId).classList.add('focused'));
+    el.addEventListener('blur',  () => $(wrapId).classList.remove('focused'));
+    // Park the caret at the end — the cells imply left-to-right entry,
+    // so letting a tap drop it mid-string would desync them
+    el.addEventListener('click', () => {
+      const n = el.value.length;
+      el.setSelectionRange(n, n);
+    });
+  }
+
+  function syncPinCells() { renderCells('inCode', 'pinCells', pinRevealed); }
 
   function togglePinReveal() {
     pinRevealed = !pinRevealed;
@@ -3246,17 +3670,18 @@ body::before {
 
     // Login — submit via the form so Enter and the button share one path
     $('loginForm').addEventListener('submit', e => { e.preventDefault(); attemptLogin(); });
-    const codeEl = $('inCode');
-    codeEl.addEventListener('input', onPinInput);
-    codeEl.addEventListener('focus', () => $('pinWrap').classList.add('focused'));
-    codeEl.addEventListener('blur',  () => $('pinWrap').classList.remove('focused'));
-    // Always park the caret at the end — the cells imply left-to-right
-    // entry, so letting a tap drop the caret mid-string would desync them
-    codeEl.addEventListener('click', () => {
-      const n = codeEl.value.length;
-      codeEl.setSelectionRange(n, n);
+    wireCodeField('inCode', 'pinWrap', PIN_LEN, () => {
+      syncPinCells();
+      $('loginError').classList.remove('show');
     });
     $('pinReveal').addEventListener('click', togglePinReveal);
+
+    // September passcode gate
+    $('sepForm').addEventListener('submit', e => { e.preventDefault(); attemptSeptember(); });
+    wireCodeField('sepCode', 'sepWrap', SEP_LEN, () => {
+      renderCells('sepCode', 'sepCells', false);
+      $('sepErr').classList.remove('show');
+    });
 
     // Finale "Always" button
     $('finaleBtn').addEventListener('click', finale);

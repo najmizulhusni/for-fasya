@@ -2687,14 +2687,16 @@ body::before {
    * the details below are plain text in this file. The date gate is a UI
    * gate only — anyone reading the page source can read them early.
    */
-  const SEP_REVEAL_AT = new Date('2026-09-07T20:00:00');
+  // Unlocked immediately — set in the past so septemberUnlocked() is
+  // always true, rather than special-casing an "always open" mode
+  const SEP_REVEAL_AT = new Date('2025-01-01T00:00:00');
 
   const SEP_GIFT = {
     kicker: 'your anniversary gift',
     headline: 'Four Years',
     date: '07 · 09 · 2026',
     rows: [
-      ['where',  "I'll tell you in person"],
+      ['where',  'Bunglow37'],
       ['when',   '7 Sept 2026 · 8:00 PM'],
       ['wear',   'something you feel good in'],
       ['guests', '2 of 2'],
@@ -3049,7 +3051,9 @@ body::before {
 
   function revealSeptember() {
     const gift  = SEP_GIFT;
-    const years = SEP_REVEAL_AT.getFullYear() - RELATIONSHIP_START.getFullYear();
+    // The 2026 anniversary this gift belongs to, independent of when the
+    // page happens to be opened
+    const years = 2026 - RELATIONSHIP_START.getFullYear();
 
     $('sepEyebrow').textContent   = SEP_LABEL;
     $('sepStatYears').textContent = years;

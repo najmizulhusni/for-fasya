@@ -1326,17 +1326,140 @@ body::before {
   color: var(--muted-lt); letter-spacing: 1.5px;
 }
 
-/* ─── Revealed letter ─── */
-.sep-letter {
-  text-align: left;
-  margin: 4px 0 26px;
+/* ════════════════════════════════════
+   SCRATCH-TO-REVEAL GIFT
+════════════════════════════════════ */
+.scratch {
+  position: relative;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  /* the canvas is clipped to this box, so the foil follows the ticket */
+  overflow: hidden;
+  box-shadow: 0 10px 34px rgba(192,65,90,0.16), 0 2px 8px rgba(0,0,0,0.05);
 }
-.sep-letter p {
+.scratch-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 2;
+  cursor: grab;
+  /* stops the browser from panning the page while she rubs */
+  touch-action: none;
+  transition: opacity 0.6s ease;
+}
+.scratch-canvas:active { cursor: grabbing; }
+.scratch.revealed .scratch-canvas { opacity: 0; pointer-events: none; }
+
+.scratch-cue {
+  position: absolute; left: 0; right: 0; bottom: 12px;
+  z-index: 3; text-align: center;
+  font-size: 9.5px; letter-spacing: 2.6px; text-transform: uppercase;
+  color: rgba(255,255,255,0.9); font-weight: 500;
+  pointer-events: none;
+  animation: cueFloat 2.2s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+}
+.scratch.revealed .scratch-cue,
+.scratch.started  .scratch-cue { opacity: 0; }
+/* fully out of the way once open — opacity alone still faintly composited */
+.scratch.revealed .scratch-cue { visibility: hidden; }
+
+/* Keyboard / assistive path — scratching is pointer-only */
+.scratch-skip {
+  display: block; margin: 0 auto 22px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500; padding: 8px 12px;
+  transition: color 0.2s ease;
+}
+.scratch-skip:hover { color: var(--rose); }
+.scratch.revealed ~ .scratch-skip { display: none; }
+
+/* ─── The ticket underneath ─── */
+.tk {
+  background: linear-gradient(160deg, #fffdfa 0%, #fdf3f6 100%);
+  text-align: center;
+  position: relative;
+}
+.tk-top { padding: 28px 18px 20px; }
+.tk-kicker {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; opacity: 0.8;
+  margin-bottom: 12px;
+}
+.tk-headline {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 16.5px; color: #3c1f2a;
-  line-height: 1.85; margin-bottom: 15px;
+  font-size: 40px; font-weight: 300; font-style: italic;
+  color: var(--ink); line-height: 1; letter-spacing: -0.5px;
 }
-.sep-letter p:last-child { margin-bottom: 0; }
+.tk-date {
+  margin-top: 10px;
+  font-size: 10px; letter-spacing: 3px;
+  color: var(--muted); font-weight: 500;
+}
+
+/* Perforation — dashed rule with a notch bitten out of each edge */
+.tk-perf {
+  position: relative; height: 20px;
+}
+.tk-perf::before {
+  content: '';
+  position: absolute; top: 50%; left: 16px; right: 16px;
+  border-top: 1.5px dashed rgba(192,65,90,0.28);
+}
+.tk-notch {
+  position: absolute; top: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
+  /* reads as a hole punched through to the card behind, so it has to
+     match the card's own background, not the page's */
+  background: #fff;
+  transform: translateY(-50%);
+  box-shadow: inset 0 0 0 1px rgba(192,65,90,0.08);
+}
+.tk-notch.l { left: -9px; }
+.tk-notch.r { right: -9px; }
+
+.tk-body { padding: 8px 18px 26px; }
+.tk-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(192,65,90,0.08);
+  text-align: left;
+}
+.tk-row:last-of-type { border-bottom: none; }
+.tk-row dt {
+  /* narrow label column leaves the value enough room to stay on one
+     line on a 390px phone */
+  flex: 0 0 60px;
+  font-size: 8.5px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500;
+}
+.tk-row dd {
+  flex: 1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15.5px; color: var(--ink); line-height: 1.4;
+}
+.tk-note {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 13.5px;
+  color: var(--muted); line-height: 1.65;
+  padding: 16px 4px 0; margin-top: 4px;
+  border-top: 1px solid rgba(192,65,90,0.08);
+}
+
+/* Barcode — repeating gradient, no image needed */
+.tk-barcode {
+  height: 34px; margin: 20px auto 8px; max-width: 190px;
+  background: repeating-linear-gradient(90deg,
+    var(--ink-soft) 0 2px, transparent 2px 4px,
+    var(--ink-soft) 4px 5px, transparent 5px 9px,
+    var(--ink-soft) 9px 12px, transparent 12px 14px);
+  opacity: 0.5;
+}
+.tk-serial {
+  font-size: 8.5px; letter-spacing: 2.4px;
+  color: var(--muted-lt); font-weight: 500;
+}
 
 .sep-stats {
   display: flex;
@@ -2520,12 +2643,39 @@ body::before {
       <p class="sep-date-line" id="sepDateLine">20 · 09</p>
     </div>
 
-    <!-- STATE B — unlocked -->
+    <!-- STATE B — unlocked: scratch the foil off the gift -->
     <div class="sep-state" id="sepReveal">
       <div class="card">
         <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
         <p class="eyebrow" id="sepEyebrow">20 · 09</p>
         <h1 class="headline">Happy anniversary,<br><em>Fasya.</em></h1>
+
+        <div class="scratch" id="scratchWrap">
+          <div class="tk" id="tkCard">
+            <div class="tk-top">
+              <p class="tk-kicker" id="tkKicker"></p>
+              <h2 class="tk-headline" id="tkHeadline"></h2>
+              <p class="tk-date" id="tkDate"></p>
+            </div>
+            <div class="tk-perf">
+              <span class="tk-notch l"></span>
+              <span class="tk-notch r"></span>
+            </div>
+            <div class="tk-body">
+              <dl id="tkRows"></dl>
+              <p class="tk-note" id="tkNote"></p>
+              <div class="tk-barcode" aria-hidden="true"></div>
+              <p class="tk-serial" id="tkSerial"></p>
+            </div>
+          </div>
+          <canvas class="scratch-canvas" id="scratchCanvas"
+                  aria-label="Scratch to reveal your gift"></canvas>
+          <p class="scratch-cue" id="scratchCue">rub to reveal</p>
+        </div>
+
+        <button type="button" class="scratch-skip" id="scratchSkip">
+          or just reveal it
+        </button>
 
         <div class="sep-stats">
           <div class="sep-stat">
@@ -2541,8 +2691,6 @@ body::before {
             <div class="sep-stat-lbl">days to 17.12</div>
           </div>
         </div>
-
-        <div class="sep-letter" id="sepLetter"></div>
 
         <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
         <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
@@ -2574,17 +2722,17 @@ body::before {
   const WAITING_FOR_DATE = new Date('2027-12-17T00:00:00');
 
   /* ═══ Something for September ═══
-   * The letter is AES-GCM ciphertext, not plaintext behind a gate, so the
-   * words are not readable in this file. The 4-digit passcode derives the
-   * key; a wrong code simply fails to decrypt.
-   * To change the wording: edit tools/september-letter.txt, run
+   * The gift details are AES-GCM ciphertext, not plaintext behind a gate,
+   * so they are not readable in this file. The 4-digit passcode derives
+   * the key; a wrong code simply fails to decrypt.
+   * To change the gift: edit tools/september-gift.json, run
    *   node tools/seal-september.mjs <passcode>
    * and paste the new blob here.
    */
   const SEP_LEN = 4;
   const SEP_BLOB = {
-    iv: 'cEnSQNQRWkdPwihu',
-    d:  'As39bIIXM0bzH9wdcS13Xfa13GvjPtaYdb7cyWj33SUsid5v89i6kFOPcCXnT4algKO3MaWOhJ8FlhWFb2k7PXJRjbd7PlIb6tCTIPXVjnpwSasCQWly7Vm4qqI69V9eWuM+kwBsVpXEnq0dsdoQyPBeuULG7/9DD6eruhEr/Ak7vDKOrIEWQyJugnH50Z4aH4rPU8J9GGja+Dl1dM8lQCnXb7MICKTTQfGxknC4h8sN5CKyaWNz/IbYgKgwOvBJKzAroSm8tkTgFghJ+6kSVPVlfAHO1U9xQH+2ba+hsY5PTL6r9wGkfC6tieURTk2Xr853OO5jsEYi2zpFLOfDd26n8ckFYl+wla0Hb2XWm7ZTlCWHIJq6jHN7OOqX4cUcSv/060ThCCQuxHS5xeG0d2ItaSmiUVy+OCL3LaU11LRRWKpbCO765klFVxxENIrub2CbuuLB4EqAaEChsghHY0WVxerm/bsVkovLDlh0u5IKCdEb69qPAecOLKL50PbW1PMkfItU2olwwMq+WUmueD1dSzy9Lt5BFqCjqOMue9oeApGeJoK9szkJ9Xieb4j3YkWuTiRI3FAdn0c6aNC784ZvrlcRbC69PasmSTSZmIDyLl/2AJn9ksi0BS9amkxfFfIe4S13QWrXGd6FY/tNeV5dXHahd/Mb02SFky/e650j+GdxRpj3uwMRYJNAKt45hyJtnL82T5g1gdgBR4doNwA31SCZ1ZfW1BszSUjLu5Ze63dMPbhT57awtIGAZ46yBcDtdvxR9A4ArpeQnv7hQvJlZdA5tN/MUynTYkyUWO0IPaLI5cyGVKyXsjG4XfamFjjKVm92',
+    iv: 'gKjF+1+zB9vwPwzy',
+    d:  'jLTzrUm3yd9q94vh9QJfpOn9KDDPK5ecr9ZZsFYkA6YaafDaL+BiwFp2XzapXUJmOp2Ng5ybEI6BWOTklx1TQfcW0Q6gNlp1Gli6KWtm4ZGY4PiPy3uzkU9vO50f2XCbdLI5FDMBsmXXA3/swl4xYQsJKCo7K0bmZfz2XpjYF7ot48odqTZJJTRaZx9q++FITsFqYTwqO0XeAGZc9BlJIOsstWdqnn7rXtnsEbGU0YQ40GO5OCDKeQhJOTMHP0S8tBLDiyzSOJLX+fi5UFsjBHtY3MR9jJclxC9WMoF5cT7Qy9H5TnrQv77K8JJ88nfhRiq4iS5wHIsUSOUOow3nFY7pW5Lrl/YGeYjxRkSbTux+94bUsPVtjf9QgFNIjTPAzDnvU/C1s5nIdBSBa0g4Fsmo4GthQ5WooBYmjQkSEHUzRuI1vr4OOV/IbNlPIpf4',
   };
 
   /* ═══ The journey to 17.12.2027 ═══
@@ -2969,23 +3117,23 @@ body::before {
     btn.disabled  = true;
     btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i>';
 
-    let text = null;
+    let gift = null;
     try {
       const key = await sepKey(code);
       const buf = await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: ub64(SEP_BLOB.iv) }, key, ub64(SEP_BLOB.d)
       );
-      text = new TextDecoder().decode(buf);
+      gift = JSON.parse(new TextDecoder().decode(buf));
     } catch {
       // AES-GCM authentication failure is the wrong-passcode signal —
       // no separate hash comparison needed
-      text = null;
+      gift = null;
     }
 
     btn.disabled  = false;
     btn.innerHTML = 'Unlock <i class="ti ti-lock-open-2"></i>';
 
-    if (text === null) {
+    if (gift === null) {
       err.textContent = 'not that one.';
       err.classList.add('show');
       shakeCard($('sepWrap'));
@@ -2994,33 +3142,175 @@ body::before {
       return;
     }
 
-    revealSeptember(text);
+    revealSeptember(gift);
   }
 
-  function revealSeptember(text) {
+  function revealSeptember(gift) {
     const { label, years } = septemberInfo();
 
-    $('sepEyebrow').textContent  = label;
+    $('sepEyebrow').textContent   = label;
     $('sepStatYears').textContent = years;
     $('sepStatDays').textContent  =
       Math.floor((Date.now() - RELATIONSHIP_START) / 86400000).toLocaleString();
     $('sepStatWed').textContent   =
       Math.max(0, Math.floor((WAITING_FOR_DATE - Date.now()) / 86400000)).toLocaleString();
 
-    const wrap = $('sepLetter');
-    wrap.textContent = '';
-    text.split(/\n\s*\n/).forEach(para => {
-      const p = document.createElement('p');
-      p.textContent = para.trim();
-      wrap.appendChild(p);
-    });
+    buildTicket(gift);
 
     showSepState('sepReveal');
     clearInterval(sepTimer);
     // The reveal is taller than the gate; without this the page stays
-    // where the gate left it and opens mid-letter
+    // where the gate left it and opens part-way down
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    launchConfetti();
+
+    // Foil has to be painted after the ticket is laid out, or it is sized
+    // against a zero-height box
+    requestAnimationFrame(() => requestAnimationFrame(initScratch));
+  }
+
+  function buildTicket(gift) {
+    $('tkKicker').textContent   = gift.kicker || '';
+    $('tkHeadline').textContent = gift.headline || '';
+    $('tkDate').textContent     = gift.date || '';
+    $('tkNote').textContent     = gift.note || '';
+    $('tkSerial').textContent   = gift.serial || '';
+
+    const rows = $('tkRows');
+    rows.textContent = '';
+    (gift.rows || []).forEach(([label, value]) => {
+      const row = document.createElement('div');
+      row.className = 'tk-row';
+      const dt = document.createElement('dt');
+      dt.textContent = label;
+      const dd = document.createElement('dd');
+      dd.textContent = value;
+      row.append(dt, dd);
+      rows.appendChild(row);
+    });
+  }
+
+  /* ═══ Scratch-to-reveal ═══ */
+  const SCRATCH_THRESHOLD = 0.45; // fraction cleared before it opens itself
+
+  function initScratch() {
+    const wrap = $('scratchWrap');
+    const cv   = $('scratchCanvas');
+    if (!wrap || !cv) return;
+
+    // Already opened on a previous visit — don't make her do it twice
+    if (localStorage.getItem('sep_scratched')) {
+      wrap.classList.add('revealed');
+      return;
+    }
+    // Pointer-only interaction; skip the foil entirely if motion is reduced
+    if (reduced()) { finishScratch(false); return; }
+
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    let painting = false, last = null, lastCheck = 0, done = false;
+
+    function paintFoil() {
+      const r   = wrap.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width  = Math.round(r.width  * dpr);
+      cv.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const g = ctx.createLinearGradient(0, 0, r.width, r.height);
+      g.addColorStop(0,    '#e8a0b0');
+      g.addColorStop(0.32, '#c0415a');
+      g.addColorStop(0.5,  '#d98a9c');
+      g.addColorStop(0.68, '#c0415a');
+      g.addColorStop(1,    '#9e3049');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, r.width, r.height);
+
+      // Diagonal sheen so it reads as foil rather than flat colour
+      const sheen = ctx.createLinearGradient(0, r.height, r.width, 0);
+      sheen.addColorStop(0,    'rgba(255,255,255,0)');
+      sheen.addColorStop(0.45, 'rgba(255,255,255,0.22)');
+      sheen.addColorStop(0.55, 'rgba(255,255,255,0.05)');
+      sheen.addColorStop(1,    'rgba(255,255,255,0)');
+      ctx.fillStyle = sheen;
+      ctx.fillRect(0, 0, r.width, r.height);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.font = '500 11px "DM Sans", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // spaced manually — canvas letterSpacing is not universally supported
+      ctx.fillText('Y O U R   G I F T', r.width / 2, r.height / 2);
+    }
+
+    function pos(e) {
+      const r = cv.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    function carve(p) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineCap = ctx.lineJoin = 'round';
+      ctx.lineWidth = 44;
+      ctx.beginPath();
+      if (last) { ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+      ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+      last = p;
+    }
+
+    // Samples the alpha channel; throttled because getImageData is costly
+    function clearedRatio() {
+      const { width, height } = cv;
+      if (!width || !height) return 0;
+      const data = ctx.getImageData(0, 0, width, height).data;
+      const step = 16; // every 16th pixel is plenty to estimate coverage
+      let clear = 0, total = 0;
+      for (let i = 3; i < data.length; i += 4 * step) {
+        total++;
+        if (data[i] < 40) clear++;
+      }
+      return total ? clear / total : 0;
+    }
+
+    function maybeDone(now) {
+      if (done || now - lastCheck < 220) return;
+      lastCheck = now;
+      if (clearedRatio() >= SCRATCH_THRESHOLD) { done = true; finishScratch(true); }
+    }
+
+    cv.addEventListener('pointerdown', e => {
+      painting = true; last = null;
+      wrap.classList.add('started');
+      cv.setPointerCapture(e.pointerId);
+      carve(pos(e));
+    });
+    cv.addEventListener('pointermove', e => {
+      if (!painting) return;
+      carve(pos(e));
+      maybeDone(performance.now());
+    });
+    const stop = () => { painting = false; last = null; maybeDone(performance.now() + 1e4); };
+    cv.addEventListener('pointerup', stop);
+    cv.addEventListener('pointercancel', stop);
+
+    // Repaint on resize, but only while still unscratched — otherwise a
+    // rotation would restore foil she had already cleared
+    window.addEventListener('resize', () => {
+      if (!done && !wrap.classList.contains('started')) paintFoil();
+    });
+
+    paintFoil();
+  }
+
+  function finishScratch(celebrate) {
+    const wrap = $('scratchWrap');
+    if (!wrap || wrap.classList.contains('revealed')) return;
+    wrap.classList.add('revealed');
+    localStorage.setItem('sep_scratched', '1');
+    if (celebrate) {
+      launchConfetti();
+      spawnHearts($('tkCard'));
+    }
   }
 
   /* ═══ Story counter ═══ */
@@ -3678,6 +3968,7 @@ body::before {
 
     // September passcode gate
     $('sepForm').addEventListener('submit', e => { e.preventDefault(); attemptSeptember(); });
+    $('scratchSkip').addEventListener('click', () => finishScratch(true));
     wireCodeField('sepCode', 'sepWrap', SEP_LEN, () => {
       renderCells('sepCode', 'sepCells', false);
       $('sepErr').classList.remove('show');

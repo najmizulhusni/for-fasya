@@ -1,6 +1,6 @@
-# The September letter in plaintext. This repo is public — committing it
+# The September gift details in plaintext. This repo is public — committing it
 # would make the words readable on GitHub and defeat the encrypted blob
 # in index.html. Keep this file local only.
-tools/september-letter.txt
+tools/september-gift.json
 
 .DS_Store

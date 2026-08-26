@@ -967,33 +967,27 @@ body::before {
 .music-chip.playing .ic-pause { display: block; }
 
 
-/* ─── Checklist ─── */
+/* ─── Waiting-for-the-day ─── */
 #scChecklist { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
 .cl-wrap { max-width: 440px; width: 100%; margin: 0 auto; }
-.cl-item {
-  display: flex; align-items: center; gap: 16px;
-  padding: 16px 0; border-bottom: 1px solid var(--line);
-  cursor: default;
+.wf-countdown {
+  display: flex; gap: 32px;
+  padding-bottom: 32px; margin-bottom: 32px;
+  border-bottom: 1px solid var(--line);
 }
-.cl-item:first-child { border-top: 1px solid var(--line); }
-.cl-item.done { opacity: 0.45; }
-.cl-check {
-  width: 24px; height: 24px; border-radius: 50%;
-  border: 1.5px solid var(--rose-md); background: transparent;
-  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: #fff; cursor: pointer;
-  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
-  outline: none; font-family: inherit;
+.wf-frame {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px;
+  padding: 56px 24px;
+  border: 1.5px dashed var(--rose-md);
+  border-radius: var(--radius-sm);
+  background: rgba(192,65,90,0.02);
 }
-.cl-item.done .cl-check { background: var(--rose); border-color: var(--rose); }
-.cl-label {
+.wf-frame svg { stroke: var(--muted-lt); opacity: 0.7; }
+.wf-frame-text {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 20px; font-weight: 400; color: var(--ink); line-height: 1.3; flex: 1;
-}
-.cl-item.done .cl-label { text-decoration: line-through; color: var(--muted); }
-.cl-progress {
-  font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--muted-lt); margin-top: 24px; font-weight: 500;
+  font-style: italic; font-size: 14px;
+  color: var(--muted-lt); text-align: center; line-height: 1.6;
 }
 
 /* ─── Vault ─── */
@@ -1537,16 +1531,16 @@ body::before {
         </div>
       </div>
 
-      <!-- Door 5: Future Checklist — OPEN -->
+      <!-- Door 5: The Day We're Waiting For — OPEN -->
       <div class="door-card open" data-door="scChecklist" role="button" tabindex="0">
         <div class="door-icon-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
-        <div class="door-title">future checklist</div>
-        <div class="door-desc">things we'll do together</div>
+        <div class="door-title">the day we're waiting for</div>
+        <div class="door-desc">17 · 12 · 2027</div>
         <div class="door-foot">
           <div class="door-dot dot-open"></div>
-          <span class="door-label label-open" id="clDoorLabel">open</span>
+          <span class="door-label label-open">open</span>
         </div>
       </div>
 
@@ -1848,14 +1842,23 @@ body::before {
 </div>
 
 <!-- ═══════════════════════════════════
-     CHECKLIST
+     THE DAY WE'RE WAITING FOR
 ════════════════════════════════════ -->
 <div class="screen" id="scChecklist">
   <div class="cl-wrap">
-    <p class="story-overline">together · someday</p>
-    <h1 class="story-title">our <em>list.</em></h1>
-    <div id="checklistItems"></div>
-    <p class="cl-progress" id="checklistCount"></p>
+    <p class="story-overline">the day we're waiting for</p>
+    <h1 class="story-title">17 · 12 · <em>2027.</em></h1>
+
+    <div class="wf-countdown">
+      <div class="cd-unit"><span class="cd-num" id="wfDays">—</span><span class="cd-label">days</span></div>
+      <div class="cd-unit"><span class="cd-num" id="wfHours">—</span><span class="cd-label">hrs</span></div>
+      <div class="cd-unit"><span class="cd-num" id="wfMins">—</span><span class="cd-label">min</span></div>
+    </div>
+
+    <div class="wf-frame">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      <p class="wf-frame-text">a photo goes here,<br>when the day comes.</p>
+    </div>
   </div>
 </div>
 
@@ -1981,13 +1984,7 @@ body::before {
     { src: 'najmi_birthday.JPG', cap: '17 · 07 · 2026 — najmi\'s birthday' },
   ];
 
-  const CHECKLIST = [
-    { id: 'wagyu',      text: 'Wagyu dinner in KL'  },
-    { id: 'langkawi',   text: 'Langkawi trip'        },
-    { id: 'bali',       text: 'Bali trip'            },
-    { id: 'disneyland', text: 'Disneyland Japan'     },
-    { id: 'omurice',    text: 'Eat omurice at TRX'   },
-  ];
+  const WAITING_FOR_DATE = new Date('2027-12-17T00:00:00');
 
   const RELATIONSHIP_START = new Date('2022-09-20T00:00:00');
 
@@ -2011,6 +2008,7 @@ body::before {
   let musicPlaying  = false;
   let lbIdx         = 0;
   let cdTimer       = null;
+  let wfTimer       = null;
   let failCount     = parseInt(sessionStorage.getItem('lf') || '0');
   let lockUntil     = parseInt(sessionStorage.getItem('lu') || '0');
   let lockTimer     = null;
@@ -2062,7 +2060,7 @@ body::before {
     const screenInits = {
       scStory:     buildCounter,
       scAlbum:     buildAlbum,
-      scChecklist: buildChecklist,
+      scChecklist: buildWaitingCountdown,
       scVault:     openVaultDoor,
     };
     const init = screenInits[targetId];
@@ -2106,7 +2104,6 @@ body::before {
     buildHubMeta();
     buildCountdown();
     checkSeptemberUnlock();
-    updateClCount();
     $('musicChip').classList.add('visible');
   }
 
@@ -2438,52 +2435,21 @@ body::before {
     $('musicChip').classList.toggle('playing', musicPlaying);
   }
 
-  /* ═══ Checklist ═══ */
-  function buildChecklist() {
-    const list = $('checklistItems');
-    if (list.childElementCount) { updateClCount(); return; }
-    const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
-    CHECKLIST.forEach(item => {
-      const done = !!saved[item.id];
-      const row  = document.createElement('div');
-      row.className = 'cl-item' + (done ? ' done' : '');
-      row.id = 'cl_' + item.id;
-
-      const btn = document.createElement('button');
-      btn.type      = 'button';
-      btn.className = 'cl-check';
-      btn.setAttribute('aria-label', item.text);
-      btn.textContent = done ? '✓' : '';
-      btn.addEventListener('click', () => toggleCheck(item.id));
-
-      const label = document.createElement('span');
-      label.className   = 'cl-label';
-      label.textContent = item.text;
-
-      row.append(btn, label);
-      list.appendChild(row);
-    });
-    updateClCount();
-  }
-
-  function toggleCheck(id) {
-    const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
-    saved[id] = !saved[id];
-    localStorage.setItem('cl_state', JSON.stringify(saved));
-    const done = saved[id];
-    const row  = $('cl_' + id);
-    row.classList.toggle('done', done);
-    row.querySelector('.cl-check').textContent = done ? '✓' : '';
-    updateClCount();
-  }
-
-  function updateClCount() {
-    const saved = JSON.parse(localStorage.getItem('cl_state') || '{}');
-    const n     = CHECKLIST.filter(i => saved[i.id]).length;
-    const el    = $('checklistCount');
-    if (el) el.textContent = `${n} of ${CHECKLIST.length} done`;
-    const lbl = $('clDoorLabel');
-    if (lbl) lbl.textContent = n === CHECKLIST.length ? 'all done ✓' : `${n}/${CHECKLIST.length}`;
+  /* ═══ The day we're waiting for ═══ */
+  function buildWaitingCountdown() {
+    function tick() {
+      const now  = new Date();
+      const diff = Math.max(0, WAITING_FOR_DATE - now);
+      const d    = Math.floor(diff / 86400000);
+      const h    = Math.floor((diff % 86400000) / 3600000);
+      const m    = Math.floor((diff % 3600000) / 60000);
+      $('wfDays').textContent  = d;
+      $('wfHours').textContent = pad(h);
+      $('wfMins').textContent  = pad(m);
+    }
+    tick();
+    clearInterval(wfTimer);
+    wfTimer = setInterval(tick, 30000);
   }
 
   /* ═══ Vault ═══ */

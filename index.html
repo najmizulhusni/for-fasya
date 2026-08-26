@@ -584,12 +584,12 @@ body::before {
 #scLogin { flex-direction: column; }
 
 .login-card {
-  background: rgba(255,255,255,0.86);
+  background: rgba(255,255,255,0.88);
   backdrop-filter: blur(48px); -webkit-backdrop-filter: blur(48px);
   border-radius: 28px;
   border: 1px solid rgba(255,255,255,0.92);
-  padding: 52px 48px 48px;
-  max-width: 400px; width: 100%;
+  padding: 44px 30px 38px;
+  max-width: 420px; width: 100%;
   text-align: center;
   box-shadow:
     0 1px 1px rgba(192,65,90,0.03),
@@ -598,6 +598,12 @@ body::before {
     0 48px 100px rgba(0,0,0,0.04);
   animation: screenIn 0.6s cubic-bezier(.16,.84,.24,1) both;
 }
+
+/* The brand half — carries the title on mobile, becomes the left
+   panel of the split layout on wide screens */
+.login-aside { text-align: center; }
+.login-blurb,
+.login-aside-foot { display: none; } /* revealed only in the split layout */
 
 /* Monogram — shared between login and letter closing */
 .monogram {
@@ -632,91 +638,126 @@ body::before {
 .login-sub {
   font-size: 9.5px; letter-spacing: 2.6px;
   text-transform: uppercase; color: var(--muted-lt);
-  font-weight: 500; margin-bottom: 34px;
+  font-weight: 500; margin-bottom: 18px;
 }
 
-/* ─── Passcode field ─────────────────────────────────── */
-.pin-field { position: relative; }
+/* ─── Passcode — 8 cells grouped as day · month · year ───
+   One real input sits invisibly on top and captures every keystroke;
+   the cells below are pure presentation. A single input (rather than
+   eight) keeps mobile keyboards, paste and backspace behaving natively.
+──────────────────────────────────────────────────────── */
+.pin-wrap { position: relative; }
 
-.pin-input {
-  width: 100%;
-  /* right padding clears the reveal button; text-indent re-centres
-     the string against the trailing letter-spacing gap */
-  padding: 0 44px 14px 16px;
-  text-indent: 14px;
-  background: transparent; color: var(--ink);
-  border: none;
-  border-bottom: 1.5px solid rgba(192,65,90,0.22);
-  border-radius: 0;
-  font-family: 'Cormorant Garamond', serif;
-  /* 30px is far above the 16px floor iOS Safari uses to decide
-     whether to auto-zoom the viewport on focus */
-  font-size: 30px; font-weight: 600; line-height: 1.25;
-  text-align: center; letter-spacing: 14px;
+.pin-real {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 2; cursor: pointer;
+  opacity: 0;              /* focusable and keyboard-capable, just unseen */
+  font-size: 16px;         /* iOS zoom floor still applies while invisible */
+  border: none; background: transparent;
   -webkit-appearance: none; appearance: none;
-  outline: none;
-  transition: border-color 0.3s ease, color 0.3s ease;
 }
-.pin-input::placeholder {
-  color: rgba(192,65,90,0.2);
-  font-weight: 400; letter-spacing: 12px;
-}
-.pin-input.masked {
-  /* keeps the numeric keypad (type=text + inputmode) while still
-     reading as a secret — type=password would force the full keyboard */
-  -webkit-text-security: disc;
-  letter-spacing: 12px;
-}
-.pin-input:focus { border-bottom-color: var(--rose); }
+.pin-real:focus { outline: none; }
 
-/* Focus glow — a soft rose wash that fades up under the rule */
-.pin-glow {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  height: 1.5px; background: var(--rose);
-  transform: scaleX(0); transform-origin: 50% 50%;
-  transition: transform 0.45s cubic-bezier(.22,.68,0,1);
-  pointer-events: none;
+.pin-cells { display: flex; gap: 9px; align-items: stretch; }
+.pin-group  { display: flex; gap: 6px; }
+.pin-group.g-day,
+.pin-group.g-month { flex: 2; }
+.pin-group.g-year  { flex: 4; }
+
+.pin-sep {
+  flex: 0 0 auto; display: flex; align-items: center;
+  color: var(--rose-md); font-size: 15px; opacity: 0.55;
 }
-.pin-input:focus ~ .pin-glow { transform: scaleX(1); }
+
+.pin-cell {
+  flex: 1 1 0; min-width: 0; max-width: 48px;
+  aspect-ratio: 13 / 16;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.75);
+  border: 1.5px solid rgba(192,65,90,0.16);
+  border-radius: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 25px; font-weight: 600; color: var(--ink);
+  line-height: 1;
+  transition: border-color 0.25s ease, background 0.25s ease,
+              transform 0.28s cubic-bezier(.34,1.56,.64,1),
+              box-shadow 0.25s ease;
+}
+.pin-cell.filled {
+  background: #fff;
+  border-color: var(--rose-md);
+}
+/* Masked digits render as a dot rather than the numeral */
+.pin-cell .pin-bullet {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rose);
+}
+/* The cell waiting for the next digit */
+.pin-wrap.focused .pin-cell.current {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(192,65,90,0.1);
+  transform: translateY(-2px);
+}
+.pin-wrap.focused .pin-cell.current::after {
+  content: '';
+  width: 1.5px; height: 42%;
+  background: var(--rose);
+  animation: caretBlink 1.1s steps(1) infinite;
+}
+@keyframes caretBlink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+
+/* Legend — flex values mirror the groups above so words sit under them */
+.pin-legend {
+  display: flex; gap: 9px;
+  margin-top: 9px;
+}
+.pin-legend span {
+  font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500;
+  text-align: center; /* centre each word under its own group */
+}
+.pin-legend .l-day,
+.pin-legend .l-month { flex: 2; }
+.pin-legend .l-year  { flex: 4; }
+.pin-legend .l-spacer { flex: 0 0 auto; width: 15px; }
 
 .pin-reveal {
-  position: absolute; right: 0; bottom: 6px;
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 16px auto 0;
   background: none; border: none; cursor: pointer;
-  color: var(--muted-lt); padding: 0;
+  color: var(--muted-lt); padding: 6px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+  font-weight: 500;
   transition: color 0.2s ease;
 }
 .pin-reveal:hover { color: var(--rose); }
 .pin-reveal svg { display: block; }
-.pin-reveal .ic-eye-off { display: none; }
-.pin-reveal.revealed .ic-eye     { display: none; }
-.pin-reveal.revealed .ic-eye-off { display: block; }
+.pin-reveal .ic-eye-off,
+.pin-reveal .lbl-hide { display: none; }
+.pin-reveal.revealed .ic-eye,
+.pin-reveal.revealed .lbl-show { display: none; }
+.pin-reveal.revealed .ic-eye-off,
+.pin-reveal.revealed .lbl-hide { display: block; }
 
-/* Progress dots — feedback while the digits stay hidden */
-.pin-dots {
-  display: flex; gap: 9px; justify-content: center;
-  margin: 20px 0 26px;
-}
-.pin-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(192,65,90,0.15);
-  transition: background 0.3s ease,
-              transform 0.34s cubic-bezier(.34,1.56,.64,1);
-}
-.pin-dot.filled { background: var(--rose); transform: scale(1.45); }
-
-/* Error */
+/* Error — kept out of flow so it reserves no blank space when hidden */
 .login-error {
-  display: flex; align-items: flex-start; gap: 8px;
+  display: none; align-items: flex-start; gap: 8px;
   background: rgba(255,240,240,0.9);
   border: 1px solid rgba(224,85,85,0.18);
-  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;
-  opacity: 0; transform: translateY(-6px);
-  transition: opacity 0.25s, transform 0.25s; pointer-events: none;
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
   text-align: left;
 }
-.login-error.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.login-error.show {
+  display: flex;
+  animation: errIn 0.3s cubic-bezier(.16,.84,.24,1) both;
+}
+@keyframes errIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .login-error i { font-size: 13px; color: #e05555; flex-shrink: 0; margin-top: 2px; }
 .login-error span { font-size: 12px; color: #c04040; line-height: 1.55; }
 
@@ -1237,10 +1278,8 @@ body::before {
   .headline        { font-size: 28px; }
   .login-card      { padding: 44px 26px 40px; }
   .login-title     { font-size: 34px; }
-  .login-sub       { margin-bottom: 28px; }
-  /* stays >=16px so iOS Safari never auto-zooms on focus */
-  .pin-input       { font-size: 26px; letter-spacing: 11px; text-indent: 11px; }
-  .pin-input.masked { letter-spacing: 10px; }
+  .login-sub       { margin-bottom: 16px; }
+  .pin-cell        { font-size: 23px; }
   .btn-primary     { padding: 13px 28px; font-size: 13.5px; }
   .hub-name        { font-size: 42px; letter-spacing: -1px; }
   .door-card       { padding: 16px 14px 14px; }
@@ -1249,9 +1288,15 @@ body::before {
   .sep-countdown   { gap: 20px; }
 }
 @media (max-width: 360px) {
-  .pin-input       { font-size: 22px; letter-spacing: 8px; text-indent: 8px; padding-right: 38px; }
-  .pin-input.masked { letter-spacing: 7px; }
-  .pin-dots        { gap: 7px; }
+  /* Trim the card gutters so eight cells still get usable width */
+  .login-card      { padding: 40px 18px 34px; }
+  .pin-cells       { gap: 5px; }
+  .pin-group       { gap: 3px; }
+  .pin-cell        { font-size: 20px; border-radius: 8px; aspect-ratio: 7 / 9; }
+  .pin-legend      { gap: 5px; }
+  .pin-legend span { font-size: 8px; letter-spacing: 1.4px; }
+  .pin-legend .l-spacer { width: 10px; }
+  .pin-sep         { font-size: 12px; }
   .door-grid       { grid-template-columns: 1fr; }
   .sep-countdown   { gap: 14px; }
 }
@@ -1264,8 +1309,9 @@ body::before {
   .headline        { font-size: 36px; }
 
   /* Login */
-  .login-card      { padding: 60px 56px 52px; max-width: 440px; }
+  .login-card      { padding: 52px 48px 46px; max-width: 460px; }
   .login-title     { font-size: 50px; }
+  .pin-cell        { font-size: 27px; }
 
   /* Hub */
   .hub-wrap        { max-width: 620px; }
@@ -1338,15 +1384,64 @@ body::before {
   .album-wrap      { max-width: 780px; }
   .album-grid      { grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-  /* Login */
-  .login-title     { font-size: 54px; }
-  .login-card      { max-width: 460px; }
+  /* Login — see the split-layout block below for the two-panel version */
 
   /* Hub nav higher up */
   .hub-nav         { top: max(28px, env(safe-area-inset-top, 0px) + 20px); left: max(28px, env(safe-area-inset-left, 0px) + 20px); }
 
   /* Music chip slightly higher */
   .music-chip      { bottom: max(28px, env(safe-area-inset-bottom, 0px) + 20px); }
+}
+
+/* ════════════════════════════════════
+   LOGIN — split layout on wide screens
+   A single narrow card looks lost in a desktop viewport, so the brand
+   half moves beside the form and the card earns its width.
+════════════════════════════════════ */
+@media (min-width: 900px) {
+  .login-card {
+    max-width: 860px;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    align-items: center;
+    column-gap: 56px;
+    padding: 64px 60px;
+    text-align: left;
+    border-radius: 32px;
+  }
+
+  .login-aside {
+    text-align: left;
+    border-right: 1px solid var(--line);
+    padding-right: 56px;
+    align-self: stretch;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .login-aside .monogram { justify-content: flex-start; margin-bottom: 28px; }
+  .login-aside .monogram hr:last-of-type { display: none; }
+  .login-aside .monogram hr:first-of-type { max-width: 44px; flex: 0 0 44px; }
+
+  .login-title { font-size: 62px; margin-bottom: 20px; letter-spacing: -1.5px; }
+
+  .login-blurb {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px; color: var(--muted);
+    line-height: 1.7; max-width: 30ch;
+  }
+  .login-aside-foot {
+    display: block;
+    margin-top: 34px;
+    font-size: 9px; letter-spacing: 2.8px; text-transform: uppercase;
+    color: var(--muted-lt); font-weight: 500;
+  }
+
+  .login-main   { text-align: left; }
+  .login-sub    { margin-bottom: 20px; }
+  .pin-cell     { font-size: 28px; max-width: 54px; }
+  .pin-reveal   { margin-left: 0; margin-right: auto; }
+  .login-hint   { text-align: left; margin-top: 22px; }
+  .login-card .btn-row { justify-content: flex-start; }
 }
 
 /* ─── Accessibility ─── */
@@ -1797,49 +1892,80 @@ body::before {
 
   <div class="login-card">
 
-    <div class="monogram">
-      <hr><span class="monogram-mark">N · F</span><hr>
+    <div class="login-aside">
+      <div class="monogram">
+        <hr><span class="monogram-mark">N · F</span><hr>
+      </div>
+
+      <h1 class="login-title">tell me<br>our <em>date.</em></h1>
+      <p class="login-blurb">Eight digits — the day everything started.</p>
+      <p class="login-aside-foot">a private page · for you only</p>
     </div>
 
-    <h1 class="login-title">tell me<br>our <em>date.</em></h1>
-    <p class="login-sub">day · month · year</p>
+    <div class="login-main">
+      <p class="login-sub">enter our date</p>
 
-    <form id="loginForm" novalidate>
-      <div class="pin-field">
-        <input class="pin-input masked" id="inCode"
-               type="text" inputmode="numeric" pattern="[0-9]*"
-               maxlength="8" placeholder="········"
-               autocomplete="off" autocorrect="off"
-               autocapitalize="off" spellcheck="false"
-               aria-label="Our date — eight digits, day month year">
-        <span class="pin-glow" aria-hidden="true"></span>
+      <form id="loginForm" novalidate>
+        <div class="pin-wrap" id="pinWrap">
+          <!-- Real field: invisible, sits over the cells, owns the keyboard -->
+          <input class="pin-real" id="inCode"
+                 type="text" inputmode="numeric" pattern="[0-9]*"
+                 maxlength="8"
+                 autocomplete="off" autocorrect="off"
+                 autocapitalize="off" spellcheck="false"
+                 aria-label="Our date — eight digits: day, month, then year">
+
+          <div class="pin-cells" id="pinCells" aria-hidden="true">
+            <div class="pin-group g-day">
+              <span class="pin-cell"></span><span class="pin-cell"></span>
+            </div>
+            <span class="pin-sep">·</span>
+            <div class="pin-group g-month">
+              <span class="pin-cell"></span><span class="pin-cell"></span>
+            </div>
+            <span class="pin-sep">·</span>
+            <div class="pin-group g-year">
+              <span class="pin-cell"></span><span class="pin-cell"></span>
+              <span class="pin-cell"></span><span class="pin-cell"></span>
+            </div>
+          </div>
+
+          <div class="pin-legend" aria-hidden="true">
+            <span class="l-day">day</span>
+            <span class="l-spacer"></span>
+            <span class="l-month">month</span>
+            <span class="l-spacer"></span>
+            <span class="l-year">year</span>
+          </div>
+        </div>
+
         <button type="button" class="pin-reveal" id="pinReveal" aria-label="Show the date">
-          <svg class="ic-eye" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-          <svg class="ic-eye-off" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a18 18 0 0 1-2.16 3.19M6.6 6.6A18 18 0 0 0 2 11s3.6 7 10 7a9.1 9.1 0 0 0 4.24-1"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="m2 2 20 20"/></svg>
+          <svg class="ic-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="ic-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.4 0 10 7 10 7a18 18 0 0 1-2.16 3.19M6.6 6.6A18 18 0 0 0 2 11s3.6 7 10 7a9.1 9.1 0 0 0 4.24-1"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="m2 2 20 20"/></svg>
+          <span class="lbl-show">show</span>
+          <span class="lbl-hide">hide</span>
         </button>
-      </div>
 
-      <div class="pin-dots" id="pinDots" aria-hidden="true"></div>
+        <div class="login-error" id="loginError">
+          <i class="ti ti-alert-circle"></i>
+          <span id="loginErrorMsg">That's not right. Think again.</span>
+        </div>
 
-      <div class="login-error" id="loginError">
-        <i class="ti ti-alert-circle"></i>
-        <span id="loginErrorMsg">That's not right. Think again.</span>
-      </div>
+        <div class="login-lockout" id="loginLockout">
+          <i class="ti ti-clock"></i>
+          <span id="lockoutMsg"></span>
+        </div>
 
-      <div class="login-lockout" id="loginLockout">
-        <i class="ti ti-clock"></i>
-        <span id="lockoutMsg"></span>
-      </div>
+        <div class="btn-row">
+          <button type="submit" class="btn-primary" id="loginBtn">
+            Open
+            <i class="ti ti-arrow-right"></i>
+          </button>
+        </div>
+      </form>
 
-      <div class="btn-row">
-        <button type="submit" class="btn-primary" id="loginBtn">
-          Open
-          <i class="ti ti-arrow-right"></i>
-        </button>
-      </div>
-    </form>
-
-    <p class="login-hint">the day we became us 🌙</p>
+      <p class="login-hint">the day we became us 🌙</p>
+    </div>
   </div>
 </div>
 
@@ -2428,7 +2554,7 @@ body::before {
     // Clear so the next try starts from an empty field rather than
     // forcing her to backspace eight digits
     $('inCode').value = '';
-    syncPinDots();
+    syncPinCells();
 
     let wait = 0;
     if      (failCount >= 8) wait = 60;
@@ -3032,47 +3158,54 @@ body::before {
     }
   }
 
-  /* ═══ Passcode field ═══ */
+  /* ═══ Passcode cells ═══ */
   const PIN_LEN = 8;
+  let pinRevealed = false;
 
-  function buildPinDots() {
-    const wrap = $('pinDots');
-    for (let i = 0; i < PIN_LEN; i++) {
-      const d = document.createElement('span');
-      d.className = 'pin-dot';
-      wrap.appendChild(d);
-    }
-  }
+  // Paints the value into the presentation cells and marks which cell
+  // is next, so the invisible input's state is always mirrored.
+  function syncPinCells() {
+    const val   = $('inCode').value;
+    const cells = $('pinCells').querySelectorAll('.pin-cell');
 
-  function syncPinDots() {
-    const n    = $('inCode').value.length;
-    const dots = $('pinDots').children;
-    for (let i = 0; i < dots.length; i++) {
-      dots[i].classList.toggle('filled', i < n);
-    }
+    cells.forEach((cell, i) => {
+      const ch = val[i];
+      cell.classList.toggle('filled', ch !== undefined);
+      cell.classList.toggle('current', i === val.length);
+
+      if (ch === undefined) { cell.textContent = ''; return; }
+      if (pinRevealed) {
+        cell.textContent = ch;
+      } else {
+        cell.textContent = '';
+        const dot = document.createElement('span');
+        dot.className = 'pin-bullet';
+        cell.appendChild(dot);
+      }
+    });
   }
 
   function onPinInput() {
     const el = $('inCode');
-    // Digits only — strips pasted separators like "20/09/2022"
+    // Digits only — also strips separators from a pasted "20/09/2022"
     const clean = el.value.replace(/\D/g, '').slice(0, PIN_LEN);
     if (clean !== el.value) el.value = clean;
-    syncPinDots();
+    syncPinCells();
     $('loginError').classList.remove('show');
   }
 
   function togglePinReveal() {
-    const el  = $('inCode');
+    pinRevealed = !pinRevealed;
     const btn = $('pinReveal');
-    const hidden = el.classList.toggle('masked');
-    btn.classList.toggle('revealed', !hidden);
-    btn.setAttribute('aria-label', hidden ? 'Show the date' : 'Hide the date');
-    el.focus();
+    btn.classList.toggle('revealed', pinRevealed);
+    btn.setAttribute('aria-label', pinRevealed ? 'Hide the date' : 'Show the date');
+    syncPinCells();
+    $('inCode').focus();
   }
 
   /* ═══ Init — wire up all event listeners ═══ */
   function init() {
-    buildPinDots();
+    syncPinCells();
     spawnPetals();
 
     // Restore lockout from a previous session
@@ -3113,7 +3246,16 @@ body::before {
 
     // Login — submit via the form so Enter and the button share one path
     $('loginForm').addEventListener('submit', e => { e.preventDefault(); attemptLogin(); });
-    $('inCode').addEventListener('input', onPinInput);
+    const codeEl = $('inCode');
+    codeEl.addEventListener('input', onPinInput);
+    codeEl.addEventListener('focus', () => $('pinWrap').classList.add('focused'));
+    codeEl.addEventListener('blur',  () => $('pinWrap').classList.remove('focused'));
+    // Always park the caret at the end — the cells imply left-to-right
+    // entry, so letting a tap drop the caret mid-string would desync them
+    codeEl.addEventListener('click', () => {
+      const n = codeEl.value.length;
+      codeEl.setSelectionRange(n, n);
+    });
     $('pinReveal').addEventListener('click', togglePinReveal);
 
     // Finale "Always" button

@@ -1495,15 +1495,20 @@ body::before {
   border-top: 1px solid rgba(192,65,90,0.08);
 }
 
-/* Barcode — repeating gradient, no image needed */
+/* Barcode — bars are generated from the date's digits (see buildBarcode),
+   so the pattern actually corresponds to the ticket rather than being a
+   decorative repeat that looks the same on every date. */
 .tk-barcode {
-  height: 34px; margin: 20px auto 8px; max-width: 190px;
-  background: repeating-linear-gradient(90deg,
-    var(--ink-soft) 0 2px, transparent 2px 4px,
-    var(--ink-soft) 4px 5px, transparent 5px 9px,
-    var(--ink-soft) 9px 12px, transparent 12px 14px);
-  opacity: 0.5;
+  display: flex; align-items: stretch; justify-content: center;
+  gap: 2px;
+  height: 34px; margin: 20px auto 8px;
 }
+.tk-bar {
+  background: var(--ink-soft);
+  opacity: 0.5;
+  border-radius: 0.5px;
+}
+.tk-bar.guard { opacity: 0.78; }
 .tk-serial {
   font-size: 8.5px; letter-spacing: 2.4px;
   color: var(--muted-lt); font-weight: 500;
@@ -2210,7 +2215,7 @@ body::before {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </div>
         <div class="door-title">something for september</div>
-        <div class="door-desc">wait for it — 07.09, 8pm 🌙</div>
+        <div class="door-desc">wait for it — 06.09, 8pm 🌙</div>
         <div class="door-foot">
           <div class="door-dot dot-lock" id="doorSepDot"></div>
           <span class="door-label label-lock" id="doorSepLabel">locked</span>
@@ -2697,7 +2702,7 @@ body::before {
 
       <p class="sep-lede">
         Our day is the 20th — but I won't be with you then.<br>
-        So this one opens early, on the 7th at 8 in the evening.
+        So this one opens early, on the 6th at 8 in the evening.
       </p>
 
       <div class="sep-countdown">
@@ -2705,7 +2710,7 @@ body::before {
         <div class="cd-unit"><span class="cd-num" id="sepHours">—</span><span class="cd-label">hrs</span></div>
         <div class="cd-unit"><span class="cd-num" id="sepMins">—</span><span class="cd-label">min</span></div>
       </div>
-      <p class="sep-date-line" id="sepDateLine">07 · 09 · 2026 · 8:00 PM</p>
+      <p class="sep-date-line" id="sepDateLine">06 · 09 · 2026 · 8:00 PM</p>
     </div>
 
     <!-- STATE B — unlocked: scratch the foil off the gift -->
@@ -2729,7 +2734,7 @@ body::before {
             <div class="tk-body">
               <dl id="tkRows"></dl>
               <p class="tk-note" id="tkNote"></p>
-              <div class="tk-barcode" aria-hidden="true"></div>
+              <div class="tk-barcode" id="tkBarcode" aria-hidden="true"></div>
               <p class="tk-serial" id="tkSerial"></p>
             </div>
           </div>
@@ -2802,15 +2807,15 @@ body::before {
   const SEP_GIFT = {
     kicker: 'your anniversary gift',
     headline: 'Four Years',
-    date: '07 · 09 · 2026',
+    date: '06 · 09 · 2026',
     rows: [
-      ['where',  'Bunglow37'],
-      ['when',   '7 Sept 2026 · 8:00 PM'],
+      ['where',  'Monograph KL'],
+      ['when',   '6 Sept 2026 · 8:00 PM'],
       ['wear',   'something you feel good in'],
       ['guests', '2 of 2'],
     ],
     note: 'Our day is the 20th. I just could not wait, and I could not be away for it.',
-    serial: 'NF · 07 · 09 · 2026',
+    serial: 'NF · 06 · 09 · 2026',
   };
 
   /* ═══ Wedding playlist ═══
@@ -3109,7 +3114,7 @@ body::before {
   }
 
   /* ═══ Something for September ═══ */
-  const SEP_LABEL = '07 · 09 · 2026';
+  const SEP_LABEL = '06 · 09 · 2026';
 
   function septemberUnlocked() { return Date.now() >= SEP_REVEAL_AT; }
 
@@ -3212,6 +3217,35 @@ body::before {
       row.append(dt, dd);
       rows.appendChild(row);
     });
+
+    buildBarcode(gift.date);
+  }
+
+  // Derives the bars from the ticket's own date instead of drawing a
+  // decorative repeat: each digit becomes four bars, wide for a 1 bit and
+  // narrow for a 0 (binary-coded decimal), bracketed by guard bars. So
+  // 06092026 produces a pattern unique to that date.
+  function buildBarcode(dateText) {
+    const el = $('tkBarcode');
+    if (!el) return;
+    el.textContent = '';
+
+    const digits = String(dateText || '').replace(/\D/g, '');
+    if (!digits) return;
+
+    const bar = (width, guard) => {
+      const s = document.createElement('span');
+      s.className = 'tk-bar' + (guard ? ' guard' : '');
+      s.style.width = width + 'px';
+      el.appendChild(s);
+    };
+
+    bar(3, true); bar(2, true);
+    for (const d of digits) {
+      const bits = Number(d).toString(2).padStart(4, '0');
+      for (const b of bits) bar(b === '1' ? 4 : 2, false);
+    }
+    bar(2, true); bar(3, true);
   }
 
   /* ═══ Scratch-to-reveal ═══ */

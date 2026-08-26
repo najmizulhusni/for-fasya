@@ -1103,9 +1103,75 @@ body::before {
 .cl-wrap { max-width: 440px; width: 100%; margin: 0 auto; }
 .wf-countdown {
   display: flex; gap: 32px;
-  padding-bottom: 30px; margin-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  /* no bottom rule — the playlist's top border is the single divider
+     here, otherwise the two stack up as a double line */
+  padding-bottom: 4px;
 }
+
+/* ─── Wedding playlist ─── */
+.pl {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.pl-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; margin-bottom: 14px;
+}
+.pl-label {
+  font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; opacity: 0.8;
+}
+.pl-count {
+  font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--muted-lt); font-weight: 500; white-space: nowrap;
+}
+
+.pl-list { list-style: none; }
+.pl-row + .pl-row { border-top: 1px solid rgba(192,65,90,0.07); }
+.pl-row a {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 4px;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+.pl-row a:hover { background: rgba(192,65,90,0.04); }
+.pl-num {
+  flex: 0 0 auto;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--rose-md); width: 14px; text-align: center;
+}
+.pl-meta { flex: 1; min-width: 0; }
+.pl-song {
+  display: block;
+  font-size: 13.5px; font-weight: 500; color: var(--ink);
+  line-height: 1.35;
+  /* long titles truncate rather than wrapping the row out of rhythm */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-artist {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 12.5px;
+  color: var(--muted); line-height: 1.35; margin-top: 1px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-row svg { flex: 0 0 auto; color: var(--muted-lt); transition: color 0.2s ease; }
+.pl-row a:hover svg { color: var(--rose); }
+
+.pl-open {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 16px; padding: 9px 16px;
+  border: 1.5px solid var(--rose-md);
+  border-radius: 50px;
+  color: var(--rose); text-decoration: none;
+  font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase;
+  font-weight: 500;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.pl-open:hover { background: var(--rose-lt); border-color: var(--rose); }
 
 /* ─── The journey to 17.12.2027 ───────────────────────
    A numbered rail of stages, each with its own frame so a
@@ -1596,7 +1662,8 @@ body::before {
   #scChecklist     { padding-top: 90px; }
   .cl-wrap         { max-width: 560px; }
   .jr-head-title   { font-size: 31px; }
-  .jr-frame        { height: 168px; }
+  /* capped so the frame keeps photo-like proportions in a wider column */
+  .jr-frame        { height: 230px; max-width: 400px; }
 
   /* Countdown */
   .cd-num          { font-size: 40px; }
@@ -1653,9 +1720,31 @@ body::before {
   .album-wrap      { max-width: 780px; }
   .album-grid      { grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-  /* Journey */
-  .cl-wrap         { max-width: 620px; }
-  .jr-frame        { height: 190px; }
+  /* Journey — two columns: the day and its playlist on the left rail,
+     the stages on the right. A single narrow column read as a phone
+     screen stranded in the middle of a desktop viewport. */
+  .cl-wrap {
+    max-width: 1040px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    column-gap: 60px;
+    align-items: start;
+  }
+  .wf-aside {
+    /* sticks while the stages scroll past */
+    position: sticky;
+    top: 104px;
+    padding-right: 44px;
+    border-right: 1px solid var(--line);
+  }
+  .wf-countdown { gap: 22px; }
+  .wf-main   { min-width: 0; }
+  .jr-head   { padding-top: 0; }
+  /* capped — left to fill the column the frame became a 3:1 letterbox
+     rather than reading as something a photo goes into */
+  .jr-frame  { height: 280px; max-width: 470px; }
+  .jr-note   { max-width: 54ch; }
+  .cl-wrap .story-title { font-size: 40px; }
 
   /* Login — see the split-layout block below for the two-panel version */
 
@@ -2466,22 +2555,41 @@ body::before {
 ════════════════════════════════════ -->
 <div class="screen" id="scChecklist">
   <div class="cl-wrap">
-    <p class="story-overline">the day we're waiting for</p>
-    <h1 class="story-title">17 · 12 · <em>2027.</em></h1>
 
-    <div class="wf-countdown">
-      <div class="cd-unit"><span class="cd-num" id="wfDays">—</span><span class="cd-label">days</span></div>
-      <div class="cd-unit"><span class="cd-num" id="wfHours">—</span><span class="cd-label">hrs</span></div>
-      <div class="cd-unit"><span class="cd-num" id="wfMins">—</span><span class="cd-label">min</span></div>
+    <!-- Left rail on desktop, stacked on top on phones -->
+    <aside class="wf-aside">
+      <p class="story-overline">the day we're waiting for</p>
+      <h1 class="story-title">17 · 12 · <em>2027.</em></h1>
+
+      <div class="wf-countdown">
+        <div class="cd-unit"><span class="cd-num" id="wfDays">—</span><span class="cd-label">days</span></div>
+        <div class="cd-unit"><span class="cd-num" id="wfHours">—</span><span class="cd-label">hrs</span></div>
+        <div class="cd-unit"><span class="cd-num" id="wfMins">—</span><span class="cd-label">min</span></div>
+      </div>
+
+      <section class="pl">
+        <div class="pl-head">
+          <span class="pl-label">wedding playlist</span>
+          <span class="pl-count" id="plCount"></span>
+        </div>
+        <ul class="pl-list" id="plList"></ul>
+        <a class="pl-open" id="plOpen" target="_blank" rel="noopener noreferrer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.75-1.77C18.25 5 12 5 12 5s-6.25 0-7.85.43A2.5 2.5 0 0 0 2.4 7.2C2 8.82 2 12 2 12s0 3.18.4 4.8a2.5 2.5 0 0 0 1.75 1.77C5.75 19 12 19 12 19s6.25 0 7.85-.43a2.5 2.5 0 0 0 1.75-1.77C22 15.18 22 12 22 12s0-3.18-.4-4.8zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
+          open the full playlist
+        </a>
+      </section>
+    </aside>
+
+    <div class="wf-main">
+      <div class="jr-head">
+        <p class="jr-head-label">the road there</p>
+        <h2 class="jr-head-title">Every step, <em>in order.</em></h2>
+        <p class="jr-progress" id="jrProgress"></p>
+      </div>
+
+      <div class="jr-list" id="jrList"></div>
     </div>
 
-    <div class="jr-head">
-      <p class="jr-head-label">the road there</p>
-      <h2 class="jr-head-title">Every step, <em>in order.</em></h2>
-      <p class="jr-progress" id="jrProgress"></p>
-    </div>
-
-    <div class="jr-list" id="jrList"></div>
   </div>
 </div>
 
@@ -2704,6 +2812,16 @@ body::before {
     note: 'Our day is the 20th. I just could not wait, and I could not be away for it.',
     serial: 'NF · 07 · 09 · 2026',
   };
+
+  /* ═══ Wedding playlist ═══
+   * Songs in the running for the day. Add a row to extend the list;
+   * PLAYLIST_URL is the "open the full playlist" destination.
+   */
+  const PLAYLIST_URL = 'https://www.youtube.com/watch?v=FcOctsNXyjk&list=RDRO75uUZiAw0';
+  const PLAYLIST = [
+    { title: 'Cinta Luar Biasa', artist: 'Andmesh', url: 'https://www.youtube.com/watch?v=FcOctsNXyjk' },
+    { title: 'Teh Hijau',        artist: 'Tulus',   url: 'https://www.youtube.com/watch?v=zyLmavBAY7k' },
+  ];
 
   /* ═══ The journey to 17.12.2027 ═══
    * Each stage renders its own frame. To add a photo, drop the file
@@ -3516,7 +3634,54 @@ body::before {
     clearInterval(wfTimer);
     wfTimer = setInterval(tick, 30000);
 
+    buildPlaylist();
     buildJourney();
+  }
+
+  function buildPlaylist() {
+    const list = $('plList');
+    if (!list || list.childElementCount) return; // build once
+
+    PLAYLIST.forEach((track, i) => {
+      const li = document.createElement('li');
+      li.className = 'pl-row';
+
+      const a = document.createElement('a');
+      a.href   = track.url;
+      a.target = '_blank';
+      a.rel    = 'noopener noreferrer';
+      a.setAttribute('aria-label', `${track.title} by ${track.artist} — open on YouTube`);
+
+      const num = document.createElement('span');
+      num.className   = 'pl-num';
+      num.textContent = i + 1;
+
+      const meta = document.createElement('span');
+      meta.className = 'pl-meta';
+      const song = document.createElement('span');
+      song.className   = 'pl-song';
+      song.textContent = track.title;
+      const artist = document.createElement('span');
+      artist.className   = 'pl-artist';
+      artist.textContent = track.artist;
+      meta.append(song, artist);
+
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('width', '13');
+      icon.setAttribute('height', '13');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('fill', 'currentColor');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+
+      a.append(num, meta, icon);
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+
+    const n = PLAYLIST.length;
+    $('plCount').textContent = n === 1 ? '1 song' : `${n} songs`;
+    $('plOpen').href = PLAYLIST_URL;
   }
 
   function buildJourney() {

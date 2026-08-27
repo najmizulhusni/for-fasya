@@ -1575,6 +1575,9 @@ body::before {
 .after { display: none; }
 .after.open {
   display: block;
+  /* clears the stats rule below — without it the calendar button sits
+     flush on that border with no breathing room */
+  margin-bottom: 30px;
   animation: screenIn 0.55s cubic-bezier(.16,.84,.24,1) both;
 }
 .after-rule {
@@ -3477,15 +3480,17 @@ body::before {
   }
 
   /* ═══ RSVP ═══
-   * The invitation asks a question; this is the answer, and answering it
-   * is what unlocks the plan for the night. Persisted in localStorage
-   * (not sessionStorage) because a confirmed yes should stay confirmed —
-   * unlike the foil, it isn't a moment worth repeating.
+   * The invitation asks a question; answering it unlocks the plan.
+   *
+   * sessionStorage, matching the foil. Persisting this forever left an
+   * incoherent state: the foil came back on a new visit, so she would
+   * scratch a ticket that was already stamped with no button to press.
+   * Now the whole sequence — scratch, ask, confirm — replays per visit.
    */
   const RSVP_KEY = 'sep_rsvp';
 
   function showRsvp() {
-    if (localStorage.getItem(RSVP_KEY)) { applyRsvp(false); return; }
+    if (sessionStorage.getItem(RSVP_KEY)) { applyRsvp(false); return; }
     $('rsvpBlock').classList.add('ask');
   }
 
@@ -3505,7 +3510,7 @@ body::before {
   }
 
   function acceptRsvp() {
-    localStorage.setItem(RSVP_KEY, '1');
+    sessionStorage.setItem(RSVP_KEY, '1');
     applyRsvp(true);
     // let the newly revealed plan settle, then bring it into view
     setTimeout(() => {

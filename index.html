@@ -1505,7 +1505,8 @@ body::before {
 .tk-barcode {
   display: flex; align-items: stretch; justify-content: center;
   gap: 2px;
-  height: 34px; margin: 20px auto 8px;
+  /* extra top margin gives the stamp clearance from the note above */
+  height: 34px; margin: 26px auto 8px;
 }
 .tk-bar {
   background: var(--ink-soft);
@@ -1519,30 +1520,41 @@ body::before {
 }
 
 /* ─── CONFIRMED stamp ─── */
+/* Anchor for the stamp — keeps it locked to the barcode block */
+.tk-validate { position: relative; }
+
 .tk-stamp {
   position: absolute;
-  /* over the barcode, not the details — a stamp across "when" and "wear"
-     would cover the two things she actually needs to read */
-  top: 82%; left: 50%;
-  padding: 6px 15px;
-  border: 2px solid var(--rose);
-  border-radius: 4px;
+  /* 32% = the barcode's centre within this block. Rotation inflates the
+     footprint, so the angle stays shallow and the type small enough that
+     the stamp clears the serial line beneath it. */
+  top: 32%; left: 50%;
+  padding: 5px 13px;
+  border: 1.5px solid var(--rose);
+  border-radius: 3px;
   color: var(--rose);
-  font-size: 13px; font-weight: 600;
-  letter-spacing: 3.5px; text-transform: uppercase;
+  /* faint paper-toned backdrop so the ink stays readable where it
+     crosses the dark barcode bars */
+  background: rgba(255, 252, 248, 0.62);
+  font-size: 11.5px; font-weight: 600;
+  letter-spacing: 2.8px; text-transform: uppercase;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   /* the resting position it settles into once pressed */
-  transform: translate(-50%, -50%) rotate(-13deg) scale(1);
+  transform: translate(-50%, -50%) rotate(-8deg) scale(1);
 }
+
+/* Bars step back once validated, so the stamp reads as the top layer */
+.tk.validated .tk-bar { opacity: 0.16; }
+.tk.validated .tk-bar.guard { opacity: 0.24; }
 .tk-stamp.stamped {
   animation: stampDown 0.5s cubic-bezier(.2,.9,.3,1.1) forwards;
 }
 @keyframes stampDown {
-  0%   { opacity: 0;    transform: translate(-50%,-50%) rotate(-13deg) scale(2.4); }
-  55%  { opacity: 0.92; transform: translate(-50%,-50%) rotate(-13deg) scale(0.94); }
-  100% { opacity: 0.88; transform: translate(-50%,-50%) rotate(-13deg) scale(1); }
+  0%   { opacity: 0;    transform: translate(-50%,-50%) rotate(-8deg) scale(2.4); }
+  55%  { opacity: 0.92; transform: translate(-50%,-50%) rotate(-8deg) scale(0.94); }
+  100% { opacity: 0.88; transform: translate(-50%,-50%) rotate(-8deg) scale(1); }
 }
 
 /* ─── RSVP ─── */
@@ -2854,10 +2866,15 @@ body::before {
             <div class="tk-body">
               <dl id="tkRows"></dl>
               <p class="tk-note" id="tkNote"></p>
-              <div class="tk-barcode" id="tkBarcode" aria-hidden="true"></div>
-              <p class="tk-serial" id="tkSerial"></p>
+              <!-- Stamp lives with the barcode so it is anchored to it,
+                   not to a percentage of a ticket whose height shifts
+                   whenever the note text rewraps -->
+              <div class="tk-validate">
+                <div class="tk-barcode" id="tkBarcode" aria-hidden="true"></div>
+                <p class="tk-serial" id="tkSerial"></p>
+                <div class="tk-stamp" id="tkStamp" aria-hidden="true">confirmed</div>
+              </div>
             </div>
-            <div class="tk-stamp" id="tkStamp" aria-hidden="true">confirmed</div>
           </div>
           <canvas class="scratch-canvas" id="scratchCanvas"
                   aria-label="Scratch to reveal your gift"></canvas>
@@ -3001,21 +3018,22 @@ body::before {
     // Unlocked once she says yes. Keep the last row vague on purpose —
     // it is the one thing left to find out on the night.
     plan: [
-      ['8:00 PM',  'I come get you'],
-      ['8:30 PM',  'Dinner at Monograph KL'],
+      ['7:30 PM',  'We set off together'],
+      ['8:00 PM',  'Dinner at Monograph KL'],
       ['10:30 PM', 'A walk, if the night is kind'],
       ['after',    'One more thing. You’ll see.'],
     ],
   };
 
-  // Powers the "add to my calendar" download. The offset is explicit so
-  // the event lands at 8pm Malaysia time regardless of device timezone.
+  // Powers the "add to my calendar" download. Starts at 7:30 — the time
+  // she needs to be ready — not 8:00 when dinner itself begins. The
+  // offset is explicit so it lands at Malaysia time on any device.
   const SEP_EVENT = {
     title:    'Anniversary dinner with Najmi',
     location: 'Monograph KL',
-    details:  'Four years. Black is the theme.',
-    startISO: '2026-09-06T20:00:00+08:00',
-    hours:    3,
+    details:  'Leave together at 7:30, dinner at 8. Black is the theme.',
+    startISO: '2026-09-06T19:30:00+08:00',
+    hours:    3.5,
   };
 
   /* ═══ Wedding playlist ═══
@@ -3474,6 +3492,9 @@ body::before {
   function applyRsvp(celebrate) {
     $('rsvpBlock').classList.remove('ask');
     $('tkStamp').classList.add('stamped');
+    // dims the barcode beneath the stamp — set here rather than with a
+    // CSS :has() selector so older Safari behaves the same
+    $('tkCard').classList.add('validated');
     buildPlan();
     $('sepAfter').classList.add('open');
 

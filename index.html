@@ -1518,6 +1518,90 @@ body::before {
   color: var(--muted-lt); font-weight: 500;
 }
 
+/* ─── CONFIRMED stamp ─── */
+.tk-stamp {
+  position: absolute;
+  /* over the barcode, not the details — a stamp across "when" and "wear"
+     would cover the two things she actually needs to read */
+  top: 82%; left: 50%;
+  padding: 6px 15px;
+  border: 2px solid var(--rose);
+  border-radius: 4px;
+  color: var(--rose);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 3.5px; text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  /* the resting position it settles into once pressed */
+  transform: translate(-50%, -50%) rotate(-13deg) scale(1);
+}
+.tk-stamp.stamped {
+  animation: stampDown 0.5s cubic-bezier(.2,.9,.3,1.1) forwards;
+}
+@keyframes stampDown {
+  0%   { opacity: 0;    transform: translate(-50%,-50%) rotate(-13deg) scale(2.4); }
+  55%  { opacity: 0.92; transform: translate(-50%,-50%) rotate(-13deg) scale(0.94); }
+  100% { opacity: 0.88; transform: translate(-50%,-50%) rotate(-13deg) scale(1); }
+}
+
+/* ─── RSVP ─── */
+/* hidden until the foil is off — asking before she can read the
+   invitation would put the question ahead of the reveal */
+.rsvp { display: none; text-align: center; margin-bottom: 4px; }
+.rsvp.ask {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(.16,.84,.24,1) both;
+}
+.rsvp-q {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 19px;
+  color: var(--ink); margin-bottom: 16px;
+}
+
+/* ─── What the RSVP unlocks ─── */
+.after { display: none; }
+.after.open {
+  display: block;
+  animation: screenIn 0.55s cubic-bezier(.16,.84,.24,1) both;
+}
+.after-rule {
+  display: flex; align-items: center; gap: 12px;
+  margin: 4px 0 22px;
+}
+.after-rule hr { flex: 1; border: none; border-top: 1px solid var(--line); }
+.after-rule span {
+  font-size: 9px; letter-spacing: 2.8px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; white-space: nowrap;
+}
+
+.plan-label {
+  font-size: 9.5px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; opacity: 0.8;
+  margin-bottom: 14px; text-align: left;
+}
+.plan-list { list-style: none; text-align: left; }
+.plan-row {
+  display: flex; gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(192,65,90,0.07);
+}
+.plan-row:last-child { border-bottom: none; }
+.plan-when {
+  flex: 0 0 68px;
+  font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500; padding-top: 4px;
+}
+.plan-what {
+  flex: 1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; color: var(--ink); line-height: 1.5;
+}
+/* the last beat is deliberately unresolved */
+.plan-row.mystery .plan-what { font-style: italic; color: var(--muted); }
+
+.plan-cal { margin-top: 20px; }
+
 .sep-stats {
   display: flex;
   border-top: 1px solid var(--line);
@@ -2773,6 +2857,7 @@ body::before {
               <div class="tk-barcode" id="tkBarcode" aria-hidden="true"></div>
               <p class="tk-serial" id="tkSerial"></p>
             </div>
+            <div class="tk-stamp" id="tkStamp" aria-hidden="true">confirmed</div>
           </div>
           <canvas class="scratch-canvas" id="scratchCanvas"
                   aria-label="Scratch to reveal your gift"></canvas>
@@ -2782,6 +2867,28 @@ body::before {
         <button type="button" class="scratch-skip" id="scratchSkip">
           or just reveal it
         </button>
+
+        <!-- The ask. An invitation that never asks anything is just a poster. -->
+        <div class="rsvp" id="rsvpBlock">
+          <p class="rsvp-q">So — will you come?</p>
+          <button type="button" class="btn-primary" id="rsvpBtn">
+            I'll be there
+            <i class="ti ti-heart"></i>
+          </button>
+        </div>
+
+        <!-- Unlocked by the RSVP -->
+        <div class="after" id="sepAfter">
+          <div class="after-rule"><hr><span>you're coming</span><hr></div>
+
+          <p class="plan-label">the plan</p>
+          <ol class="plan-list" id="planList"></ol>
+
+          <button type="button" class="btn-ghost plan-cal" id="icsBtn">
+            <i class="ti ti-calendar-plus"></i>
+            add to my calendar
+          </button>
+        </div>
 
         <div class="sep-stats">
           <div class="sep-stat">
@@ -2890,6 +2997,25 @@ body::before {
     ],
     note: 'Our day is the 20th. I just could not wait, and I could not be away for it.',
     serial: 'NF · 06 · 09 · 2026',
+
+    // Unlocked once she says yes. Keep the last row vague on purpose —
+    // it is the one thing left to find out on the night.
+    plan: [
+      ['8:00 PM',  'I come get you'],
+      ['8:30 PM',  'Dinner at Monograph KL'],
+      ['10:30 PM', 'A walk, if the night is kind'],
+      ['after',    'One more thing. You’ll see.'],
+    ],
+  };
+
+  // Powers the "add to my calendar" download. The offset is explicit so
+  // the event lands at 8pm Malaysia time regardless of device timezone.
+  const SEP_EVENT = {
+    title:    'Anniversary dinner with Najmi',
+    location: 'Monograph KL',
+    details:  'Four years. Black is the theme.',
+    startISO: '2026-09-06T20:00:00+08:00',
+    hours:    3,
   };
 
   /* ═══ Wedding playlist ═══
@@ -3332,6 +3458,100 @@ body::before {
     bar(2, true); bar(3, true);
   }
 
+  /* ═══ RSVP ═══
+   * The invitation asks a question; this is the answer, and answering it
+   * is what unlocks the plan for the night. Persisted in localStorage
+   * (not sessionStorage) because a confirmed yes should stay confirmed —
+   * unlike the foil, it isn't a moment worth repeating.
+   */
+  const RSVP_KEY = 'sep_rsvp';
+
+  function showRsvp() {
+    if (localStorage.getItem(RSVP_KEY)) { applyRsvp(false); return; }
+    $('rsvpBlock').classList.add('ask');
+  }
+
+  function applyRsvp(celebrate) {
+    $('rsvpBlock').classList.remove('ask');
+    $('tkStamp').classList.add('stamped');
+    buildPlan();
+    $('sepAfter').classList.add('open');
+
+    if (celebrate) {
+      launchConfetti();
+      spawnHearts($('tkStamp'));
+    }
+  }
+
+  function acceptRsvp() {
+    localStorage.setItem(RSVP_KEY, '1');
+    applyRsvp(true);
+    // let the newly revealed plan settle, then bring it into view
+    setTimeout(() => {
+      $('sepAfter').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 450);
+  }
+
+  function buildPlan() {
+    const list = $('planList');
+    if (!list || list.childElementCount) return; // build once
+
+    const plan = SEP_GIFT.plan || [];
+    plan.forEach(([when, what], i) => {
+      const li = document.createElement('li');
+      li.className = 'plan-row' + (i === plan.length - 1 ? ' mystery' : '');
+
+      const w = document.createElement('span');
+      w.className   = 'plan-when';
+      w.textContent = when;
+
+      const t = document.createElement('span');
+      t.className   = 'plan-what';
+      t.textContent = what;
+
+      li.append(w, t);
+      list.appendChild(li);
+    });
+  }
+
+  /* ═══ Add to calendar ═══ */
+  // Minimal single-event .ics. Times are emitted as UTC so the event
+  // lands correctly whatever timezone her phone is set to.
+  function downloadIcs() {
+    const start = new Date(SEP_EVENT.startISO);
+    const end   = new Date(start.getTime() + SEP_EVENT.hours * 3600000);
+    const stamp = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    // commas, semicolons and newlines are structural in ics text values
+    const esc   = s => String(s).replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//for-fasya//EN',
+      'CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      `UID:${stamp(start)}-nf@for-fasya`,
+      `DTSTAMP:${stamp(new Date())}`,
+      `DTSTART:${stamp(start)}`,
+      `DTEND:${stamp(end)}`,
+      `SUMMARY:${esc(SEP_EVENT.title)}`,
+      `LOCATION:${esc(SEP_EVENT.location)}`,
+      `DESCRIPTION:${esc(SEP_EVENT.details)}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'anniversary-dinner.ics';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // revoke on the next tick so the download has already started
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   /* ═══ Scratch-to-reveal ═══ */
   const SCRATCH_THRESHOLD = 0.45; // fraction cleared before it opens itself
 
@@ -3345,6 +3565,7 @@ body::before {
     // so the reveal isn't spent permanently after the first open
     if (sessionStorage.getItem('sep_scratched')) {
       wrap.classList.add('revealed');
+      showRsvp();
       return;
     }
     // Pointer-only interaction; skip the foil entirely if motion is reduced
@@ -3456,6 +3677,8 @@ body::before {
       launchConfetti();
       spawnHearts($('tkCard'));
     }
+    // The invitation is legible now, so it can ask its question
+    showRsvp();
   }
 
   /* ═══ Story counter ═══ */
@@ -4158,8 +4381,10 @@ body::before {
     });
     $('pinReveal').addEventListener('click', togglePinReveal);
 
-    // September — no passcode; the scratch fallback is the only control
+    // September — no passcode; scratch fallback, RSVP, and calendar
     $('scratchSkip').addEventListener('click', () => finishScratch(true));
+    $('rsvpBtn').addEventListener('click', acceptRsvp);
+    $('icsBtn').addEventListener('click', downloadIcs);
 
     // Finale "Always" button
     $('finaleBtn').addEventListener('click', finale);

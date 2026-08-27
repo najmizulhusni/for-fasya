@@ -1,1 +1,6 @@
 .DS_Store
+
+# Full-resolution originals of the photos, kept locally as a safety net.
+# The site ships the resized copies; committing 71MB of camera files
+# would bloat the repo and slow every clone.
+originals/

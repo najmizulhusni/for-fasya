@@ -70,7 +70,9 @@ body::before {
   pointer-events: none;
   z-index: 1;
   animation: petalFall var(--dur, 15s) linear var(--delay, 0s) infinite;
-  will-change: transform, opacity;
+  /* No will-change: these run forever, so it would pin a GPU layer per
+     heart for the life of the page. Animating transform already gets
+     compositing without holding the memory. */
 }
 .petal-sway {
   display: block;
@@ -1066,6 +1068,8 @@ body::before {
   cursor: pointer; white-space: nowrap;
   transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
 }
+/* sits above the near-invisible autoplay iframe behind it */
+.music-pill { position: relative; z-index: 1; }
 .music-pill:hover { background: var(--rose-lt); border-color: var(--rose-md); transform: translateY(-2px); }
 .music-pill:active { transform: scale(0.96); }
 .music-pill-song { font-size: 12px; font-weight: 500; color: var(--ink-soft); line-height: 1.3; }
@@ -1575,6 +1579,23 @@ body::before {
   box-shadow: 0 4px 16px rgba(192,65,90,0.3);
 }
 .vault-drive-btn:hover { transform: translateY(-2px); }
+.vault-lede {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.7; margin-bottom: 14px;
+}
+
+/* How-to-use panel */
+.vault-how { background: rgba(192,65,90,0.03); border-color: rgba(192,65,90,0.1); }
+.vault-steps {
+  margin: 0; padding-left: 18px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.vault-steps li {
+  font-size: 12.5px; color: var(--muted); line-height: 1.65;
+}
+.vault-steps li::marker { color: var(--rose-md); font-weight: 600; }
+.vault-steps strong { color: var(--ink-soft); font-weight: 500; }
+
 .vault-body {
   font-size: 14px; color: var(--muted); line-height: 1.8; white-space: pre-wrap;
 }
@@ -1685,24 +1706,25 @@ body::before {
   /* Hub — split layout: left=header+countdown, right=door-grid */
   #scHub           { align-items: center; }
   .hub-wrap {
-    max-width: 940px;
+    max-width: 980px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 64px;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    column-gap: 60px;
     align-items: center;
   }
-  .hub-header {
-    grid-column: 1; grid-row: 1;
-    border-bottom: none; margin-bottom: 0;
-    padding-bottom: 28px;
+  /* One continuous rule down the side, rather than one per child */
+  .hub-side {
     border-right: 1px solid var(--line);
-    padding-right: 44px;
+    padding-right: 48px;
+  }
+  .hub-header {
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 0;
+    padding-bottom: 26px;
   }
   .hub-countdown {
-    grid-column: 1; grid-row: 2;
     border-bottom: none; margin-bottom: 0;
-    padding: 28px 44px 0 0;
-    border-right: 1px solid var(--line);
+    padding: 26px 0 0;
     text-align: left;
   }
   .countdown-display { justify-content: flex-start; }
@@ -2105,7 +2127,7 @@ body::before {
 <!-- Music chip — iframe hidden inside, near-zero opacity lets browser render it for autoplay -->
 <div class="music-chip" id="musicChip">
   <iframe id="musicFrame" src="" allow="autoplay; encrypted-media"></iframe>
-  <div class="music-pill" id="musicPill" style="position:relative;z-index:1;" role="button" tabindex="0" aria-label="Toggle music">
+  <div class="music-pill" id="musicPill" role="button" tabindex="0" aria-label="Toggle music">
     <div class="music-bars">
       <div class="bar b1"></div>
       <div class="bar b2"></div>
@@ -2149,21 +2171,25 @@ body::before {
 <div class="screen" id="scHub">
   <div class="hub-wrap">
 
-    <div class="hub-header">
-      <p class="hub-eyebrow">private · for you only</p>
-      <h1 class="hub-name">Fasya.</h1>
-      <p class="hub-meta" id="hubMeta"></p>
-    </div>
-
-    <!-- Countdown -->
-    <div class="hub-countdown">
-      <div class="countdown-label">until our next anniversary</div>
-      <div class="countdown-display">
-        <div class="cd-unit"><span class="cd-num" id="cdDays">—</span><span class="cd-label">days</span></div>
-        <div class="cd-unit"><span class="cd-num" id="cdHours">—</span><span class="cd-label">hrs</span></div>
-        <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
+    <!-- One block, so the desktop grid can't stretch the name and the
+         countdown apart to the height of the door grid beside them -->
+    <div class="hub-side">
+      <div class="hub-header">
+        <p class="hub-eyebrow">private · for you only</p>
+        <h1 class="hub-name">Fasya.</h1>
+        <p class="hub-meta" id="hubMeta"></p>
       </div>
-      <div class="countdown-sub" id="cdSub"></div>
+
+      <!-- Countdown -->
+      <div class="hub-countdown">
+        <div class="countdown-label">until our next anniversary</div>
+        <div class="countdown-display">
+          <div class="cd-unit"><span class="cd-num" id="cdDays">—</span><span class="cd-label">days</span></div>
+          <div class="cd-unit"><span class="cd-num" id="cdHours">—</span><span class="cd-label">hrs</span></div>
+          <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
+        </div>
+        <div class="countdown-sub" id="cdSub"></div>
+      </div>
     </div>
 
     <div class="door-grid">
@@ -2478,7 +2504,7 @@ body::before {
         <h2 class="tl-heading">You sent me off.</h2>
         <p class="tl-body">I had a UTM event in Jakarta. You drove me to the airport — I didn't have to ask. I remember thinking that was the kind of thing people only do when they actually care.</p>
         <div class="tl-photo">
-          <img src="first-airport.png" alt="Airport sendoff, 25 November 2023" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
+          <img src="first-airport.jpg" alt="Airport sendoff, 25 November 2023" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
         </div>
         <p class="tl-caption">25.11.2023 — klia, jakarta trip</p>
       </div>
@@ -2490,7 +2516,7 @@ body::before {
         <h2 class="tl-heading">Our first date in KL.</h2>
         <p class="tl-body">I started my internship at SLB in Petaling Jaya the day before. You already had somewhere in mind for us. I was still figuring out the commute — you were already planning where to take me.</p>
         <div class="tl-photo">
-          <img src="first-date-kl.png" alt="First date in KL, 2 August 2024" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
+          <img src="first-date-kl.jpg" alt="First date in KL, 2 August 2024" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
         </div>
         <p class="tl-caption">02.08.2024 — kuala lumpur</p>
       </div>
@@ -2514,7 +2540,7 @@ body::before {
         <h2 class="tl-heading">We ran 12km together.</h2>
         <p class="tl-body">Twincity Marathon. I didn't see this one coming — but there's something about doing hard things together that felt right.</p>
         <div class="tl-photo">
-          <img src="convocation.png" alt="Twincity Marathon, 18 January 2026" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
+          <img src="convocation.jpg" alt="Twincity Marathon, 18 January 2026" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
         </div>
         <p class="tl-caption">18.01.2026 — twincity marathon, 12 km</p>
       </div>
@@ -2642,10 +2668,20 @@ body::before {
     <div class="vault-content" id="vaultContent">
       <div class="monogram"><hr><span class="monogram-mark">the vault</span><hr></div>
 
+      <!-- How to use -->
+      <div class="vault-section vault-how">
+        <span class="vault-section-label">how to use</span>
+        <ol class="vault-steps">
+          <li><strong>Open Drive</strong> for everything that lives in Google Drive — photos, documents, scans.</li>
+          <li><strong>Tap “edit”</strong> under a section below, type, then <strong>“save”</strong>.</li>
+          <li>Notes are encrypted with the vault answer and kept <strong>on this device only</strong>. They don’t sync between phones, and clearing your browser data erases them — so keep anything important in Drive too.</li>
+        </ol>
+      </div>
+
       <!-- Google Drive -->
       <div class="vault-section">
         <span class="vault-section-label">our google drive</span>
-        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px;">All our files, photos, and documents — in one place.</p>
+        <p class="vault-lede">All our files, photos, and documents — in one place.</p>
         <a class="vault-drive-btn" href="https://drive.google.com/drive/folders/14VUziIgf8tU4GWVnqqsHQmww0NMGd3Vg?usp=sharing" target="_blank" rel="noopener">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           Open Drive
@@ -2771,20 +2807,58 @@ body::before {
 </div>
 
 <script>
+/* ══════════════════════════════════════════════════════════════════
+   FOR FASYA — maintainer's notes
+
+   Everything you are likely to change lives in the CONTENT block just
+   below, near the top of this script. You should not need to touch the
+   logic further down.
+
+   ── Common edits ──────────────────────────────────────────────────
+   Add a photo to the album ......... PHOTOS
+   Add a wedding song ............... PLAYLIST
+   Fill in a wedding stage .......... JOURNEY  (set `photo` and `done`)
+   Change the September gift ........ SEP_GIFT
+   Move the wedding date ............ WAITING_FOR_DATE
+   Re-lock September until a date ... SEP_REVEAL_AT
+
+   ── Adding a photo ────────────────────────────────────────────────
+   Drop the file next to index.html and reference it by filename.
+   Resize big camera shots first — full-resolution photos are what made
+   this page slow before:
+       sips -Z 1600 --setProperty formatOptions 80 big.jpg --out small.jpg
+
+   ── Adding a new door to the hub ──────────────────────────────────
+   1. Copy a `.door-card` block in the HUB section of the HTML and give
+      it `data-door="scYourScreen"`.
+   2. Add a matching `<div class="screen" id="scYourScreen">` alongside
+      the other screens.
+   3. If it needs to build something when opened, add it to the
+      `screenInits` map in handleDoor(). Nothing else is wired by hand.
+
+   ── Passcodes ─────────────────────────────────────────────────────
+   Stored as PBKDF2 hashes, never as plain text. To change one you have
+   to regenerate the hash — see the note above `kdf()`.
+══════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
-  /* ═══ Constants ═══ */
-  // Hash chunks — split so no single readable constant exists in source
+  /* ══════════════════════════════════════════════════════════
+     CONTENT — edit here. Everything below this block is logic.
+  ══════════════════════════════════════════════════════════ */
+
+  // Passcode hashes (PBKDF2), split so no readable constant sits in source.
+  // TH = the login date. VH = the vault answer.
   const TH = ['cf8159df','1232014a','dac16341','004a4e8a','94bd6bbd','d2484994','233d3b76','37ef91c1'];
   const VH = ['aea995a2','587286a7','41900782','14245ee7','d5d991a2','d638308c','df1bb827','c0822c87'];
 
+  // Album + lightbox, in order. Keep files ~1600px on the long edge.
   const PHOTOS = [
     { src: 'IMG_0118.JPG',      cap: '10 · 10 · 2022 — our first date' },
-    { src: 'first-airport.png', cap: '25 · 11 · 2023 — KLIA, jakarta trip' },
-    { src: 'first-date-kl.png', cap: '02 · 08 · 2024 — kuala lumpur' },
+    { src: 'first-airport.jpg', cap: '25 · 11 · 2023 — KLIA, jakarta trip' },
+    { src: 'first-date-kl.jpg', cap: '02 · 08 · 2024 — kuala lumpur' },
     { src: 'IMG_7735.JPG',      cap: '18 · 11 · 2025 — UTM graduation' },
-    { src: 'convocation.png',   cap: '18 · 01 · 2026 — twincity marathon' },
+    { src: 'convocation.jpg',   cap: '18 · 01 · 2026 — twincity marathon' },
     { src: 'fasya_birthday.JPG', cap: '20 · 05 · 2026 — fasya\'s birthday' },
     { src: 'najmi_birthday.JPG', cap: '17 · 07 · 2026 — najmi\'s birthday' },
   ];
@@ -2879,6 +2953,8 @@ body::before {
     { icon: 'ti-tools-kitchen-2',     hint: 'a first meal',  order: 2 },
   ];
 
+  /* ═════════════ end of CONTENT — logic below ═════════════ */
+
   /* ═══ State ═══ */
   let currentScreen = -1; // -1 = login
   let fleeCount     = 0;
@@ -2913,8 +2989,16 @@ body::before {
   // apex, which is why it read as half a heart / a teardrop.
   const HEART_PATH = 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
 
-  /* ═══ Crypto — PBKDF2 ═══ */
-  // 250k iterations: ~47ms per attempt, making brute-force of all date combos ~3.5 min
+  /* ═══ Crypto — PBKDF2 ═══
+   * 250k iterations: ~47ms per attempt, so brute-forcing every date
+   * combination takes minutes rather than milliseconds.
+   *
+   * To change a passcode, print the new hash and paste it over TH (login)
+   * or VH (vault). Run this in the browser console on this page:
+   *   await kdf('newpasscode', 'bmYtZ2F0ZS0yMDIy', 256)   // login salt
+   *   await kdf('newanswer',   'bmYtdmF1bHQtMjAyMg==', 256) // vault salt
+   * then split the 64-char result into eight 8-char chunks.
+   */
   async function kdf(password, saltB64, bits) {
     const enc = new TextEncoder();
     const km  = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);

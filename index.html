@@ -1592,6 +1592,21 @@ body::before {
   100% { opacity: 0.88; transform: translate(-50%,-50%) rotate(-8deg) scale(1); }
 }
 
+/* ─── September layout states ───────────────────────────
+   The layout escalates with the story rather than sitting pre-filled:
+     1. foiled      one centred object, nothing else
+     2. scratched   the invitation, plus the question
+     3. confirmed   opens out to two columns, closing lines appear
+──────────────────────────────────────────────────────── */
+.sep-grid { max-width: 380px; margin: 26px auto 0; }
+.sep-col-plan { display: none; }
+.sep-footer   { display: none; }
+
+.sep-card.confirmed .sep-col-plan,
+.sep-card.confirmed .sep-footer { display: block; }
+
+.sep-footer { margin-top: 26px; }
+
 /* ─── RSVP ─── */
 /* hidden until the foil is off — asking before she can read the
    invitation would put the question ahead of the reveal */
@@ -1937,26 +1952,34 @@ body::before {
   .vault-main .vault-section  { padding: 26px; margin-bottom: 18px; }
   .vault-main .vault-textarea { min-height: 150px; }
 
-  /* ─── September — ticket beside the plan ─── */
+  /* ─── September ───
+     Before she says yes this stays a single centred card. Confirming
+     widens it and splits the ticket from the plan, so the card itself
+     opens out as the story does. */
   .sep-wrap { max-width: 940px; }
-  .card.sep-card { max-width: 940px; padding: 56px 56px 48px; }
-  .sep-grid {
+  .card.sep-card {
+    max-width: 540px;
+    padding: 56px 52px 48px;
+    transition: max-width 0.5s cubic-bezier(.16,.84,.24,1);
+  }
+  .card.sep-card.confirmed { max-width: 940px; }
+
+  .sep-card.confirmed .sep-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 52px;
-    align-items: start;
+    /* stretch, not start — the divider on the plan column has to run the
+       full height or it stops short and reads as a stray line */
+    align-items: stretch;
     text-align: left;
+    max-width: none;
     margin-top: 30px;
   }
-  .sep-col-plan {
+  .sep-card.confirmed .sep-col-plan {
     padding-left: 52px;
-    margin-left: -52px;
     border-left: 1px solid var(--line);
   }
-  /* the plan column carries the closing lines, so they sit under it
-     rather than centred beneath the whole card */
-  .sep-col-plan .signature { text-align: left; }
-  .after.open { margin-bottom: 26px; }
+  .after.open { margin-bottom: 0; }
 
   /* Journey — two columns: the day and its playlist on the left rail,
      the stages on the right. A single narrow column read as a phone
@@ -2910,9 +2933,11 @@ body::before {
         </div>
 
         </div><!-- /sep-col-ticket -->
+
+        <!-- Empty until she says yes, so the layout stays a single
+             centred object through the reveal -->
         <div class="sep-col-plan">
 
-        <!-- Unlocked by the RSVP -->
         <div class="after" id="sepAfter">
           <div class="after-rule"><hr><span>you're coming</span><hr></div>
 
@@ -2925,26 +2950,31 @@ body::before {
           </button>
         </div>
 
-        <div class="sep-stats">
-          <div class="sep-stat">
-            <div class="sep-stat-num" id="sepStatYears">—</div>
-            <div class="sep-stat-lbl">years</div>
-          </div>
-          <div class="sep-stat">
-            <div class="sep-stat-num" id="sepStatDays">—</div>
-            <div class="sep-stat-lbl">days together</div>
-          </div>
-          <div class="sep-stat">
-            <div class="sep-stat-num" id="sepStatWed">—</div>
-            <div class="sep-stat-lbl">days to 17.12</div>
-          </div>
-        </div>
-
-        <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
-        <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
-
         </div><!-- /sep-col-plan -->
         </div><!-- /sep-grid -->
+
+        <!-- The closing. Held back until she has said yes — these are the
+             pay-off, and showing them up front spoils the reveal and left
+             the pre-scratch layout badly lopsided. -->
+        <div class="sep-footer" id="sepFooter">
+          <div class="sep-stats">
+            <div class="sep-stat">
+              <div class="sep-stat-num" id="sepStatYears">—</div>
+              <div class="sep-stat-lbl">years</div>
+            </div>
+            <div class="sep-stat">
+              <div class="sep-stat-num" id="sepStatDays">—</div>
+              <div class="sep-stat-lbl">days together</div>
+            </div>
+            <div class="sep-stat">
+              <div class="sep-stat-num" id="sepStatWed">—</div>
+              <div class="sep-stat-lbl">days to 17.12</div>
+            </div>
+          </div>
+
+          <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
+          <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
+        </div>
       </div>
     </div>
 
@@ -3625,6 +3655,8 @@ body::before {
     // dims the barcode beneath the stamp — set here rather than with a
     // CSS :has() selector so older Safari behaves the same
     $('tkCard').classList.add('validated');
+    // widens the card and opens the second column
+    document.querySelector('.sep-card').classList.add('confirmed');
     buildPlan();
     $('sepAfter').classList.add('open');
 
@@ -3750,12 +3782,37 @@ body::before {
       ctx.fillStyle = sheen;
       ctx.fillRect(0, 0, r.width, r.height);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.92)';
-      ctx.font = '500 11px "DM Sans", system-ui, sans-serif';
+      // Inset frame, echoing the stationery border on the letter pages —
+      // gives the foil the edges of a wrapped object instead of reading
+      // as one flat rectangle
+      ctx.strokeStyle = 'rgba(255,255,255,0.34)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(11.5, 11.5, r.width - 23, r.height - 23);
+      ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+      ctx.strokeRect(16.5, 16.5, r.width - 33, r.height - 33);
+
+      const cx = r.width / 2;
+      const cy = r.height / 2;
+
+      // Heart above the label, drawn from the same path the petals use
+      ctx.save();
+      const s = 26 / 24; // path is authored on a 24px grid
+      ctx.translate(cx - 13, cy - 46);
+      ctx.scale(s, s);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fill(new Path2D(HEART_PATH));
+      ctx.restore();
+
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.font = '500 11px "DM Sans", system-ui, sans-serif';
       // spaced manually — canvas letterSpacing is not universally supported
-      ctx.fillText('Y O U R   G I F T', r.width / 2, r.height / 2);
+      ctx.fillText('Y O U R   G I F T', cx, cy);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = 'italic 400 13px "Cormorant Garamond", Georgia, serif';
+      ctx.fillText('open it', cx, cy + 24);
     }
 
     function pos(e) {

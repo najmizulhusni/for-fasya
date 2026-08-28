@@ -1871,15 +1871,92 @@ body::before {
   .hub-name        { font-size: 76px; letter-spacing: -2.5px; line-height: 0.88; }
   .cd-num          { font-size: 44px; }
 
-  /* Story */
-  .story-wrap      { max-width: 640px; }
-  .story-title     { font-size: 48px; }
-  .s-num           { font-size: 56px; }
-  .tl-photo img    { max-height: 420px; }
+  /* Story — sticky title and counter on the left, timeline on the right.
+     640px of column in a 1440px viewport left 400px dead on each side. */
+  .story-wrap {
+    max-width: 1060px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    column-gap: 60px;
+    align-items: start;
+  }
+  .story-side {
+    position: sticky;
+    top: 104px;
+    padding-right: 48px;
+    border-right: 1px solid var(--line);
+  }
+  .story-main    { min-width: 0; }
+  .story-title   { font-size: 46px; }
+  .tl-photo img  { max-height: 420px; }
+
+  /* Counter stacks in the rail instead of sitting as three wide pills */
+  .story-counter {
+    display: block;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  .story-counter .s-pill {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 0;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .story-counter .s-pill:last-child { border-bottom: none; }
+  .s-num   { font-size: 34px; min-width: 68px; text-align: right; }
+  .s-label { font-size: 8.5px; }
 
   /* Album — 3 wide columns */
   .album-wrap      { max-width: 780px; }
   .album-grid      { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  /* ─── Vault — reference rail beside the editable notes ─── */
+  .vault-wrap { max-width: 1020px; }
+  .vault-content.open {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    column-gap: 52px;
+    align-items: start;
+  }
+  .vault-side {
+    position: sticky;
+    top: 104px;
+  }
+  .vault-main { min-width: 0; }
+  .vault-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px; font-weight: 300;
+    color: var(--ink); line-height: 1.1;
+    margin-bottom: 22px;
+  }
+  .vault-heading em { font-style: italic; color: var(--rose); }
+  /* notes get room to breathe, since this is where the typing happens */
+  .vault-main .vault-section  { padding: 26px; margin-bottom: 18px; }
+  .vault-main .vault-textarea { min-height: 150px; }
+
+  /* ─── September — ticket beside the plan ─── */
+  .sep-wrap { max-width: 940px; }
+  .card.sep-card { max-width: 940px; padding: 56px 56px 48px; }
+  .sep-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 52px;
+    align-items: start;
+    text-align: left;
+    margin-top: 30px;
+  }
+  .sep-col-plan {
+    padding-left: 52px;
+    margin-left: -52px;
+    border-left: 1px solid var(--line);
+  }
+  /* the plan column carries the closing lines, so they sit under it
+     rather than centred beneath the whole card */
+  .sep-col-plan .signature { text-align: left; }
+  .after.open { margin-bottom: 26px; }
 
   /* Journey — two columns: the day and its playlist on the left rail,
      the stages on the right. A single narrow column read as a phone
@@ -2609,12 +2686,16 @@ body::before {
 ════════════════════════════════════ -->
 <div class="screen" id="scStory">
   <div class="story-wrap">
-    <p class="story-overline">20 · 09 · 2022 — present</p>
-    <h1 class="story-title">Our story,<br><em>so far.</em></h1>
+    <!-- Becomes a sticky left rail on desktop, stacked header on phones -->
+    <aside class="story-side">
+      <p class="story-overline">20 · 09 · 2022 — present</p>
+      <h1 class="story-title">Our story,<br><em>so far.</em></h1>
+      <div class="story-counter" id="storyCounter"></div>
+    </aside>
 
-    <div class="story-counter" id="storyCounter"></div>
-
-    <div class="timeline" id="storyTimeline"></div>
+    <div class="story-main">
+      <div class="timeline" id="storyTimeline"></div>
+    </div>
   </div>
 </div>
 
@@ -2703,47 +2784,35 @@ body::before {
 
     <!-- Unlocked content -->
     <div class="vault-content" id="vaultContent">
-      <div class="monogram"><hr><span class="monogram-mark">the vault</span><hr></div>
 
-      <!-- How to use -->
-      <div class="vault-section vault-how">
-        <span class="vault-section-label">how to use</span>
-        <ol class="vault-steps">
-          <li><strong>Open Drive</strong> for everything that lives in Google Drive — photos, documents, scans.</li>
-          <li><strong>Tap “edit”</strong> under a section below, type, then <strong>“save”</strong>.</li>
-          <li>Notes are encrypted with the vault answer and kept <strong>on this device only</strong>. They don’t sync between phones, and clearing your browser data erases them — so keep anything important in Drive too.</li>
-        </ol>
-      </div>
+      <!-- Reference column: what this is, and the link out -->
+      <aside class="vault-side">
+        <p class="story-overline">private · protected</p>
+        <h2 class="vault-heading">the <em>vault.</em></h2>
 
-      <!-- Google Drive -->
-      <div class="vault-section">
-        <span class="vault-section-label">our google drive</span>
-        <p class="vault-lede">All our files, photos, and documents — in one place.</p>
-        <a class="vault-drive-btn" href="https://drive.google.com/drive/folders/14VUziIgf8tU4GWVnqqsHQmww0NMGd3Vg?usp=sharing" target="_blank" rel="noopener">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Open Drive
-        </a>
-      </div>
+        <!-- How to use -->
+        <div class="vault-section vault-how">
+          <span class="vault-section-label">how to use</span>
+          <ol class="vault-steps">
+            <li><strong>Open Drive</strong> for everything that lives in Google Drive — photos, documents, scans.</li>
+            <li><strong>Tap “edit”</strong> under a section, type, then <strong>“save”</strong>.</li>
+            <li>Notes are encrypted with the vault answer and kept <strong>on this device only</strong>. They don’t sync between phones, and clearing your browser data erases them — so keep anything important in Drive too.</li>
+          </ol>
+        </div>
 
-      <!-- Folder guide -->
-      <div class="vault-section">
-        <span class="vault-section-label">folder guide</span>
-        <div class="vault-body empty" id="vaultFolder"></div>
-        <button type="button" class="vault-edit-btn" id="vaultFolderEdit">edit</button>
-        <textarea class="vault-textarea" id="vaultFolderArea"
-          placeholder="Describe the folder structure — e.g.&#10;/Photos — sorted by year&#10;/Documents — IDs, insurance"></textarea>
-        <button type="button" class="vault-save-btn" id="vaultFolderSave">save</button>
-      </div>
+        <!-- Google Drive -->
+        <div class="vault-section">
+          <span class="vault-section-label">our google drive</span>
+          <p class="vault-lede">All our files, photos, and documents — in one place.</p>
+          <a class="vault-drive-btn" href="https://drive.google.com/drive/folders/14VUziIgf8tU4GWVnqqsHQmww0NMGd3Vg?usp=sharing" target="_blank" rel="noopener">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open Drive
+          </a>
+        </div>
+      </aside>
 
-      <!-- Bank accounts -->
-      <div class="vault-section">
-        <span class="vault-section-label">bank accounts</span>
-        <div class="vault-body empty" id="vaultBank"></div>
-        <button type="button" class="vault-edit-btn" id="vaultBankEdit">edit</button>
-        <textarea class="vault-textarea" id="vaultBankArea"
-          placeholder="Maybank: [account number]&#10;Aeon Bank: [account number]&#10;&#10;Add any other details."></textarea>
-        <button type="button" class="vault-save-btn" id="vaultBankSave">save</button>
-      </div>
+      <!-- The editable notes — built from VAULT_NOTES -->
+      <div class="vault-main" id="vaultNotes"></div>
     </div>
 
   </div>
@@ -2788,10 +2857,15 @@ body::before {
 
     <!-- STATE B — unlocked: scratch the foil off the gift -->
     <div class="sep-state" id="sepReveal">
-      <div class="card">
+      <div class="card sep-card">
         <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
         <p class="eyebrow" id="sepEyebrow">20 · 09</p>
         <h1 class="headline">Happy Anniversary,<br><em>Fasya.</em></h1>
+
+        <!-- Two columns on desktop: the ticket beside the plan, so the card
+             stops being a 1,300px-tall ribbon in the middle of the screen -->
+        <div class="sep-grid">
+        <div class="sep-col-ticket">
 
         <div class="scratch" id="scratchWrap">
           <div class="tk" id="tkCard">
@@ -2835,6 +2909,9 @@ body::before {
           </button>
         </div>
 
+        </div><!-- /sep-col-ticket -->
+        <div class="sep-col-plan">
+
         <!-- Unlocked by the RSVP -->
         <div class="after" id="sepAfter">
           <div class="after-rule"><hr><span>you're coming</span><hr></div>
@@ -2865,6 +2942,9 @@ body::before {
 
         <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
         <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
+
+        </div><!-- /sep-col-plan -->
+        </div><!-- /sep-grid -->
       </div>
     </div>
 
@@ -3012,6 +3092,30 @@ body::before {
     .map(entry => ({ src: entry.photo, cap: entry.cap }));
 
   const WAITING_FOR_DATE = new Date('2027-12-17T00:00:00');
+
+  /* ═══ Vault notes ═══
+   * Each becomes an editable card inside the vault. Add an entry to add a
+   * card — `key` is what it saves under, so don't rename an existing one
+   * or its saved text will be orphaned.
+   */
+  const VAULT_NOTES = [
+    {
+      key: 'folder', label: 'folder guide',
+      placeholder: 'How the Drive is organised — e.g.\n/Photos — by year\n/Documents — IDs, insurance',
+    },
+    {
+      key: 'bank', label: 'bank accounts',
+      placeholder: 'Maybank: [account number]\nAeon Bank: [account number]\n\nAnything else worth keeping.',
+    },
+    {
+      key: 'dates', label: 'dates to remember',
+      placeholder: 'Renewals, appointments, birthdays —\ne.g. passport expires Mar 2028\nmak’s birthday, 14 June',
+    },
+    {
+      key: 'contacts', label: 'who to call',
+      placeholder: 'The numbers worth having in one place —\nfamily, the clinic, insurance, vendors.',
+    },
+  ];
 
   /* ═══ Something for September ═══
    * The anniversary is the 20th, but the surprise happens in person on
@@ -4335,39 +4439,73 @@ body::before {
     } catch { return ''; }
   }
 
+  // key -> the display element, so decrypted text can be filled in later
+  const vaultNoteBodies = new Map();
+
+  // Cards are built from VAULT_NOTES with their handlers closed over the
+  // right elements, so adding a note needs no extra wiring
+  function buildVaultNotes() {
+    const host = $('vaultNotes');
+    if (!host || host.childElementCount) return;
+
+    VAULT_NOTES.forEach(note => {
+      const sec = document.createElement('div');
+      sec.className = 'vault-section';
+
+      const label = document.createElement('span');
+      label.className   = 'vault-section-label';
+      label.textContent = note.label;
+
+      const body = document.createElement('div');
+      body.className = 'vault-body empty';
+
+      const editBtn = document.createElement('button');
+      editBtn.type        = 'button';
+      editBtn.className   = 'vault-edit-btn';
+      editBtn.textContent = 'edit';
+
+      const area = document.createElement('textarea');
+      area.className   = 'vault-textarea';
+      area.placeholder = note.placeholder;
+      area.setAttribute('aria-label', note.label);
+
+      const saveBtn = document.createElement('button');
+      saveBtn.type        = 'button';
+      saveBtn.className   = 'vault-save-btn';
+      saveBtn.textContent = 'save';
+
+      editBtn.addEventListener('click', () => {
+        area.value = body.textContent;
+        area.classList.add('editing');
+        saveBtn.classList.add('editing');
+        area.focus();
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const text = area.value.trim();
+        localStorage.setItem('vault_' + note.key, await vaultEncrypt(text));
+        body.textContent = text;
+        body.classList.toggle('empty', !text);
+        area.classList.remove('editing');
+        saveBtn.classList.remove('editing');
+      });
+
+      vaultNoteBodies.set(note.key, body);
+      sec.append(label, body, editBtn, area, saveBtn);
+      host.appendChild(sec);
+    });
+  }
+
   async function renderVaultContent() {
-    for (const sec of ['folder', 'bank']) {
-      const stored = localStorage.getItem('vault_' + sec);
-      const cap    = sec[0].toUpperCase() + sec.slice(1);
-      const el     = $('vault' + cap);
+    buildVaultNotes();
+    for (const note of VAULT_NOTES) {
+      const el = vaultNoteBodies.get(note.key);
       if (!el) continue;
-      const text = stored ? await vaultDecrypt(stored) : '';
+      const stored = localStorage.getItem('vault_' + note.key);
+      const text   = stored ? await vaultDecrypt(stored) : '';
       el.textContent = text;
       el.classList.toggle('empty', !text);
     }
-  }
-
-  function editVault(sec) {
-    const cap  = sec[0].toUpperCase() + sec.slice(1);
-    const area = $('vault' + cap + 'Area');
-    const save = $('vault' + cap + 'Save');
-    const disp = $('vault' + cap);
-    area.value = disp.textContent;
-    area.classList.add('editing');
-    save.classList.add('editing');
-  }
-
-  async function saveVault(sec) {
-    const cap  = sec[0].toUpperCase() + sec.slice(1);
-    const area = $('vault' + cap + 'Area');
-    const save = $('vault' + cap + 'Save');
-    const disp = $('vault' + cap);
-    const text = area.value.trim();
-    localStorage.setItem('vault_' + sec, await vaultEncrypt(text));
-    disp.textContent = text;
-    disp.classList.toggle('empty', !text);
-    area.classList.remove('editing');
-    save.classList.remove('editing');
   }
 
   /* ═══ Vault Puzzle 2: tap moments in order ═══ */
@@ -4573,10 +4711,7 @@ body::before {
     $('vaultInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptVaultUnlock(); });
     $('vaultP2Btn').addEventListener('click', () => checkPuzzle2());
     $('vaultP2Reset').addEventListener('click', () => resetPuzzle2(false));
-    $('vaultFolderEdit').addEventListener('click', () => editVault('folder'));
-    $('vaultFolderSave').addEventListener('click', () => saveVault('folder'));
-    $('vaultBankEdit').addEventListener('click',   () => editVault('bank'));
-    $('vaultBankSave').addEventListener('click',   () => saveVault('bank'));
+    // note cards wire their own edit/save when built — see buildVaultNotes
 
     // Global keyboard shortcuts
     document.addEventListener('keydown', e => {

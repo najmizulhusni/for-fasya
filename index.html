@@ -282,7 +282,14 @@ body::before {
 .tl-entry {
   position: relative;
   margin-bottom: 44px;
+  /* revealed as it scrolls in; JS adds .in, and falls back to showing
+     everything if IntersectionObserver is unavailable */
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(.16,.84,.24,1),
+              transform 0.6s cubic-bezier(.16,.84,.24,1);
 }
+.tl-entry.in { opacity: 1; transform: none; }
 .tl-entry:last-child { margin-bottom: 0; }
 .tl-dot {
   position: absolute;
@@ -321,8 +328,24 @@ body::before {
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
   border: 1px solid rgba(192,65,90,0.1);
+  /* tappable — opens the same lightbox as the album */
+  cursor: zoom-in;
+  background: var(--rose-lt);
+  transition: transform 0.24s cubic-bezier(.34,1.56,.64,1), box-shadow 0.24s ease;
 }
-.tl-photo img { width: 100%; height: auto; display: block; max-height: 360px; object-fit: cover; }
+.tl-photo:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.16), 0 3px 10px rgba(0,0,0,0.07);
+}
+.tl-photo:active { transform: scale(0.985); }
+.tl-photo img {
+  width: 100%; height: auto; display: block;
+  max-height: 360px; object-fit: cover;
+  /* fades up when decoded instead of popping in mid-scroll */
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.tl-photo img.loaded { opacity: 1; }
 .tl-caption {
   margin-top: 8px;
   font-family: 'Cormorant Garamond', serif;
@@ -1000,7 +1023,11 @@ body::before {
 }
 .album-thumb:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .album-thumb:active { transform: scale(0.97); }
-.album-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.album-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+.album-thumb img.loaded { opacity: 1; }
 .album-hover-cap {
   position: absolute; bottom: 0; left: 0; right: 0;
   padding: 20px 10px 10px;
@@ -1036,7 +1063,15 @@ body::before {
 }
 .lb-close:hover { background: rgba(255,255,255,0.15); }
 .lb-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; max-width: 100%; }
-.lb-img-wrap img { max-width: 100%; max-height: calc(100dvh - 150px); object-fit: contain; border-radius: 6px; }
+.lb-img-wrap img {
+  max-width: 100%; max-height: calc(100dvh - 150px);
+  object-fit: contain; border-radius: 6px;
+  /* cross-fades between photos rather than snapping, and hides the
+     moment where a not-yet-loaded image has no dimensions */
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+.lb-img-wrap img.loaded { opacity: 1; }
 .lb-caption { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12.5px; color: rgba(255,255,255,0.38); text-align: center; margin-top: 14px; }
 .lb-footer {
   position: absolute; bottom: 28px; left: 0; right: 0;
@@ -2209,6 +2244,11 @@ body::before {
   }
   /* ambient hearts add nothing without motion */
   .petal { display: none; }
+  /* never leave scroll-revealed or fading content stuck invisible */
+  .tl-entry     { opacity: 1 !important; transform: none !important; }
+  .tl-photo img,
+  .album-thumb img,
+  .lb-img-wrap img { opacity: 1 !important; }
 }
 </style>
 </head>
@@ -2574,109 +2614,7 @@ body::before {
 
     <div class="story-counter" id="storyCounter"></div>
 
-    <div class="timeline">
-
-      <!-- Entry 1: The beginning -->
-      <div class="tl-entry">
-        <div class="tl-dot origin"></div>
-        <p class="tl-date">20 September 2022</p>
-        <h2 class="tl-heading">We became us.</h2>
-        <p class="tl-body">I still remember how the conversation went that night — nervous, careful. The kind of moment you don't fully understand until it's already passed.</p>
-      </div>
-
-      <!-- Entry 2: First date + photo -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">10 October 2022</p>
-        <h2 class="tl-heading">Our first date.</h2>
-        <p class="tl-body">Three weeks in. I remember thinking I needed to remember everything — so I kept looking at you when you weren't looking.</p>
-        <div class="tl-photo">
-          <img src="IMG_0118.JPG" alt="Our first date, 10 October 2022" loading="lazy">
-        </div>
-        <p class="tl-caption">10.10.2022 — the first one</p>
-      </div>
-
-      <!-- Entry 3: Airport sendoff -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">25 November 2023</p>
-        <h2 class="tl-heading">You sent me off.</h2>
-        <p class="tl-body">I had a UTM event in Jakarta. You drove me to the airport — I didn't have to ask. I remember thinking that was the kind of thing people only do when they actually care.</p>
-        <div class="tl-photo">
-          <img src="first-airport.jpg" alt="Airport sendoff, 25 November 2023" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
-        </div>
-        <p class="tl-caption">25.11.2023 — klia, jakarta trip</p>
-      </div>
-
-      <!-- Entry 4: First date in KL -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">2 August 2024</p>
-        <h2 class="tl-heading">Our first date in KL.</h2>
-        <p class="tl-body">I started my internship at SLB in Petaling Jaya the day before. You already had somewhere in mind for us. I was still figuring out the commute — you were already planning where to take me.</p>
-        <div class="tl-photo">
-          <img src="first-date-kl.jpg" alt="First date in KL, 2 August 2024" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
-        </div>
-        <p class="tl-caption">02.08.2024 — kuala lumpur</p>
-      </div>
-
-      <!-- Entry 5: Graduation -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">18 November 2025</p>
-        <h2 class="tl-heading">You came from KL.</h2>
-        <p class="tl-body">My graduation day at UTM. You made the trip down. That meant something — more than I probably said at the time.</p>
-        <div class="tl-photo">
-          <img src="IMG_7735.JPG" alt="Graduation, 18 November 2025" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
-        </div>
-        <p class="tl-caption">18.11.2025 — UTM graduation</p>
-      </div>
-
-      <!-- Entry 6: First running event -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">18 January 2026</p>
-        <h2 class="tl-heading">We ran 12km together.</h2>
-        <p class="tl-body">Twincity Marathon. I didn't see this one coming — but there's something about doing hard things together that felt right.</p>
-        <div class="tl-photo">
-          <img src="convocation.jpg" alt="Twincity Marathon, 18 January 2026" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
-        </div>
-        <p class="tl-caption">18.01.2026 — twincity marathon, 12 km</p>
-      </div>
-
-      <!-- Entry 7: Fasya's birthday -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">20 May 2026</p>
-        <h2 class="tl-heading">Your birthday.</h2>
-        <p class="tl-body">Lily bouquet, wagyu yakiniku at Kuro TRX, a photobooth run at MyTOWN, and baseball after. A full day, just for you.</p>
-        <div class="tl-photo">
-          <img src="fasya_birthday.JPG" alt="Fasya's birthday, 20 May 2026" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
-        </div>
-        <p class="tl-caption">20.05.2026 — happy birthday, fasya</p>
-      </div>
-
-      <!-- Entry 8: Najmi's birthday -->
-      <div class="tl-entry">
-        <div class="tl-dot"></div>
-        <p class="tl-date">17 July 2026</p>
-        <h2 class="tl-heading">My birthday.</h2>
-        <p class="tl-body">You took me to watch The Odyssey for the first time at Aurum TRX, and treated me to a new pair of Asics. I wasn't expecting either.</p>
-        <div class="tl-photo">
-          <img src="najmi_birthday.JPG" alt="Najmi's birthday, 17 July 2026" loading="lazy" onerror="this.closest('.tl-photo').style.display='none'">
-        </div>
-        <p class="tl-caption">17.07.2026 — happy birthday, najmi</p>
-      </div>
-
-      <!-- Entry 9: Now -->
-      <div class="tl-entry">
-        <div class="tl-dot present"></div>
-        <div class="tl-live"><div class="tl-live-dot"></div> right now</div>
-        <h2 class="tl-heading">Still here.</h2>
-        <p class="tl-body">Not just surviving — actually happy. And a lot of that is because of you.</p>
-      </div>
-
-    </div>
+    <div class="timeline" id="storyTimeline"></div>
   </div>
 </div>
 
@@ -2979,16 +2917,97 @@ body::before {
   const TH = ['cf8159df','1232014a','dac16341','004a4e8a','94bd6bbd','d2484994','233d3b76','37ef91c1'];
   const VH = ['aea995a2','587286a7','41900782','14245ee7','d5d991a2','d638308c','df1bb827','c0822c87'];
 
-  // Album + lightbox, in order. Keep files ~1600px on the long edge.
-  const PHOTOS = [
-    { src: 'IMG_0118.JPG',      cap: '10 · 10 · 2022 — our first date' },
-    { src: 'first-airport.jpg', cap: '25 · 11 · 2023 — KLIA, jakarta trip' },
-    { src: 'first-date-kl.jpg', cap: '02 · 08 · 2024 — kuala lumpur' },
-    { src: 'IMG_7735.JPG',      cap: '18 · 11 · 2025 — UTM graduation' },
-    { src: 'convocation.jpg',   cap: '18 · 01 · 2026 — twincity marathon' },
-    { src: 'fasya_birthday.JPG', cap: '20 · 05 · 2026 — fasya\'s birthday' },
-    { src: 'najmi_birthday.JPG', cap: '17 · 07 · 2026 — najmi\'s birthday' },
+  /* ═══ Our story ═══
+   * One entry per memory, oldest first. This is the only place a memory
+   * needs adding — the album below is derived from it, and any entry with
+   * a `photo` becomes an album tile automatically.
+   *
+   *   date   heading above the entry (omit for the closing "right now")
+   *   title  the bold line
+   *   body   the paragraph
+   *   photo  optional filename, sitting next to index.html (~1600px)
+   *   cap    caption, shown under the photo and in the album
+   */
+  const STORY = [
+    {
+      date: '20 September 2022',
+      title: 'We became us.',
+      body: "I still remember how the conversation went that night — nervous, careful. The kind of moment you don't fully understand until it's already passed.",
+      origin: true,
+    },
+    {
+      date: '10 October 2022',
+      title: 'Our first date.',
+      body: "Three weeks in. I remember thinking I needed to remember everything — so I kept looking at you when you weren't looking.",
+      photo: 'IMG_0118.JPG',
+      cap: '10 · 10 · 2022 — our first date',
+    },
+    {
+      date: '25 November 2023',
+      title: 'You sent me off.',
+      body: "I had a UTM event in Jakarta. You drove me to the airport — I didn't have to ask. I remember thinking that was the kind of thing people only do when they actually care.",
+      photo: 'first-airport.jpg',
+      cap: '25 · 11 · 2023 — KLIA, jakarta trip',
+    },
+    {
+      date: '2 August 2024',
+      title: 'Our first date in KL.',
+      body: 'I started my internship at SLB in Petaling Jaya the day before. You already had somewhere in mind for us. I was still figuring out the commute — you were already planning where to take me.',
+      photo: 'first-date-kl.jpg',
+      cap: '02 · 08 · 2024 — kuala lumpur',
+    },
+    {
+      date: '30 January 2025',
+      title: 'My first steak.',
+      body: 'My last day in KL. You took me to Menate and treated me to the first Angus steak of my life — I had never had one. You had the aglio olio. I remember it because it was you paying, and you not making anything of it.',
+      cap: '30 · 01 · 2025 — menate, kuala lumpur',
+    },
+    {
+      date: '7 September 2025',
+      title: 'You came with me.',
+      body: 'Boom Run at Putrajaya, 5km. You were not running — you came along anyway, just to keep me company. That was the first time someone was waiting for me at a finish line.',
+      cap: '07 · 09 · 2025 — boom run, putrajaya',
+    },
+    {
+      date: '18 November 2025',
+      title: 'You came from KL.',
+      body: 'My graduation day at UTM. You made the trip down. That meant something — more than I probably said at the time.',
+      photo: 'IMG_7735.JPG',
+      cap: '18 · 11 · 2025 — UTM graduation',
+    },
+    {
+      date: '18 January 2026',
+      title: 'We ran 12km together.',
+      body: "Twincity Marathon. I didn't see this one coming — but there's something about doing hard things together that felt right.",
+      photo: 'convocation.jpg',
+      cap: '18 · 01 · 2026 — twincity marathon',
+    },
+    {
+      date: '20 May 2026',
+      title: 'Your birthday.',
+      body: 'Lily bouquet, wagyu yakiniku at Kuro TRX, a photobooth run at MyTOWN, and baseball after. A full day, just for you.',
+      photo: 'fasya_birthday.JPG',
+      cap: "20 · 05 · 2026 — fasya's birthday",
+    },
+    {
+      date: '17 July 2026',
+      title: 'My birthday.',
+      body: "You took me to watch The Odyssey for the first time at Aurum TRX, and treated me to a new pair of Asics. I wasn't expecting either.",
+      photo: 'najmi_birthday.JPG',
+      cap: "17 · 07 · 2026 — najmi's birthday",
+    },
+    {
+      present: true,
+      title: 'Still here.',
+      body: 'Not just surviving — actually happy. And a lot of that is because of you.',
+    },
   ];
+
+  // Album is derived from the story, so there is no second list to keep
+  // in sync — add a memory once and it shows up in both places.
+  const PHOTOS = STORY
+    .filter(entry => entry.photo)
+    .map(entry => ({ src: entry.photo, cap: entry.cap }));
 
   const WAITING_FOR_DATE = new Date('2027-12-17T00:00:00');
 
@@ -3722,6 +3741,108 @@ body::before {
     ].map(({ num, label }) =>
       `<div class="s-pill"><span class="s-num">${num}</span><span class="s-label">${label}</span></div>`
     ).join('');
+
+    buildStory();
+  }
+
+  /* ═══ Story timeline ═══ */
+  function buildStory() {
+    const tl = $('storyTimeline');
+    if (!tl || tl.childElementCount) return; // build once
+
+    // Tracks position in PHOTOS so a tapped story photo opens the album
+    // lightbox on the matching image
+    let photoIdx = 0;
+
+    STORY.forEach(entry => {
+      const item = document.createElement('div');
+      item.className = 'tl-entry';
+
+      const dot = document.createElement('div');
+      dot.className = 'tl-dot'
+        + (entry.origin  ? ' origin'  : '')
+        + (entry.present ? ' present' : '');
+      item.appendChild(dot);
+
+      if (entry.present) {
+        const live = document.createElement('div');
+        live.className = 'tl-live';
+        const ld = document.createElement('div');
+        ld.className = 'tl-live-dot';
+        live.append(ld, document.createTextNode(' right now'));
+        item.appendChild(live);
+      } else if (entry.date) {
+        const d = document.createElement('p');
+        d.className   = 'tl-date';
+        d.textContent = entry.date;
+        item.appendChild(d);
+      }
+
+      const h = document.createElement('h2');
+      h.className   = 'tl-heading';
+      h.textContent = entry.title;
+      item.appendChild(h);
+
+      const b = document.createElement('p');
+      b.className   = 'tl-body';
+      b.textContent = entry.body;
+      item.appendChild(b);
+
+      if (entry.photo) {
+        const idx  = photoIdx++;
+        const wrap = document.createElement('div');
+        wrap.className = 'tl-photo';
+        wrap.setAttribute('role', 'button');
+        wrap.setAttribute('tabindex', '0');
+        wrap.setAttribute('aria-label', `${entry.cap || entry.title} — open larger`);
+
+        const img = document.createElement('img');
+        img.src     = entry.photo;
+        img.alt     = entry.cap || entry.title;
+        img.loading = 'lazy';
+        // fade in once decoded, so photos don't pop in mid-scroll
+        img.addEventListener('load',  () => img.classList.add('loaded'), { once: true });
+        img.addEventListener('error', () => wrap.remove(), { once: true });
+        if (img.complete && img.naturalWidth) img.classList.add('loaded');
+        wrap.appendChild(img);
+
+        // Story photos open the same lightbox the album uses
+        wrap.addEventListener('click', () => openLightbox(idx));
+        wrap.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(idx); }
+        });
+        item.appendChild(wrap);
+      }
+
+      if (entry.cap) {
+        const c = document.createElement('p');
+        c.className   = 'tl-caption';
+        c.textContent = entry.cap;
+        item.appendChild(c);
+      }
+
+      tl.appendChild(item);
+    });
+
+    revealOnScroll(tl.querySelectorAll('.tl-entry'));
+  }
+
+  // Fades entries in as they arrive. Without IntersectionObserver, or with
+  // reduced motion, everything is simply shown — never left hidden.
+  function revealOnScroll(nodes) {
+    if (!('IntersectionObserver' in window) || reduced()) {
+      nodes.forEach(n => n.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        obs.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+
+    nodes.forEach(n => io.observe(n));
   }
 
   /* ═══ Countdown ═══ */
@@ -3939,6 +4060,10 @@ body::before {
       });
       el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy">
         <div class="album-hover-cap" aria-hidden="true">${p.cap}</div>`;
+      // fade each tile up as it decodes, so the grid fills in gently
+      const im = el.querySelector('img');
+      im.addEventListener('load', () => im.classList.add('loaded'), { once: true });
+      if (im.complete && im.naturalWidth) im.classList.add('loaded');
       grid.appendChild(el);
     });
   }
@@ -3963,11 +4088,32 @@ body::before {
   }
 
   function renderLb() {
-    const p = PHOTOS[lbIdx];
-    $('lbImg').src             = p.src;
-    $('lbImg').alt             = p.cap;
-    $('lbCap').textContent     = p.cap;
-    $('lbCount').textContent   = `${lbIdx + 1} / ${PHOTOS.length}`;
+    const p   = PHOTOS[lbIdx];
+    const img = $('lbImg');
+
+    // Cross-fade rather than swapping instantly, so stepping through the
+    // album doesn't flash the previous photo's dimensions
+    img.classList.remove('loaded');
+    img.src = p.src;
+    img.alt = p.cap;
+    if (img.complete && img.naturalWidth) img.classList.add('loaded');
+    else img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+
+    $('lbCap').textContent   = p.cap;
+    $('lbCount').textContent = `${lbIdx + 1} / ${PHOTOS.length}`;
+
+    preloadNeighbours();
+  }
+
+  // Warms the images either side of the current one so next/prev is
+  // instant instead of waiting on a fresh network request each tap
+  function preloadNeighbours() {
+    if (PHOTOS.length < 2) return;
+    [-1, 1].forEach(offset => {
+      const i = (lbIdx + offset + PHOTOS.length) % PHOTOS.length;
+      const warm = new Image();
+      warm.src = PHOTOS[i].src;
+    });
   }
 
   /* ═══ Music ═══ */

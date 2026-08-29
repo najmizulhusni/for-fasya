@@ -1022,47 +1022,47 @@ body::before {
   border-bottom: 1px solid var(--line);
 }
 
-/* ─── Hub portrait ─── */
-.hub-photo {
+/* ─── Hub masthead photo ───────────────────────────────
+   A wide band across the top of the column. The previous version parked
+   a small portrait at the foot of a sidebar, which read as filler; a
+   band at the top reads as the header of the page.
+──────────────────────────────────────────────────────── */
+.hub-hero {
   position: relative;
-  /* On phones it sits as a short banner between the countdown and the
-     doors — enough to warm the page without pushing the doors off-screen.
-     The desktop block below turns it into a taller portrait. */
   display: block;
-  margin: 0 0 22px;
-  aspect-ratio: 3 / 2;
-  max-height: 180px;
-  border-radius: var(--radius-sm);
+  width: 100%;
+  /* 4:3 matches the source, so the photo is framed rather than cropped.
+     A wide band forced a heavy crop and cut people out of their own
+     picture. */
+  aspect-ratio: 4 / 3;
+  max-width: 440px;
+  margin: 0 auto 26px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: var(--rose-lt);
-  border: 1px solid rgba(192,65,90,0.1);
-  box-shadow: 0 10px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 14px 40px rgba(192,65,90,0.16), 0 3px 10px rgba(0,0,0,0.05);
   cursor: pointer;
-  transition: transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
 }
-.hub-photo:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 42px rgba(0,0,0,0.16), 0 3px 10px rgba(0,0,0,0.06);
+.hub-hero:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 54px rgba(192,65,90,0.22), 0 4px 14px rgba(0,0,0,0.06);
 }
-.hub-photo:active { transform: scale(0.99); }
-.hub-photo img {
+.hub-hero:active { transform: scale(0.995); }
+.hub-hero img {
   width: 100%; height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
-  /* The source is a wide environmental shot, and cover alone trims only
-     ~20px, leaving her tiny in the frame. Scaling about a point low in
-     the image crops in on her without touching the original file. */
-  transform: scale(1.55);
-  transform-origin: 50% 66%;
-  opacity: 0; transition: opacity 0.45s ease;
+  opacity: 0; transition: opacity 0.5s ease;
 }
-.hub-photo img.loaded { opacity: 1; }
-.hub-photo-cap {
+.hub-hero img.loaded { opacity: 1; }
+.hub-hero-cap {
   position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 26px 14px 12px;
-  background: linear-gradient(transparent, rgba(15,4,8,0.6));
-  font-size: 9.5px; letter-spacing: 2.2px; text-transform: uppercase;
-  color: rgba(255,255,255,0.9); font-weight: 500;
+  padding: 40px 20px 16px;
+  background: linear-gradient(transparent, rgba(15,4,8,0.55));
+  font-size: 9.5px; letter-spacing: 2.4px; text-transform: uppercase;
+  color: rgba(255,255,255,0.92); font-weight: 500;
 }
 .countdown-label {
   font-size: 9.5px; letter-spacing: 2.5px;
@@ -1929,39 +1929,22 @@ body::before {
   .card            { max-width: 560px; padding: 64px 60px; }
   .headline        { font-size: 38px; }
 
-  /* Hub — split layout: left=header+countdown, right=door-grid */
+  /* Hub — one centred column: photo, name, countdown, then the doors
+     three across. The old sidebar split forced the photo into whatever
+     space was left at the bottom of the rail, which is why it read as
+     filler rather than as part of the page. */
   #scHub           { align-items: center; }
-  .hub-wrap {
-    max-width: 980px;
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    column-gap: 60px;
-    align-items: center;
-  }
-  /* One continuous rule down the side, rather than one per child */
-  .hub-side {
-    border-right: 1px solid var(--line);
-    padding-right: 48px;
-  }
-  .hub-header {
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 0;
-    padding-bottom: 26px;
-  }
-  .hub-countdown {
-    border-bottom: none; margin-bottom: 0;
-    padding: 26px 0 0;
-    text-align: left;
-  }
-  .countdown-display { justify-content: flex-start; }
-  .countdown-label   { text-align: left; }
-  .countdown-sub     { text-align: left; }
-  .door-grid {
-    grid-column: 2; grid-row: 1 / span 2;
-    gap: 10px;
-  }
-  .hub-name        { font-size: 76px; letter-spacing: -2.5px; line-height: 0.88; }
-  .cd-num          { font-size: 44px; }
+  .hub-wrap        { max-width: 900px; text-align: center; }
+
+  .hub-hero        { max-width: 480px; margin-bottom: 32px; }
+
+  .hub-header      { padding-bottom: 26px; margin-bottom: 24px; }
+  .hub-name        { font-size: 72px; letter-spacing: -2.5px; line-height: 0.9; }
+
+  .hub-countdown   { padding: 0 0 26px; margin-bottom: 30px; }
+  .cd-num          { font-size: 42px; }
+
+  .door-grid       { grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: left; }
 
   /* Taller portrait here, filling rail space the door grid does not use */
   .hub-photo {
@@ -2497,33 +2480,29 @@ body::before {
 <div class="screen" id="scHub">
   <div class="hub-wrap">
 
-    <!-- One block, so the desktop grid can't stretch the name and the
-         countdown apart to the height of the door grid beside them -->
-    <div class="hub-side">
-      <div class="hub-header">
-        <p class="hub-eyebrow">private · for you only</p>
-        <h1 class="hub-name">Fasya.</h1>
-        <p class="hub-meta" id="hubMeta"></p>
-      </div>
+    <!-- Masthead: photo, then name, then the countdown. One centred
+         column that reads top-to-bottom on every width, rather than a
+         sidebar with the photo parked at the bottom of it. -->
+    <div class="hub-hero" id="hubPhoto" role="button" tabindex="0"
+         aria-label="Open our album">
+      <img src="menate_steak.jpg" alt="Us" loading="eager">
+      <span class="hub-hero-cap">our album →</span>
+    </div>
 
-      <!-- Countdown -->
-      <div class="hub-countdown">
-        <div class="countdown-label">until our next anniversary</div>
-        <div class="countdown-display">
-          <div class="cd-unit"><span class="cd-num" id="cdDays">—</span><span class="cd-label">days</span></div>
-          <div class="cd-unit"><span class="cd-num" id="cdHours">—</span><span class="cd-label">hrs</span></div>
-          <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
-        </div>
-        <div class="countdown-sub" id="cdSub"></div>
-      </div>
+    <div class="hub-header">
+      <p class="hub-eyebrow">private · for you only</p>
+      <h1 class="hub-name">Fasya.</h1>
+      <p class="hub-meta" id="hubMeta"></p>
+    </div>
 
-      <!-- Fills the rail, which otherwise ran ~230px shorter than the
-           door grid beside it. Tapping it opens the album. -->
-      <div class="hub-photo" id="hubPhoto" role="button" tabindex="0"
-           aria-label="Open our album">
-        <img src="IMG_7890.JPG" alt="Fasya" loading="lazy">
-        <span class="hub-photo-cap">our album →</span>
+    <div class="hub-countdown">
+      <div class="countdown-label">until our next anniversary</div>
+      <div class="countdown-display">
+        <div class="cd-unit"><span class="cd-num" id="cdDays">—</span><span class="cd-label">days</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdHours">—</span><span class="cd-label">hrs</span></div>
+        <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
       </div>
+      <div class="countdown-sub" id="cdSub"></div>
     </div>
 
     <div class="door-grid">

@@ -1021,6 +1021,49 @@ body::before {
   margin-bottom: 20px;
   border-bottom: 1px solid var(--line);
 }
+
+/* ─── Hub portrait ─── */
+.hub-photo {
+  position: relative;
+  /* On phones it sits as a short banner between the countdown and the
+     doors — enough to warm the page without pushing the doors off-screen.
+     The desktop block below turns it into a taller portrait. */
+  display: block;
+  margin: 0 0 22px;
+  aspect-ratio: 3 / 2;
+  max-height: 180px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--rose-lt);
+  border: 1px solid rgba(192,65,90,0.1);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.26s cubic-bezier(.34,1.56,.64,1), box-shadow 0.26s ease;
+}
+.hub-photo:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 42px rgba(0,0,0,0.16), 0 3px 10px rgba(0,0,0,0.06);
+}
+.hub-photo:active { transform: scale(0.99); }
+.hub-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  /* The source is a wide environmental shot, and cover alone trims only
+     ~20px, leaving her tiny in the frame. Scaling about a point low in
+     the image crops in on her without touching the original file. */
+  transform: scale(1.55);
+  transform-origin: 50% 66%;
+  opacity: 0; transition: opacity 0.45s ease;
+}
+.hub-photo img.loaded { opacity: 1; }
+.hub-photo-cap {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 26px 14px 12px;
+  background: linear-gradient(transparent, rgba(15,4,8,0.6));
+  font-size: 9.5px; letter-spacing: 2.2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.9); font-weight: 500;
+}
 .countdown-label {
   font-size: 9.5px; letter-spacing: 2.5px;
   text-transform: uppercase; color: var(--muted-lt);
@@ -1920,6 +1963,13 @@ body::before {
   .hub-name        { font-size: 76px; letter-spacing: -2.5px; line-height: 0.88; }
   .cd-num          { font-size: 44px; }
 
+  /* Taller portrait here, filling rail space the door grid does not use */
+  .hub-photo {
+    margin: 24px auto 0;
+    aspect-ratio: 4 / 5;
+    max-height: 300px;
+  }
+
   /* Story — sticky title and counter on the left, timeline on the right.
      640px of column in a 1440px viewport left 400px dead on each side. */
   .story-wrap {
@@ -2465,6 +2515,14 @@ body::before {
           <div class="cd-unit"><span class="cd-num" id="cdMins">—</span><span class="cd-label">min</span></div>
         </div>
         <div class="countdown-sub" id="cdSub"></div>
+      </div>
+
+      <!-- Fills the rail, which otherwise ran ~230px shorter than the
+           door grid beside it. Tapping it opens the album. -->
+      <div class="hub-photo" id="hubPhoto" role="button" tabindex="0"
+           aria-label="Open our album">
+        <img src="IMG_7890.JPG" alt="Fasya" loading="lazy">
+        <span class="hub-photo-cap">our album →</span>
       </div>
     </div>
 
@@ -4109,61 +4167,47 @@ body::before {
     'I can do this all day',
   ];
 
+  // Fine pointers can chase a moving target; a finger cannot. The two
+  // get different jokes rather than one that only works on a mouse.
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+
   function flee(btn) {
     if (btn.dataset.done) return;
-
-    // Pin to its starting spot once, then move with transform only —
-    // animating left/top would relayout on every dodge
-    if (!btn.dataset.pinned) {
-      const r = btn.getBoundingClientRect();
-      // Reparent to <body> first. The letter card sets will-change:
-      // transform, which makes it the containing block for position:fixed
-      // — so without this the button is positioned against the card and
-      // the viewport maths below sends it off-screen.
-      document.body.appendChild(btn);
-      btn.style.position = 'fixed';
-      btn.style.left     = r.left + 'px';
-      btn.style.top      = r.top  + 'px';
-      btn.style.margin   = '0';
-      btn.style.willChange = 'transform';
-      btn.style.transition = 'transform 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.3s ease';
-      btn.dataset.pinned = '1';
-      btn.dataset.originX = r.left;
-      btn.dataset.originY = r.top;
-    }
-
     fleeCount++;
 
-    const originX = parseFloat(btn.dataset.originX);
-    const originY = parseFloat(btn.dataset.originY);
-    const pad = 14;
-    const maxX = window.innerWidth  - btn.offsetWidth  - pad;
-    const maxY = window.innerHeight - btn.offsetHeight - pad;
+    if (!btn.dataset.playing) {
+      btn.dataset.playing = '1';
+      btn.style.transition =
+        'transform 0.26s cubic-bezier(.34,1.56,.64,1), opacity 0.3s ease';
+      btn.style.willChange = 'transform';
+    }
 
-    // Keep it clear of the "Always" button so it never lands on top of it
-    const yes = $('finaleBtn').getBoundingClientRect();
-    let x, y, tries = 0;
-    do {
-      x = pad + Math.random() * Math.max(0, maxX - pad);
-      y = pad + Math.random() * Math.max(0, maxY - pad);
-      tries++;
-    } while (
-      tries < 12 &&
-      x < yes.right + 20 && x + btn.offsetWidth  > yes.left - 20 &&
-      y < yes.bottom + 20 && y + btn.offsetHeight > yes.top  - 20
-    );
+    btn.textContent = NO_LABELS[Math.min(fleeCount, NO_LABELS.length - 1)];
 
-    btn.style.transform = `translate(${Math.round(x - originX)}px, ${Math.round(y - originY)}px)`;
+    if (canHover.matches) {
+      // Transform only — no position or parent change, so the button keeps
+      // its box in .lp-actions and the letter's layout never shifts. The
+      // range is deliberately small: it should duck away from the cursor,
+      // not teleport across the screen where it can't be found.
+      const dx = (Math.random() * 2 - 1) * 120;
+      const dy = (Math.random() * 2 - 1) * 64;
+      btn.style.transform = `translate(${Math.round(dx)}px, ${Math.round(dy)}px)`;
+    } else {
+      // On touch it stays put and only flinches, so every tap still lands.
+      // A dodging button on a phone just reads as broken — and shrinking it
+      // far enough to be cute makes it too small to hit, which is worse.
+      // Floor of 0.88 keeps it above a comfortable tap target.
+      const scale = Math.max(0.88, 1 - fleeCount * 0.02);
+      btn.style.transform = `scale(${scale.toFixed(3)})`;
+    }
 
-    const label = NO_LABELS[Math.min(fleeCount, NO_LABELS.length - 1)];
-    if (label) btn.textContent = label;
-
-    // "Always" grows as the other one retreats, capped so it stays sane
+    // "Always" swells a little — kept small because it is flex:1 here, so
+    // a big scale would overflow the card and shove the signature about
     const yesBtn = $('finaleBtn');
     yesBtn.style.transition = 'transform 0.32s cubic-bezier(.34,1.56,.64,1)';
-    yesBtn.style.transform  = `scale(${Math.min(1 + fleeCount * 0.05, 1.3)})`;
+    yesBtn.style.transform  = `scale(${Math.min(1 + fleeCount * 0.018, 1.07)})`;
 
-    // Out of lines — let it go, leaving only the answer that was ever there
+    // Out of lines — let it go, leaving the only answer there ever was
     if (fleeCount >= NO_LABELS.length - 1) {
       btn.dataset.done = '1';
       btn.style.opacity = '0';
@@ -4838,6 +4882,18 @@ body::before {
     // Hub nav
     $('hubNavBtn').addEventListener('click', goToHub);
 
+    // Hub portrait — a shortcut into the album
+    const hubPhoto = $('hubPhoto');
+    if (hubPhoto) {
+      const hpImg = hubPhoto.querySelector('img');
+      hpImg.addEventListener('load', () => hpImg.classList.add('loaded'), { once: true });
+      if (hpImg.complete && hpImg.naturalWidth) hpImg.classList.add('loaded');
+      hubPhoto.addEventListener('click', () => handleDoor('scAlbum'));
+      hubPhoto.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDoor('scAlbum'); }
+      });
+    }
+
     // Music pill (click and Enter/Space keyboard)
     const musicPill = $('musicPill');
     musicPill.addEventListener('click', toggleMusic);
@@ -4889,9 +4945,12 @@ body::before {
     const noBtn = $('noBtn0');
     noBtn.setAttribute('aria-hidden', 'true');
     noBtn.setAttribute('tabindex', '-1');
-    // hover handles desktop; pointerdown covers touch, where there is no
-    // hover to dodge on. preventDefault stops the tap becoming a click.
-    noBtn.addEventListener('pointerenter', () => flee(noBtn));
+    // Hover is bound only on devices that actually hover — on touch it
+    // fires alongside pointerdown and would count every tap twice.
+    if (canHover.matches) {
+      noBtn.addEventListener('pointerenter', () => flee(noBtn));
+    }
+    // preventDefault stops the tap resolving into a click
     noBtn.addEventListener('pointerdown', e => { e.preventDefault(); flee(noBtn); });
 
     // Vault

@@ -807,32 +807,66 @@ body::before {
 }
 
 /* ─── Unlock animation overlay ─── */
+/* ─── Unlock ───────────────────────────────────────────
+   Washes open as a circle from the Open button rather than
+   cross-fading a flat panel, then sets the monogram and the line
+   in sequence. clip-path and opacity are both compositable, so the
+   whole thing runs off the main thread.
+──────────────────────────────────────────────────────── */
 .unlock-overlay {
   position: fixed; inset: 0; z-index: 999;
-  background: radial-gradient(ellipse at center, #c0415a, #9e3049);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.4s;
-}
-.unlock-overlay.show { opacity: 1; pointer-events: auto; }
-.unlock-overlay.fade { opacity: 0; }
-.unlock-icon-big {
-  width: 96px; height: 96px;
-  border-radius: 50%; background: rgba(255,255,255,0.2);
+  background: radial-gradient(ellipse at 50% 40%, #c94e67, #9e3049 70%);
   display: flex; align-items: center; justify-content: center;
-  animation: unlockPop 0.6s cubic-bezier(.34,1.56,.64,1) both;
+  opacity: 0; pointer-events: none;
+  clip-path: circle(0px at var(--ox, 50%) var(--oy, 50%));
 }
-.unlock-icon-big i { font-size: 44px; color: #fff; }
+.unlock-overlay.show {
+  opacity: 1; pointer-events: auto;
+  animation: unlockOpen 0.72s cubic-bezier(.22,.68,0,1) forwards;
+}
+.unlock-overlay.fade {
+  transition: opacity 0.45s ease;
+  opacity: 0;
+}
+@keyframes unlockOpen {
+  from { clip-path: circle(0px at var(--ox, 50%) var(--oy, 50%)); }
+  to   { clip-path: circle(var(--r, 120vmax) at var(--ox, 50%) var(--oy, 50%)); }
+}
+
+.unlock-inner {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 0 24px;
+}
+.unlock-mark {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 26px; letter-spacing: 10px;
+  color: rgba(255,255,255,0.96);
+  padding-left: 10px; /* balances the trailing letter-space */
+  opacity: 0;
+  animation: unlockRise 0.6s cubic-bezier(.16,.84,.24,1) 0.34s forwards;
+}
+/* the rule draws outward from the centre */
+.unlock-rule {
+  width: 74px; height: 1px; margin: 16px 0 14px;
+  background: rgba(255,255,255,0.55);
+  transform: scaleX(0);
+  animation: unlockRule 0.55s cubic-bezier(.22,.68,0,1) 0.52s forwards;
+}
 .unlock-text {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-style: italic;
-  color: rgba(255,255,255,0.95);
-  animation: unlockPop 0.6s cubic-bezier(.34,1.56,.64,1) 0.1s both;
+  font-size: 21px; font-style: italic;
+  color: rgba(255,255,255,0.9);
+  opacity: 0;
+  animation: unlockRise 0.6s cubic-bezier(.16,.84,.24,1) 0.62s forwards;
 }
-@keyframes unlockPop {
-  from { opacity:0; transform: scale(0.6); }
-  to   { opacity:1; transform: scale(1); }
+@keyframes unlockRise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes unlockRule {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -2399,9 +2433,12 @@ body::before {
   </div>
 </div>
 
-<div class="unlock-overlay" id="unlockOverlay">
-  <div class="unlock-icon-big"><i class="ti ti-lock-open-2"></i></div>
-  <div class="unlock-text">You remembered 🤍</div>
+<div class="unlock-overlay" id="unlockOverlay" aria-hidden="true">
+  <div class="unlock-inner">
+    <div class="unlock-mark">N · F</div>
+    <div class="unlock-rule"></div>
+    <p class="unlock-text">welcome back</p>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════
@@ -3481,15 +3518,35 @@ body::before {
 
   function showUnlock() {
     const overlay = $('unlockOverlay');
+    const r = $('loginBtn').getBoundingClientRect();
+
+    // Wash opens from the button she just pressed, so the transition
+    // starts where her attention already is
+    const ox = r.left + r.width / 2;
+    const oy = r.top + r.height / 2;
+    // radius that reaches the furthest corner, so nothing is left uncovered
+    const radius = Math.hypot(
+      Math.max(ox, window.innerWidth - ox),
+      Math.max(oy, window.innerHeight - oy)
+    );
+    overlay.style.setProperty('--ox', ox + 'px');
+    overlay.style.setProperty('--oy', oy + 'px');
+    overlay.style.setProperty('--r', Math.ceil(radius) + 'px');
+
     overlay.classList.add('show');
-    launchConfetti();
+
     setTimeout(() => {
       overlay.classList.add('fade');
       setTimeout(() => {
         overlay.classList.remove('show', 'fade');
+        overlay.style.opacity = '';
         goFromLogin();
-      }, 500);
-    }, 1800);
+        // Confetti lands on the hub. Firing it during the overlay was
+        // wasted work — the canvas sits at z-index 200, under the
+        // overlay's 999, so none of it was ever visible.
+        launchConfetti();
+      }, 450);
+    }, 1750);
   }
 
   /* ═══ Hub ═══ */
@@ -4035,16 +4092,84 @@ body::before {
     setTimeout(() => navigate('sc3'), 600);
   }
 
+  /* ═══ The "No" that never lets itself be pressed ═══
+   * Each dodge relabels the button and nudges "Always" a little bigger,
+   * so the pair tells a small joke instead of just jittering. It gives up
+   * once the lines run out.
+   */
+  const NO_LABELS = [
+    'No',
+    'Are you sure?',
+    'Really?',
+    'Think about it',
+    'Wrong button',
+    'That one’s broken',
+    'Try the other one',
+    'Please? 🥺',
+    'I can do this all day',
+  ];
+
   function flee(btn) {
+    if (btn.dataset.done) return;
+
+    // Pin to its starting spot once, then move with transform only —
+    // animating left/top would relayout on every dodge
+    if (!btn.dataset.pinned) {
+      const r = btn.getBoundingClientRect();
+      // Reparent to <body> first. The letter card sets will-change:
+      // transform, which makes it the containing block for position:fixed
+      // — so without this the button is positioned against the card and
+      // the viewport maths below sends it off-screen.
+      document.body.appendChild(btn);
+      btn.style.position = 'fixed';
+      btn.style.left     = r.left + 'px';
+      btn.style.top      = r.top  + 'px';
+      btn.style.margin   = '0';
+      btn.style.willChange = 'transform';
+      btn.style.transition = 'transform 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.3s ease';
+      btn.dataset.pinned = '1';
+      btn.dataset.originX = r.left;
+      btn.dataset.originY = r.top;
+    }
+
     fleeCount++;
-    btn.style.position   = 'fixed';
-    btn.style.transition = 'left 0.18s ease, top 0.18s ease';
-    const x = Math.random() * (window.innerWidth  - btn.offsetWidth  - 16);
-    const y = Math.random() * (window.innerHeight - btn.offsetHeight - 16);
-    btn.style.left = x + 'px';
-    btn.style.top  = y + 'px';
-    if (fleeCount > 4) { btn.style.opacity = '0.3'; btn.style.fontSize = '11px'; }
-    if (fleeCount > 7) { btn.style.opacity = '0';   btn.style.pointerEvents = 'none'; }
+
+    const originX = parseFloat(btn.dataset.originX);
+    const originY = parseFloat(btn.dataset.originY);
+    const pad = 14;
+    const maxX = window.innerWidth  - btn.offsetWidth  - pad;
+    const maxY = window.innerHeight - btn.offsetHeight - pad;
+
+    // Keep it clear of the "Always" button so it never lands on top of it
+    const yes = $('finaleBtn').getBoundingClientRect();
+    let x, y, tries = 0;
+    do {
+      x = pad + Math.random() * Math.max(0, maxX - pad);
+      y = pad + Math.random() * Math.max(0, maxY - pad);
+      tries++;
+    } while (
+      tries < 12 &&
+      x < yes.right + 20 && x + btn.offsetWidth  > yes.left - 20 &&
+      y < yes.bottom + 20 && y + btn.offsetHeight > yes.top  - 20
+    );
+
+    btn.style.transform = `translate(${Math.round(x - originX)}px, ${Math.round(y - originY)}px)`;
+
+    const label = NO_LABELS[Math.min(fleeCount, NO_LABELS.length - 1)];
+    if (label) btn.textContent = label;
+
+    // "Always" grows as the other one retreats, capped so it stays sane
+    const yesBtn = $('finaleBtn');
+    yesBtn.style.transition = 'transform 0.32s cubic-bezier(.34,1.56,.64,1)';
+    yesBtn.style.transform  = `scale(${Math.min(1 + fleeCount * 0.05, 1.3)})`;
+
+    // Out of lines — let it go, leaving only the answer that was ever there
+    if (fleeCount >= NO_LABELS.length - 1) {
+      btn.dataset.done = '1';
+      btn.style.opacity = '0';
+      btn.style.pointerEvents = 'none';
+      setTimeout(() => { btn.style.willChange = 'auto'; }, 400);
+    }
   }
 
   /* ═══ Heart burst ═══ */
@@ -4758,10 +4883,16 @@ body::before {
     // Finale "Always" button
     $('finaleBtn').addEventListener('click', finale);
 
-    // Flee "No" button
+    // The "No" button. It is decoration — it does nothing and cannot be
+    // pressed — so it is hidden from keyboard and screen readers, leaving
+    // "Always" as the only real control.
     const noBtn = $('noBtn0');
-    noBtn.addEventListener('mouseover',  () => flee(noBtn));
-    noBtn.addEventListener('touchstart', () => flee(noBtn), { passive: true });
+    noBtn.setAttribute('aria-hidden', 'true');
+    noBtn.setAttribute('tabindex', '-1');
+    // hover handles desktop; pointerdown covers touch, where there is no
+    // hover to dodge on. preventDefault stops the tap becoming a click.
+    noBtn.addEventListener('pointerenter', () => flee(noBtn));
+    noBtn.addEventListener('pointerdown', e => { e.preventDefault(); flee(noBtn); });
 
     // Vault
     $('vaultUnlockBtn').addEventListener('click', attemptVaultUnlock);

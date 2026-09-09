@@ -1,0 +1,38 @@
+# Response headers, served alongside index.html.
+# Cloudflare Pages and Netlify both read this file; on Cloudflare Workers
+# the equivalent lives in the Worker's response.
+#
+# These are the two defences a <meta> tag cannot give us — framing and
+# transport — plus the small ones that cost nothing.
+
+/*
+  # No one gets to put this page inside their own frame and phish over it.
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+
+  # HTTPS only, for a year, including subdomains.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  # No MIME sniffing, no referrer leaking the URL, no legacy XSS filter quirks.
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+
+  # Nothing here needs the camera, mic, location or sensors.
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+
+  # Isolate this origin from anything that opens it.
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+  # Keep it out of search engines even where robots.txt is ignored.
+  X-Robots-Tag: noindex, nofollow, noimageindex
+
+# The page changes often; the photos never do.
+/index.html
+  Cache-Control: no-cache
+
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.JPG
+  Cache-Control: public, max-age=31536000, immutable

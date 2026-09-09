@@ -1,0 +1,3 @@
+# Private. Not for indexing.
+User-agent: *
+Disallow: /

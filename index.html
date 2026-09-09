@@ -4,11 +4,51 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>For Fasya</title>
+
+<!-- ─── Hardening ───────────────────────────────────────────────────────
+     This page is a static file in a public repo, so the defences that
+     matter are the ones a browser enforces on its own:
+
+       default-src 'none'   nothing loads unless a rule below allows it,
+                            so an injected <script src> or a stray
+                            tracker has nowhere to load from
+       connect-src 'none'   no fetch / XHR / WebSocket at all, which is
+                            what an exfiltration attempt would need
+       object-src / base-uri / form-action  kill plugin embeds, <base>
+                            hijacking, and form posts to another origin
+
+     Clickjacking (frame-ancestors) and HSTS cannot be set from a meta
+     tag — they live in `_headers`, which the host serves alongside
+     this file.
+──────────────────────────────────────────────────────────────────── -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  base-uri 'none';
+  form-action 'none';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+  font-src https://fonts.gstatic.com https://cdn.jsdelivr.net;
+  img-src 'self' data:;
+  frame-src https://www.youtube.com;
+  connect-src 'none';
+  media-src 'none';
+  object-src 'none';
+  upgrade-insecure-requests">
+<!-- Ours, not the internet's: keep it out of search results, and never
+     leak this URL to the sites we link out to. -->
+<meta name="robots" content="noindex, nofollow, noarchive, noimageindex, nosnippet">
+<meta name="referrer" content="no-referrer">
+
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<!-- Pinned version + integrity: if the CDN copy is ever tampered with,
+     the browser refuses the file instead of applying it. Regenerate with
+       curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"
+      integrity="sha384-hs5SINUk7GPohxRis+rS7grpSWEbtOIJ3sRoseBKg3CDPIKpG55RfSenbvA6ALOt"
+      crossorigin="anonymous" referrerpolicy="no-referrer">
 <style>
 /* ─── Design tokens ─── */
 :root {
@@ -32,7 +72,13 @@
 
 /* ─── Reset ─── */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+html {
+  scroll-behavior: smooth;
+  /* the home chip floats over the top of every screen — without this,
+     anything scrolled to lands underneath it */
+  scroll-padding-top: 84px;
+  -webkit-text-size-adjust: 100%;
+}
 body {
   background: var(--blush);
   color: var(--ink);
@@ -41,6 +87,9 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
+  /* no rubber-band bounce past the ends, and no pull-to-refresh eating a
+     scroll that was meant for the page */
+  overscroll-behavior-y: none;
 }
 
 /* ─── Animated gradient background ─── */
@@ -104,7 +153,10 @@ body::before {
   min-height: 100dvh;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
+  /* the bottom allowance clears the music chip, which is fixed to the
+     centre of the bottom edge on a phone and used to sit on top of the
+     last row of whatever screen she was reading */
+  padding: 2rem 1rem 5.5rem;
   position: relative;
   z-index: 10;
 }
@@ -874,23 +926,31 @@ body::before {
 #scHub { flex-direction: column; align-items: center; }
 .hub-wrap { max-width: 520px; width: 100%; }
 
+/* ─── Hub masthead ──────────────────────────────────────
+   A title page: monogram, then who it is for, then how long it has
+   been. No rule under it — the countdown plate below supplies the
+   line, and two of them stacked read as a form, not a page.
+──────────────────────────────────────────────────────── */
 .hub-header {
-  margin-bottom: 28px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+  text-align: center;
 }
+.hub-header .monogram { margin-bottom: 22px; }
 .hub-eyebrow {
-  font-size: 10px; letter-spacing: 3.5px;
+  font-size: 9.5px; letter-spacing: 3.8px;
   text-transform: uppercase; color: var(--rose);
-  font-weight: 500; opacity: 0.65; margin-bottom: 10px;
+  font-weight: 500; opacity: 0.6; margin-bottom: 14px;
 }
 .hub-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 56px; font-weight: 300; font-style: italic;
-  color: var(--ink); line-height: 0.92;
-  margin-bottom: 14px; letter-spacing: -1.5px;
+  font-size: 64px; font-weight: 300; font-style: italic;
+  color: var(--ink); line-height: 0.9;
+  margin-bottom: 16px; letter-spacing: -1.8px;
 }
-.hub-meta { font-size: 12px; color: var(--muted); letter-spacing: 0.2px; }
+.hub-meta {
+  font-size: 11.5px; color: var(--muted);
+  letter-spacing: 0.4px; line-height: 1.6;
+}
 .hub-meta strong { color: var(--ink-soft); font-weight: 500; }
 
 .door-grid {
@@ -902,12 +962,26 @@ body::before {
   background: rgba(255,255,255,0.96);
   border: 1px solid rgba(192,65,90,0.08);
   border-radius: 16px;
-  padding: 18px 16px 16px;
+  padding: 20px 18px 16px;
   position: relative;
+  overflow: hidden;
   display: flex; flex-direction: column;
   transition: transform 0.22s cubic-bezier(.34,1.56,.64,1),
               box-shadow 0.22s ease, border-color 0.22s ease;
 }
+/* A chevron in the corner, held just off the edge until she hovers —
+   the cards were tappable with nothing to say so. */
+.door-card.open::after,
+.door-card.peek::after {
+  content: '→';
+  position: absolute; top: 18px; right: 18px;
+  font-size: 13px; color: var(--rose);
+  opacity: 0; transform: translateX(-5px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.door-card.open:hover::after,
+.door-card.peek:hover::after { opacity: 0.75; transform: none; }
+.door-card.peek::after { color: var(--muted-lt); }
 .door-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
@@ -957,7 +1031,7 @@ body::before {
   border-top: 1px solid rgba(192,65,90,0.07);
 }
 .door-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.dot-open { background: var(--rose); }
+.dot-open { background: var(--rose-md); }
 .dot-lock {
   background: var(--muted-lt);
   animation: dotPulse 2.5s ease-in-out infinite;
@@ -970,8 +1044,16 @@ body::before {
   font-size: 9px; letter-spacing: 2px;
   text-transform: uppercase; font-weight: 500;
 }
-.label-open { color: var(--rose); }
+/* Six doors all shouting OPEN in rose left nothing for the eye to land
+   on. The open ones state themselves quietly; rose is kept for the one
+   door with something behind it she has not seen. */
+.label-open { color: var(--muted-lt); }
 .label-lock { color: var(--muted-lt); }
+.label-new  { color: var(--rose); font-weight: 600; }
+.dot-new {
+  background: var(--rose);
+  box-shadow: 0 0 0 3px rgba(192,65,90,0.14);
+}
 
 /* ─── Fixed hub nav pill ─── */
 .hub-nav {
@@ -1014,65 +1096,35 @@ body::before {
 }
 .hub-nav-btn:active { transform: scale(0.94); }
 
-/* ─── Countdown ─── */
+/* ─── Countdown ─────────────────────────────────────────
+   With no photograph above it this is the second thing she reads, so it
+   is set as a plate: hairlines top and bottom, the numerals divided
+   from each other, nothing boxed in.
+──────────────────────────────────────────────────────── */
 .hub-countdown {
   text-align: center;
-  padding: 18px 0 22px;
-  margin-bottom: 20px;
+  padding: 22px 0 24px;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
 
-/* ─── Hub masthead photo ───────────────────────────────
-   A wide band across the top of the column. The previous version parked
-   a small portrait at the foot of a sidebar, which read as filler; a
-   band at the top reads as the header of the page.
-──────────────────────────────────────────────────────── */
-.hub-hero {
-  position: relative;
-  display: block;
-  width: 100%;
-  /* 4:3 matches the source, so the photo is framed rather than cropped.
-     A wide band forced a heavy crop and cut people out of their own
-     picture. */
-  aspect-ratio: 4 / 3;
-  max-width: 440px;
-  margin: 0 auto 26px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--rose-lt);
-  box-shadow: 0 14px 40px rgba(192,65,90,0.16), 0 3px 10px rgba(0,0,0,0.05);
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
-}
-.hub-hero:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 22px 54px rgba(192,65,90,0.22), 0 4px 14px rgba(0,0,0,0.06);
-}
-.hub-hero:active { transform: scale(0.995); }
-.hub-hero img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  opacity: 0; transition: opacity 0.5s ease;
-}
-.hub-hero img.loaded { opacity: 1; }
-.hub-hero-cap {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 40px 20px 16px;
-  background: linear-gradient(transparent, rgba(15,4,8,0.55));
-  font-size: 9.5px; letter-spacing: 2.4px; text-transform: uppercase;
-  color: rgba(255,255,255,0.92); font-weight: 500;
-}
 .countdown-label {
   font-size: 9.5px; letter-spacing: 2.5px;
   text-transform: uppercase; color: var(--muted-lt);
   font-weight: 500; margin-bottom: 14px;
 }
 .countdown-display {
-  display: flex; gap: 24px; justify-content: center; align-items: flex-end;
+  display: flex; justify-content: center; align-items: stretch;
 }
 .cd-unit { display: flex; flex-direction: column; align-items: center; }
+/* Only the hub divides its units — September and the wedding countdown
+   keep the plain spaced version */
+.hub-countdown .cd-unit {
+  padding: 0 22px;
+  border-right: 1px solid var(--line);
+}
+.hub-countdown .cd-unit:last-child { border-right: none; }
 .cd-num {
   font-family: 'Cormorant Garamond', serif;
   font-size: 34px; font-weight: 600;
@@ -1171,6 +1223,14 @@ body::before {
   z-index: 85; display: none;
 }
 .music-chip.visible { display: block; }
+/* Centred at the bottom on a phone, tucked into the corner once there
+   is room — mid-screen it was landing on top of the door grid. */
+@media (min-width: 768px) {
+  .music-chip {
+    left: auto; right: 24px;
+    bottom: 24px; transform: none;
+  }
+}
 .music-pill {
   display: inline-flex; align-items: center; gap: 10px;
   background: #fff;
@@ -1762,6 +1822,109 @@ body::before {
   color: var(--muted); margin-top: 6px;
 }
 
+/* ─── The night itself ──────────────────────────────────
+   Four prints from the 6th, laid out as if dropped on a table:
+   white borders, a degree or two of tilt, the caption written in
+   the margin underneath. Each frame straightens and lifts when
+   touched, and fades up as it scrolls in.
+──────────────────────────────────────────────────────── */
+.night { display: none; margin-top: 46px; }
+.night.show { display: block; }
+
+.night-head { text-align: center; margin-bottom: 30px; }
+.night-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 31px; font-weight: 300; line-height: 1.14;
+  color: var(--ink); margin: 10px 0 14px;
+}
+.night-title em { font-style: italic; color: var(--rose); }
+.night-lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; color: var(--muted);
+  line-height: 1.75; max-width: 36ch; margin: 0 auto;
+}
+
+.night-collage { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.night-frame {
+  background: #fff;
+  padding: 9px 9px 0;
+  border: 1px solid rgba(192,65,90,0.07);
+  border-radius: 5px;
+  box-shadow: var(--shadow-md);
+  cursor: zoom-in;
+  /* --tilt is the resting angle; the reveal animates on top of it */
+  opacity: 0;
+  transform: translateY(24px) rotate(var(--tilt, 0deg));
+  transition: opacity 0.7s ease,
+              transform 0.7s cubic-bezier(.16,.84,.24,1),
+              box-shadow 0.4s ease;
+}
+.night-frame.in { opacity: 1; transform: rotate(var(--tilt, 0deg)); }
+.night-frame:nth-child(2) { --tilt: -1.5deg; }
+.night-frame:nth-child(3) { --tilt:  1.5deg; }
+.night-frame:nth-child(4) { --tilt: -0.6deg; }
+
+.night-frame:hover,
+.night-frame:focus-visible {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+}
+
+.night-frame img {
+  display: block; width: 100%;
+  aspect-ratio: 3 / 4; object-fit: cover;
+  border-radius: 3px;
+  /* warm placeholder while it decodes, so the frame is never a white hole */
+  background: var(--rose-lt);
+  opacity: 0; transition: opacity 0.65s ease;
+}
+.night-frame img.loaded { opacity: 1; }
+
+/* the two of us, and the table — both run the full width */
+.night-frame.span { grid-column: 1 / -1; }
+.night-frame.span img { aspect-ratio: 4 / 3; }
+/* the food, trimmed to a strip: the plates sit low in the frame */
+.night-frame.crop img { aspect-ratio: 16 / 9; object-position: center 58%; }
+
+.night-cap {
+  font-size: 8.5px; letter-spacing: 1.7px; text-transform: uppercase;
+  color: var(--muted); line-height: 1.6;
+  padding: 10px 3px 11px;
+}
+
+/* ─── What the night meant ─── */
+.night-note {
+  margin-top: 30px;
+  background: rgba(255,255,255,0.66);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 30px 26px 26px;
+  text-align: center;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.16,.84,.24,1);
+}
+.night-note.in { opacity: 1; transform: none; }
+
+.night-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 21px; line-height: 1.5;
+  color: var(--ink);
+  padding-bottom: 20px; margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.night-body p {
+  font-size: 13.5px; line-height: 1.9;
+  color: var(--ink-soft); text-align: left;
+}
+.night-body p + p { margin-top: 14px; }
+.night-sign {
+  font-size: 9px; letter-spacing: 3.4px; text-transform: uppercase;
+  color: var(--rose); font-weight: 500;
+}
+
 /* ─── Vault ─── */
 #scVault { align-items: flex-start; padding-top: 72px; padding-bottom: 60px; }
 .vault-wrap { max-width: 480px; width: 100%; margin: 0 auto; }
@@ -1880,7 +2043,7 @@ body::before {
 }
 /* ── Tablet (768px+) ── */
 @media (min-width: 768px) {
-  .screen          { padding: 3rem 2rem; }
+  .screen          { padding: 3rem 2rem 4rem; }
 
   /* Cards */
   .card            { padding: 60px 56px; max-width: 520px; }
@@ -1923,35 +2086,31 @@ body::before {
 
 /* ── Desktop (1024px+) ── */
 @media (min-width: 1024px) {
-  .screen          { padding: 4rem 3rem; }
+  .screen          { padding: 4rem 3rem; }   /* chip sits in the corner here */
 
   /* Cards wider, more breathing room */
   .card            { max-width: 560px; padding: 64px 60px; }
   .headline        { font-size: 38px; }
 
-  /* Hub — one centred column: photo, name, countdown, then the doors
-     three across. The old sidebar split forced the photo into whatever
-     space was left at the bottom of the rail, which is why it read as
-     filler rather than as part of the page. */
+  /* Hub — one centred column: the name, the countdown, then the doors
+     three across, vertically centred in the viewport. Nothing competes
+     with her name for the top of the page. */
   #scHub           { align-items: center; }
   .hub-wrap        { max-width: 900px; text-align: center; }
 
-  .hub-hero        { max-width: 480px; margin-bottom: 32px; }
+  /* The masthead and the countdown keep a book-page measure while the
+     door grid runs the full 900px. Stretched to the same width, the
+     monogram's hairline and the countdown rules read as dividers in a
+     form rather than as part of a title page. */
+  .hub-header      { max-width: 560px; margin: 0 auto 30px; }
+  .hub-name        { font-size: 88px; letter-spacing: -3px; line-height: 0.88; }
+  .hub-meta        { font-size: 12.5px; }
 
-  .hub-header      { padding-bottom: 26px; margin-bottom: 24px; }
-  .hub-name        { font-size: 72px; letter-spacing: -2.5px; line-height: 0.9; }
-
-  .hub-countdown   { padding: 0 0 26px; margin-bottom: 30px; }
-  .cd-num          { font-size: 42px; }
+  .hub-countdown   { max-width: 560px; margin: 0 auto 38px; padding: 26px 0 28px; }
+  .cd-num          { font-size: 46px; }
+  .hub-countdown .cd-unit { padding: 0 34px; }
 
   .door-grid       { grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: left; }
-
-  /* Taller portrait here, filling rail space the door grid does not use */
-  .hub-photo {
-    margin: 24px auto 0;
-    aspect-ratio: 4 / 5;
-    max-height: 300px;
-  }
 
   /* Story — sticky title and counter on the left, timeline on the right.
      640px of column in a 1440px viewport left 400px dead on each side. */
@@ -2026,6 +2185,9 @@ body::before {
   .sep-wrap { max-width: 940px; }
   .card.sep-card {
     max-width: 540px;
+    /* the wrap is 940px wide for the confirmed layout, so without this
+       the card sat against its left edge instead of the middle */
+    margin-inline: auto;
     padding: 56px 52px 48px;
     transition: max-width 0.5s cubic-bezier(.16,.84,.24,1);
   }
@@ -2047,6 +2209,36 @@ body::before {
     border-left: 1px solid var(--line);
   }
   .after.open { margin-bottom: 0; }
+
+  /* The night — an editorial collage rather than a stack: the two of us
+     large on the left with the single shots beside it, then the table
+     running the full width underneath. Composed for exactly the four
+     photos in SEP_NIGHT; adding a fifth means placing it here too. */
+  .night { max-width: 760px; margin: 56px auto 0; }
+  .night-title { font-size: 38px; }
+  .night-collage { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+  .night-frame:nth-child(1) {
+    grid-column: 1 / 3; grid-row: 1 / 3;
+    /* the frame is stretched by the grid, so the photo has to fill
+       whatever height the two frames beside it come to */
+    display: flex; flex-direction: column;
+  }
+  .night-frame:nth-child(1) img {
+    /* fills the height of the two frames beside it; the crop is pulled
+       up because we are standing in the top half of the shot */
+    flex: 1; min-height: 0; aspect-ratio: auto;
+    object-position: center 32%;
+  }
+  .night-frame:nth-child(2) { grid-column: 3; grid-row: 1; }
+  .night-frame:nth-child(3) { grid-column: 3; grid-row: 2; }
+  .night-frame:nth-child(4) { grid-column: 1 / -1; }
+  .night-frame.crop img { aspect-ratio: 21 / 9; }
+
+  .night-note { padding: 38px 40px 32px; }
+  .night-quote { font-size: 25px; }
+  .night-body { max-width: 62ch; margin: 0 auto; }
+  .night-body p { font-size: 14.5px; }
 
   /* Journey — two columns: the day and its playlist on the left rail,
      the stages on the right. A single narrow column read as a phone
@@ -2415,7 +2607,9 @@ body::before {
   .tl-entry     { opacity: 1 !important; transform: none !important; }
   .tl-photo img,
   .album-thumb img,
+  .night-frame img,
   .lb-img-wrap img { opacity: 1 !important; }
+  .night, .night-frame, .night-note { opacity: 1 !important; transform: none !important; }
 }
 </style>
 </head>
@@ -2432,7 +2626,14 @@ body::before {
 
 <!-- Music chip — iframe hidden inside, near-zero opacity lets browser render it for autoplay -->
 <div class="music-chip" id="musicChip">
-  <iframe id="musicFrame" src="" allow="autoplay; encrypted-media"></iframe>
+  <!-- Sandboxed: the player may run scripts and play, and nothing else —
+       no top-level navigation, no forms, no access to our storage.
+       strict-origin, not no-referrer: YouTube rejects an embedder it
+       cannot identify at all, so it gets the domain and never the path. -->
+  <iframe id="musicFrame" src="" title="Background music"
+          allow="autoplay; encrypted-media"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
+          referrerpolicy="strict-origin" loading="lazy"></iframe>
   <div class="music-pill" id="musicPill" role="button" tabindex="0" aria-label="Toggle music">
     <div class="music-bars">
       <div class="bar b1"></div>
@@ -2480,16 +2681,12 @@ body::before {
 <div class="screen" id="scHub">
   <div class="hub-wrap">
 
-    <!-- Masthead: photo, then name, then the countdown. One centred
-         column that reads top-to-bottom on every width, rather than a
-         sidebar with the photo parked at the bottom of it. -->
-    <div class="hub-hero" id="hubPhoto" role="button" tabindex="0"
-         aria-label="Open our album">
-      <img src="menate_steak.jpg" alt="Us" loading="eager">
-      <span class="hub-hero-cap">our album →</span>
-    </div>
-
+    <!-- Masthead. Type only, no photograph: her name is the loudest
+         thing on the page, the way a title page works. The photographs
+         live behind the doors, which is where she goes looking for them
+         anyway. -->
     <div class="hub-header">
+      <div class="monogram"><hr><span class="monogram-mark">N · F</span><hr></div>
       <p class="hub-eyebrow">private · for you only</p>
       <h1 class="hub-name">Fasya.</h1>
       <p class="hub-meta" id="hubMeta"></p>
@@ -2901,7 +3098,7 @@ body::before {
         <div class="vault-section">
           <span class="vault-section-label">our google drive</span>
           <p class="vault-lede">All our files, photos, and documents — in one place.</p>
-          <a class="vault-drive-btn" href="https://drive.google.com/drive/folders/14VUziIgf8tU4GWVnqqsHQmww0NMGd3Vg?usp=sharing" target="_blank" rel="noopener">
+          <a class="vault-drive-btn" href="https://drive.google.com/drive/folders/14VUziIgf8tU4GWVnqqsHQmww0NMGd3Vg?usp=sharing" target="_blank" rel="noopener noreferrer">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Open Drive
           </a>
@@ -3050,6 +3247,27 @@ body::before {
           <p class="signature">still yours,<br><strong>Najmi Zulhusni</strong></p>
         </div>
       </div>
+
+      <!-- The night itself. Sits outside the card, on the page, so the
+           photographs read as prints laid on a table rather than as
+           more content inside the invitation. Hidden until the 6th has
+           passed — before then there is nothing to show. -->
+      <section class="night" id="sepNight" aria-labelledby="nightTitle">
+        <div class="night-head">
+          <p class="story-overline" id="nightOverline"></p>
+          <h2 class="night-title" id="nightTitle"></h2>
+          <p class="night-lede" id="nightLede"></p>
+        </div>
+
+        <div class="night-collage" id="nightCollage"></div>
+
+        <div class="night-note" id="nightNote">
+          <p class="night-quote" id="nightQuote"></p>
+          <div class="night-body" id="nightBody"></div>
+          <div class="divider"><hr><i class="ti ti-heart"></i><hr></div>
+          <p class="night-sign" id="nightSign"></p>
+        </div>
+      </section>
     </div>
 
   </div>
@@ -3068,6 +3286,7 @@ body::before {
    Add a wedding song ............... PLAYLIST
    Fill in a wedding stage .......... JOURNEY  (set `photo` and `done`)
    Change the September gift ........ SEP_GIFT
+   Edit the night's photos/words .... SEP_NIGHT
    Move the wedding date ............ WAITING_FOR_DATE
    Re-lock September until a date ... SEP_REVEAL_AT
 
@@ -3183,6 +3402,13 @@ body::before {
       cap: "17 · 07 · 2026 — najmi's birthday",
     },
     {
+      date: '6 September 2026',
+      title: 'Four years, fourteen days early.',
+      body: "Our day is the 20th, but I couldn't be with you for it — so we had it on the 6th instead. Both of us in black, a table at Monograph, a chandelier made out of paper. You said yes to the invitation before you'd finished reading it.",
+      photo: 'monograph-1.jpg',
+      cap: '06 · 09 · 2026 — four years, at monograph kl',
+    },
+    {
       present: true,
       title: 'Still here.',
       body: 'Not just surviving — actually happy. And a lot of that is because of you.',
@@ -3268,6 +3494,39 @@ body::before {
     hours:    3.5,
   };
 
+  /* ═══ The night, afterwards ═══
+   * Everything above is written for the days *before* the 6th. This is
+   * what the same screen becomes once the night has actually happened:
+   * the invitation stays, and the evening itself is laid out underneath
+   * it. It appears on its own once `at` has passed — nothing to switch
+   * on by hand.
+   *
+   *   photos  laid out as prints on a table. `span` runs a photo the
+   *           full width of the collage; `crop` trims it to a strip.
+   */
+  const SEP_NIGHT = {
+    at:       new Date('2026-09-06T22:30:00+08:00'),
+    overline: 'and then it happened',
+    // split so the page can style the second half without any HTML
+    // living in the content block
+    title:    'The night,',
+    titleEm:  'as it went.',
+    lede:     'Black, both of us. A room lit by paper and warm bulbs. Three hours where nothing outside that table needed anything from either of us.',
+    photos: [
+      { src: 'monograph-1.jpg', cap: 'us — four years, one table', span: true },
+      { src: 'monograph-2.jpg', cap: 'me, pretending to be calm about it' },
+      { src: 'monograph-3.jpg', cap: 'you, and the drink you took one sip of' },
+      { src: 'monograph-4.jpg', cap: 'the omurice, the hamburg steak, and the green one you liked more than the food',
+        span: true, crop: true },
+    ],
+    quote: 'The best table we have had. Still not the best one we will get.',
+    close: [
+      "You laughed at the ceiling before you even looked at the menu. I have four years of photographs of you, and that is still the one I keep going back to.",
+      "And a night like that one still ends with me driving you home. That is the only part I would change — and 17 · 12 · 2027 is the date it stops. Same black, same two of us, no long drive back and no goodnight at the door. This was good, Fasya. Where we are going is better.",
+    ],
+    sign: '17 · 12 · 2027',
+  };
+
   /* ═══ Wedding playlist ═══
    * Songs in the running for the day. Add a row to extend the list;
    * PLAYLIST_URL is the "open the full playlist" destination.
@@ -3340,10 +3599,14 @@ body::before {
   let musicLoaded   = false;
   let musicPlaying  = false;
   let lbIdx         = 0;
+  let lbList        = [];   // the photo list the lightbox is currently paging
   let cdTimer       = null;
   let wfTimer       = null;
-  let failCount     = parseInt(sessionStorage.getItem('lf') || '0');
-  let lockUntil     = parseInt(sessionStorage.getItem('lu') || '0');
+  // localStorage, deliberately: in sessionStorage the fail count and the
+  // wait were both cleared by closing the tab, which made the lockout
+  // free to skip. Now the wait has to actually be waited out.
+  let failCount     = 0;
+  let lockUntil     = 0;
   let lockTimer     = null;
   let lbTouchX      = 0;
   let sepTimer      = null;
@@ -3364,6 +3627,68 @@ body::before {
   // A real heart — two lobes and a point. The old path had a single
   // apex, which is why it read as half a heart / a teardrop.
   const HEART_PATH = 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
+
+  /* ═══ Storage ═══
+   * Safari in private mode, and any browser with site data blocked,
+   * throws on touching storage rather than returning null. Everything
+   * saved here is a convenience, so a throw should cost us the
+   * convenience and nothing else.
+   *
+   *   session  forgotten when the tab closes — the scratch, the RSVP
+   *   local    kept between visits — the vault, and the login lockout
+   */
+  const store = {
+    get(scope, key) {
+      try { return window[scope + 'Storage'].getItem(key); }
+      catch { return null; }
+    },
+    set(scope, key, value) {
+      try { window[scope + 'Storage'].setItem(key, value); } catch { /* ignore */ }
+    },
+    del(scope, key) {
+      try { window[scope + 'Storage'].removeItem(key); } catch { /* ignore */ }
+    },
+  };
+
+  /* ═══ Scrolling ═══
+   * Every scroll in the page goes through these two, so the behaviour is
+   * decided in one place: glide normally, jump instantly when the device
+   * asks for reduced motion. `scroll-behavior: smooth` on <html> covers
+   * anchors and focus jumps; this covers the scripted ones.
+   */
+  const scrollMode = () => (reduced() ? 'auto' : 'smooth');
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: scrollMode() });
+  }
+
+  function scrollToEl(el, block = 'center') {
+    if (el) el.scrollIntoView({ behavior: scrollMode(), block });
+  }
+
+  /* Locks the page behind an overlay without losing her place. Setting
+   * `overflow: hidden` alone makes iOS Safari forget the scroll offset,
+   * so the position is pinned with `top` and restored on release.
+   */
+  let lockedAt = null;
+
+  function lockScroll() {
+    if (lockedAt !== null) return;
+    lockedAt = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top      = `-${lockedAt}px`;
+    document.body.style.width    = '100%';
+  }
+
+  function unlockScroll() {
+    if (lockedAt === null) return;
+    const y = lockedAt;
+    lockedAt = null;
+    document.body.style.position = '';
+    document.body.style.top      = '';
+    document.body.style.width    = '';
+    window.scrollTo({ top: y, behavior: 'auto' });
+  }
 
   /* ═══ Crypto — PBKDF2 ═══
    * 250k iterations: ~47ms per attempt, so brute-forcing every date
@@ -3402,7 +3727,7 @@ body::before {
     currentScreen = targetId;
     $(targetId).classList.add('active');
     setHubNav(targetId !== 'scHub');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   }
 
   // Open a door from the hub
@@ -3424,7 +3749,7 @@ body::before {
 
     $(targetId).classList.add('active');
     setHubNav(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   }
 
   function openVaultDoor() {
@@ -3449,7 +3774,7 @@ body::before {
     }
     currentScreen = 'hub';
     $('scHub').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   }
 
   function goFromLogin() {
@@ -3492,14 +3817,14 @@ body::before {
     if (hash === TH.join('')) {
       err.classList.remove('show');
       $('loginLockout').classList.remove('show');
-      sessionStorage.removeItem('lf');
-      sessionStorage.removeItem('lu');
+      store.del('local', 'lf');
+      store.del('local', 'lu');
       showUnlock();
       return;
     }
 
     failCount++;
-    sessionStorage.setItem('lf', failCount);
+    store.set('local', 'lf', failCount);
     const hints = [
       "That's not right. Think again.",
       "Hmm, not that one — you know this 🥺",
@@ -3524,7 +3849,7 @@ body::before {
 
   function startLockout(seconds) {
     lockUntil = Date.now() + seconds * 1000;
-    sessionStorage.setItem('lu', lockUntil);
+    store.set('local', 'lu', lockUntil);
     const btn     = $('loginBtn');
     const lockDiv = $('loginLockout');
     const lockMsg = $('lockoutMsg');
@@ -3607,10 +3932,16 @@ body::before {
     if (septemberUnlocked()) {
       card.classList.remove('locked', 'peek');
       card.classList.add('open');
-      $('doorSepDot').className     = 'door-dot dot-open';
-      $('doorSepLabel').className   = 'door-label label-open';
-      $('doorSepLabel').textContent = 'open';
-      card.querySelector('.door-desc').textContent = `it's time — ${SEP_LABEL}`;
+      // Once the night has been and gone the door stops promising and
+      // starts remembering — and it is the one door marked, because the
+      // photographs behind it are the only thing here she has not seen
+      const held = Date.now() >= SEP_NIGHT.at;
+      $('doorSepDot').className     = held ? 'door-dot dot-new'     : 'door-dot dot-open';
+      $('doorSepLabel').className   = held ? 'door-label label-new'  : 'door-label label-open';
+      $('doorSepLabel').textContent = held ? 'new' : 'open';
+      card.querySelector('.door-desc').textContent =
+        held ? `the night we had — ${SEP_LABEL}`
+             : `it's time — ${SEP_LABEL}`;
     } else {
       // floor, matching the days figure the countdown screen shows —
       // ceil here made the door and the screen disagree by one
@@ -3652,6 +3983,54 @@ body::before {
     sepTimer = setInterval(tick, 30000);
   }
 
+  /* ═══ The night itself ═══
+   * Built from SEP_NIGHT, and only once the evening has actually
+   * happened — before the 6th there is nothing to show, so the whole
+   * block stays out of the document flow.
+   */
+  function buildNight() {
+    const host = $('sepNight');
+    if (!host || Date.now() < SEP_NIGHT.at) return;
+
+    host.classList.add('show');
+    if (host.dataset.built) return;   // survive a second visit to the screen
+    host.dataset.built = '1';
+
+    $('nightOverline').textContent = SEP_NIGHT.overline;
+    $('nightLede').textContent     = SEP_NIGHT.lede;
+    $('nightQuote').textContent    = SEP_NIGHT.quote;
+    $('nightSign').textContent     = SEP_NIGHT.sign;
+
+    // "The night, as it went." — the second half in italic rose
+    const title = $('nightTitle');
+    title.textContent = SEP_NIGHT.title + ' ';
+    const em = document.createElement('em');
+    em.textContent = SEP_NIGHT.titleEm;
+    title.appendChild(em);
+
+    const body = $('nightBody');
+    SEP_NIGHT.close.forEach(para => {
+      const p = document.createElement('p');
+      p.textContent = para;
+      body.appendChild(p);
+    });
+
+    // Same tile builder as the album, in a print frame, paging through
+    // the night's own four photos rather than the whole album
+    const collage = $('nightCollage');
+    SEP_NIGHT.photos.forEach((photo, i) => {
+      const cls = ['night-frame'];
+      if (photo.span) cls.push('span');
+      if (photo.crop) cls.push('crop');
+      collage.appendChild(
+        photoTile(photo, SEP_NIGHT.photos, i,
+                  { className: cls.join(' '), caption: 'night-cap' })
+      );
+    });
+
+    revealOnScroll([...collage.children, $('nightNote')]);
+  }
+
   function revealSeptember() {
     const gift  = SEP_GIFT;
     // The 2026 anniversary this gift belongs to, independent of when the
@@ -3666,12 +4045,13 @@ body::before {
       Math.max(0, Math.floor((WAITING_FOR_DATE - Date.now()) / 86400000)).toLocaleString();
 
     buildTicket(gift);
+    buildNight();
 
     showSepState('sepReveal');
     clearInterval(sepTimer);
     // The reveal is taller than the gate; without this the page stays
     // where the gate left it and opens part-way down
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
 
     // Foil has to be painted after the ticket is laid out, or it is sized
     // against a zero-height box
@@ -3739,7 +4119,7 @@ body::before {
   const RSVP_KEY = 'sep_rsvp';
 
   function showRsvp() {
-    if (sessionStorage.getItem(RSVP_KEY)) { applyRsvp(false); return; }
+    if (store.get('session', RSVP_KEY)) { applyRsvp(false); return; }
     $('rsvpBlock').classList.add('ask');
   }
 
@@ -3761,11 +4141,11 @@ body::before {
   }
 
   function acceptRsvp() {
-    sessionStorage.setItem(RSVP_KEY, '1');
+    store.set('session', RSVP_KEY, '1');
     applyRsvp(true);
     // let the newly revealed plan settle, then bring it into view
     setTimeout(() => {
-      $('sepAfter').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      scrollToEl($('sepAfter'));
     }, 450);
   }
 
@@ -3840,7 +4220,7 @@ body::before {
     // sessionStorage, not localStorage: within one visit she never has to
     // scratch the same card twice, but a fresh visit brings the foil back
     // so the reveal isn't spent permanently after the first open
-    if (sessionStorage.getItem('sep_scratched')) {
+    if (store.get('session', 'sep_scratched')) {
       wrap.classList.add('revealed');
       showRsvp();
       return;
@@ -3974,7 +4354,7 @@ body::before {
     const wrap = $('scratchWrap');
     if (!wrap || wrap.classList.contains('revealed')) return;
     wrap.classList.add('revealed');
-    sessionStorage.setItem('sep_scratched', '1');
+    store.set('session', 'sep_scratched', '1');
     if (celebrate) {
       launchConfetti();
       spawnHearts($('tkCard'));
@@ -4045,30 +4425,13 @@ body::before {
       b.textContent = entry.body;
       item.appendChild(b);
 
+      // Story photos open the same lightbox the album uses, on the
+      // matching image — same tile builder, different frame
       if (entry.photo) {
-        const idx  = photoIdx++;
-        const wrap = document.createElement('div');
-        wrap.className = 'tl-photo';
-        wrap.setAttribute('role', 'button');
-        wrap.setAttribute('tabindex', '0');
-        wrap.setAttribute('aria-label', `${entry.cap || entry.title} — open larger`);
-
-        const img = document.createElement('img');
-        img.src     = entry.photo;
-        img.alt     = entry.cap || entry.title;
-        img.loading = 'lazy';
-        // fade in once decoded, so photos don't pop in mid-scroll
-        img.addEventListener('load',  () => img.classList.add('loaded'), { once: true });
-        img.addEventListener('error', () => wrap.remove(), { once: true });
-        if (img.complete && img.naturalWidth) img.classList.add('loaded');
-        wrap.appendChild(img);
-
-        // Story photos open the same lightbox the album uses
-        wrap.addEventListener('click', () => openLightbox(idx));
-        wrap.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(idx); }
-        });
-        item.appendChild(wrap);
+        const photo = { src: entry.photo, cap: entry.cap || entry.title };
+        item.appendChild(
+          photoTile(photo, PHOTOS, photoIdx++, { className: 'tl-photo' })
+        );
       }
 
       if (entry.cap) {
@@ -4355,51 +4718,91 @@ body::before {
     document.body.appendChild(frag);
   }
 
+  /* ═══ Photo tiles ═══
+   * The album, the story and the September collage all want the same
+   * thing: an image that fades in when it decodes, opens the lightbox on
+   * click or Enter, and removes itself if the file is missing. Built once
+   * here so the three of them cannot drift apart.
+   *
+   *   photo  { src, cap } from a photo list
+   *   list   the list the lightbox should page through
+   *   index  where this photo sits in that list
+   */
+  function photoTile(photo, list, index, { className, caption = null } = {}) {
+    const tile = document.createElement('div');
+    tile.className = className;
+    tile.setAttribute('role', 'button');
+    tile.setAttribute('tabindex', '0');
+    tile.setAttribute('aria-label', `${photo.cap} — open larger`);
+
+    const img = document.createElement('img');
+    // textContent/property assignment throughout — nothing here is built
+    // by string-concatenating HTML, so a caption can never become markup
+    img.src     = photo.src;
+    img.alt     = photo.cap;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.addEventListener('load',  () => img.classList.add('loaded'), { once: true });
+    img.addEventListener('error', () => tile.remove(), { once: true });
+    if (img.complete && img.naturalWidth) img.classList.add('loaded');
+    tile.appendChild(img);
+
+    // The tile already carries the caption in its aria-label, so the
+    // visible copy is decorative
+    if (caption) {
+      const cap = document.createElement('p');
+      cap.className   = caption;
+      cap.textContent = photo.cap;
+      cap.setAttribute('aria-hidden', 'true');
+      tile.appendChild(cap);
+    }
+
+    const open = () => openLightbox(list, index);
+    tile.addEventListener('click', open);
+    tile.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
+    return tile;
+  }
+
   /* ═══ Album ═══ */
   function buildAlbum() {
     const grid = $('albumGrid');
     if (!grid || grid.childElementCount) return;
-    PHOTOS.forEach((p, i) => {
-      const el = document.createElement('div');
-      el.className = 'album-thumb';
-      el.setAttribute('role', 'button');
-      el.setAttribute('tabindex', '0');
-      el.setAttribute('aria-label', p.cap);
-      el.addEventListener('click', () => openLightbox(i));
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i); }
-      });
-      el.innerHTML = `<img src="${p.src}" alt="${p.cap}" loading="lazy">
-        <div class="album-hover-cap" aria-hidden="true">${p.cap}</div>`;
-      // fade each tile up as it decodes, so the grid fills in gently
-      const im = el.querySelector('img');
-      im.addEventListener('load', () => im.classList.add('loaded'), { once: true });
-      if (im.complete && im.naturalWidth) im.classList.add('loaded');
-      grid.appendChild(el);
+    PHOTOS.forEach((photo, i) => {
+      grid.appendChild(
+        photoTile(photo, PHOTOS, i, { className: 'album-thumb', caption: 'album-hover-cap' })
+      );
     });
   }
 
-  /* ═══ Lightbox ═══ */
-  function openLightbox(i) {
-    lbIdx = i;
+  /* ═══ Lightbox ═══
+   * Holds whichever list was opened — the album, or September's collage —
+   * so next/prev pages through that set and nothing else.
+   */
+  function openLightbox(list, i) {
+    lbList = list;
+    lbIdx  = i;
     renderLb();
     $('lightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    lockScroll();
     $('lbClose').focus();
   }
 
   function closeLightbox() {
     $('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
+    unlockScroll();
   }
 
   function lbMove(dir) {
-    lbIdx = (lbIdx + dir + PHOTOS.length) % PHOTOS.length;
+    if (!lbList.length) return;
+    lbIdx = (lbIdx + dir + lbList.length) % lbList.length;
     renderLb();
   }
 
   function renderLb() {
-    const p   = PHOTOS[lbIdx];
+    const p   = lbList[lbIdx];
+    if (!p) return;
     const img = $('lbImg');
 
     // Cross-fade rather than swapping instantly, so stepping through the
@@ -4411,7 +4814,7 @@ body::before {
     else img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
 
     $('lbCap').textContent   = p.cap;
-    $('lbCount').textContent = `${lbIdx + 1} / ${PHOTOS.length}`;
+    $('lbCount').textContent = `${lbIdx + 1} / ${lbList.length}`;
 
     preloadNeighbours();
   }
@@ -4419,27 +4822,36 @@ body::before {
   // Warms the images either side of the current one so next/prev is
   // instant instead of waiting on a fresh network request each tap
   function preloadNeighbours() {
-    if (PHOTOS.length < 2) return;
+    if (lbList.length < 2) return;
     [-1, 1].forEach(offset => {
-      const i = (lbIdx + offset + PHOTOS.length) % PHOTOS.length;
+      const i = (lbIdx + offset + lbList.length) % lbList.length;
       const warm = new Image();
-      warm.src = PHOTOS[i].src;
+      warm.src = lbList[i].src;
     });
   }
 
   /* ═══ Music ═══ */
+  const YT_ORIGIN = 'https://www.youtube.com';
+  const MUSIC_SRC = YT_ORIGIN + '/embed/QLVei17AIUY'
+                  + '?autoplay=1&controls=0&rel=0&enablejsapi=1&playsinline=1';
+
+  // Addressed to YouTube specifically rather than '*', so the command
+  // never lands in whatever else may be framed there.
+  function ytCommand(frame, func) {
+    frame.contentWindow.postMessage(
+      JSON.stringify({ event: 'command', func, args: [] }), YT_ORIGIN
+    );
+  }
+
   function toggleMusic() {
     const frame = $('musicFrame');
     if (!musicLoaded) {
-      frame.src    = 'https://www.youtube.com/embed/QLVei17AIUY?autoplay=1&controls=0&rel=0&enablejsapi=1&playsinline=1';
+      frame.src    = MUSIC_SRC;
       musicLoaded  = true;
       musicPlaying = true;
-    } else if (musicPlaying) {
-      frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
-      musicPlaying = false;
     } else {
-      frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo',  args: [] }), '*');
-      musicPlaying = true;
+      ytCommand(frame, musicPlaying ? 'pauseVideo' : 'playVideo');
+      musicPlaying = !musicPlaying;
     }
     $('musicChip').classList.toggle('playing', musicPlaying);
   }
@@ -4688,7 +5100,7 @@ body::before {
 
       saveBtn.addEventListener('click', async () => {
         const text = area.value.trim();
-        localStorage.setItem('vault_' + note.key, await vaultEncrypt(text));
+        store.set('local', 'vault_' + note.key, await vaultEncrypt(text));
         body.textContent = text;
         body.classList.toggle('empty', !text);
         area.classList.remove('editing');
@@ -4706,7 +5118,7 @@ body::before {
     for (const note of VAULT_NOTES) {
       const el = vaultNoteBodies.get(note.key);
       if (!el) continue;
-      const stored = localStorage.getItem('vault_' + note.key);
+      const stored = store.get('local', 'vault_' + note.key);
       const text   = stored ? await vaultDecrypt(stored) : '';
       el.textContent = text;
       el.classList.toggle('empty', !text);
@@ -4854,24 +5266,15 @@ body::before {
     syncPinCells();
     spawnPetals();
 
-    // Restore lockout from a previous session
+    // Restore the fail count and any unexpired wait from last time —
+    // reopening the page is not a way out of a lockout
+    failCount = parseInt(store.get('local', 'lf') || '0', 10) || 0;
+    lockUntil = parseInt(store.get('local', 'lu') || '0', 10) || 0;
     const rem = lockUntil - Date.now();
     if (rem > 0) startLockout(Math.ceil(rem / 1000));
 
     // Hub nav
     $('hubNavBtn').addEventListener('click', goToHub);
-
-    // Hub portrait — a shortcut into the album
-    const hubPhoto = $('hubPhoto');
-    if (hubPhoto) {
-      const hpImg = hubPhoto.querySelector('img');
-      hpImg.addEventListener('load', () => hpImg.classList.add('loaded'), { once: true });
-      if (hpImg.complete && hpImg.naturalWidth) hpImg.classList.add('loaded');
-      hubPhoto.addEventListener('click', () => handleDoor('scAlbum'));
-      hubPhoto.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDoor('scAlbum'); }
-      });
-    }
 
     // Music pill (click and Enter/Space keyboard)
     const musicPill = $('musicPill');
